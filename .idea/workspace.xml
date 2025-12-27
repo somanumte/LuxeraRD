@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.01">
-      <change afterPath="$PROJECT_DIR$/app/services/catalog_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/css/price-slider.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/js/inventory/price-slider.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forms/laptop_forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/laptop_forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/inventory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/inventory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/ai_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/inventory_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/inventory_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/laptop_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/inventory/laptop_detail.html" afterDir="false" />
-    </list>
+    <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.05" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -185,7 +174,7 @@
       <updated>1766790089262</updated>
       <workItem from="1766790090283" duration="582000" />
       <workItem from="1766790689463" duration="5072000" />
-      <workItem from="1766796380412" duration="28660000" />
+      <workItem from="1766796380412" duration="29220000" />
     </task>
     <task id="LOCAL-00001" summary="Proyecto Luxera, V.01">
       <option name="closed" value="true" />
@@ -195,7 +184,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766835488189</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Proyecto Luxera, V.05">
+      <option name="closed" value="true" />
+      <created>1766850655081</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1766850655081</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -203,10 +200,11 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Proyecto Luxera, V.01" />
-    <option name="LAST_COMMIT_MESSAGE" value="Proyecto Luxera, V.01" />
+    <MESSAGE value="Proyecto Luxera, V.05" />
+    <option name="LAST_COMMIT_MESSAGE" value="Proyecto Luxera, V.05" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1766850053609" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1766850670914" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1766812336842" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1766812318026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$config.coverage" NAME="config Coverage Results" MODIFIED="1766811118244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
