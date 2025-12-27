@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Acceso denegado{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-red-900">
+    <div class="max-w-2xl w-full text-center animate-fade-in">
+        
+        <!-- Número de error animado -->
+        <div class="mb-8">
+            <h1 class="text-9xl sm:text-[12rem] font-extrabold bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 bg-clip-text text-transparent animate-pulse">
+                403
+            </h1>
+        </div>
+        
+        <!-- Icono -->
+        <div class="flex justify-center mb-8">
+            <div class="w-24 h-24 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center shadow-2xl animate-shake">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Mensaje -->
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            🚫 Acceso denegado
+        </h2>
+        
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            No tienes permisos para acceder a esta página. Si crees que esto es un error, contacta al administrador.
+        </p>
+        
+        <!-- Razones comunes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-8 max-w-md mx-auto shadow-lg">
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Razones comunes:</h3>
+            <ul class="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    No has iniciado sesión
+                </li>
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    No tienes el rol adecuado (se requiere administrador)
+                </li>
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    Tu cuenta ha sido desactivada
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.index') }}" class="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Volver al inicio
+            </a>
+            
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}" class="inline-flex items-center justify-center px-8 py-3 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 border-2 border-red-600 dark:border-red-400 rounded-lg font-semibold hover:bg-red-50 dark:hover:bg-gray-700 transform hover:-translate-y-1 transition-all duration-300">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
+                Iniciar sesión
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

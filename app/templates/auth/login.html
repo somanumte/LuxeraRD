@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-indigo-900 dark:to-purple-900">
+    
+    <!-- Elementos decorativos de fondo -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-30 animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 dark:bg-indigo-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-300 dark:bg-pink-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <!-- Contenedor principal -->
+    <div class="max-w-md w-full relative z-10 animate-fade-in">
+        
+        <!-- Logo y título -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+            </div>
+            <h2 class="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Bienvenido de nuevo
+            </h2>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+                Inicia sesión en tu cuenta de Luxera
+            </p>
+        </div>
+        
+        <!-- Card del formulario con glassmorphism MEJORADO -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20">
+            <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
+                {{ form.hidden_tag() }}
+
+                <!-- Campo de Email MEJORADO -->
+                <div class="space-y-2">
+                    <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                        Email
+                    </label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                        </div>
+                        {{ form.email(
+                            class="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-900 border-2 " +
+                            ("border-red-300 dark:border-red-500 focus:border-red-500 dark:focus:border-red-400" if form.email.errors else "border-gray-200 dark:border-gray-700 focus:border-indigo-500 dark:focus:border-indigo-400") +
+                            " rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 transition-all duration-300 text-base",
+                            id="email",
+                            autofocus=true
+                        ) }}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class="mt-2 space-y-1 animate-shake">
+                            {% for error in form.email.errors %}
+                                <div class="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>{{ error }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo de Contraseña MEJORADO -->
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                        Contraseña
+                    </label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        {{ form.password(
+                            class="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-900 border-2 " +
+                            ("border-red-300 dark:border-red-500 focus:border-red-500 dark:focus:border-red-400" if form.password.errors else "border-gray-200 dark:border-gray-700 focus:border-indigo-500 dark:focus:border-indigo-400") +
+                            " rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 transition-all duration-300 text-base",
+                            id="password"
+                        ) }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="mt-2 space-y-1 animate-shake">
+                            {% for error in form.password.errors %}
+                                <div class="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>{{ error }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Checkbox Recordarme y Olvidé Contraseña -->
+                <div class="flex items-center justify-between pt-2">
+                    <div class="flex items-center">
+                        {{ form.remember_me(
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer bg-white dark:bg-gray-900",
+                            id="remember_me"
+                        ) }}
+                        <label for="remember_me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300 cursor-pointer font-medium">
+                            Recordarme
+                        </label>
+                    </div>
+
+                    <div class="text-sm">
+                        <a href="#" onclick="alert('Función próximamente disponible'); return false;" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Botón de Submit MEJORADO -->
+                <div class="pt-2">
+                    {{ form.submit(
+                        class="w-full py-4 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-base"
+                    ) }}
+                </div>
+            </form>
+
+            <!-- Divisor -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400">
+                            ¿No tienes cuenta?
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Link a Registro -->
+                {% if allow_registration %}
+                <div class="mt-6">
+                    <a href="{{ url_for('auth.register') }}" class="w-full flex justify-center py-4 px-4 border-2 border-indigo-600 dark:border-indigo-400 rounded-xl text-base font-semibold text-indigo-600 dark:text-indigo-400 bg-transparent hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transform hover:-translate-y-0.5 transition-all duration-300">
+                        Crear cuenta nueva
+                    </a>
+                </div>
+                {% else %}
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        El registro público no está disponible actualmente
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Link para volver -->
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('main.index') }}" class="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

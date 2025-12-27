@@ -1,0 +1,382 @@
+/* ============================================
+   ESTILOS PERSONALIZADOS LUXERA
+   ============================================
+   Variables CSS, animaciones y estilos adicionales
+   que complementan Tailwind CSS
+*/
+
+/* ===== VARIABLES CSS ===== */
+
+:root {
+    /* Colores primarios personalizables */
+    --color-primary: #6366f1;
+    --color-primary-dark: #4f46e5;
+    --color-primary-light: #818cf8;
+
+    /* Transiciones */
+    --transition-speed: 300ms;
+    --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Sombras personalizadas */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+    /* Blur para glassmorphism */
+    --blur-glass: 12px;
+}
+
+/* Variables para tema oscuro */
+.dark {
+    --color-primary: #818cf8;
+    --color-primary-dark: #6366f1;
+    --color-primary-light: #a5b4fc;
+
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ===== ANIMACIONES ===== */
+
+/* Fade in (aparecer gradualmente) */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide in desde la derecha */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Slide in desde la izquierda */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Pulse suave */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Shake (vibración) para errores */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+
+/* ===== CLASES DE UTILIDAD ===== */
+
+/* Animación de aparición */
+.animate-fade-in {
+    animation: fadeIn var(--transition-speed) var(--transition-ease);
+}
+
+.animate-slide-in-right {
+    animation: slideInRight var(--transition-speed) var(--transition-ease);
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft var(--transition-speed) var(--transition-ease);
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+
+/* ===== GLASSMORPHISM ===== */
+
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(var(--blur-glass));
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* ===== BOTONES CON COLOR PERSONALIZADO ===== */
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+
+/* ===== INPUTS PERSONALIZADOS ===== */
+
+.form-input {
+    @apply w-full px-4 py-3 rounded-lg border-2 border-gray-300
+           focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200
+           transition-all duration-300 outline-none
+           dark:bg-gray-800 dark:border-gray-600 dark:text-white
+           dark:focus:border-indigo-400 dark:focus:ring-indigo-900;
+}
+
+.form-input:focus {
+    box-shadow: var(--shadow-soft);
+}
+
+/* Input con error */
+.form-input.error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-200
+           dark:border-red-400 dark:focus:ring-red-900;
+    animation: shake 0.5s ease-in-out;
+}
+
+
+/* ===== ALERTAS/MENSAJES FLASH ===== */
+
+.alert {
+    @apply px-4 py-3 rounded-lg mb-4 animate-slide-in-right;
+    box-shadow: var(--shadow-soft);
+}
+
+.alert-success {
+    @apply bg-green-100 border-l-4 border-green-500 text-green-700
+           dark:bg-green-900 dark:border-green-400 dark:text-green-200;
+}
+
+.alert-error {
+    @apply bg-red-100 border-l-4 border-red-500 text-red-700
+           dark:bg-red-900 dark:border-red-400 dark:text-red-200;
+}
+
+.alert-warning {
+    @apply bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700
+           dark:bg-yellow-900 dark:border-yellow-400 dark:text-yellow-200;
+}
+
+.alert-info {
+    @apply bg-blue-100 border-l-4 border-blue-500 text-blue-700
+           dark:bg-blue-900 dark:border-blue-400 dark:text-blue-200;
+}
+
+
+/* ===== CARDS ===== */
+
+.card {
+    @apply bg-white rounded-xl shadow-lg overflow-hidden
+           dark:bg-gray-800 transition-all duration-300;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-strong);
+}
+
+
+/* ===== NAVEGACIÓN ===== */
+
+.nav-link {
+    @apply px-4 py-2 rounded-lg transition-all duration-300
+           hover:bg-gray-100 dark:hover:bg-gray-700;
+}
+
+.nav-link.active {
+    @apply bg-indigo-100 text-indigo-700
+           dark:bg-indigo-900 dark:text-indigo-300;
+}
+
+
+/* ===== GRADIENTES ===== */
+
+.gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-success {
+    background: linear-gradient(135deg, #5ee7df 0%, #b490ca 100%);
+}
+
+.gradient-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+
+/* ===== SCROLLBAR PERSONALIZADA ===== */
+
+/* Para navegadores Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-600;
+}
+
+/* Para Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.dark * {
+    scrollbar-color: #4b5563 #111827;
+}
+
+
+/* ===== LOADING SPINNER ===== */
+
+.spinner {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ===== TOOLTIP ===== */
+
+.tooltip {
+    @apply absolute hidden group-hover:block bg-gray-900 text-white
+           text-xs px-2 py-1 rounded whitespace-nowrap z-50;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+
+/* ===== TRANSICIONES SUAVES ===== */
+
+.smooth-transition {
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+/* Transición de página */
+.page-transition {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+
+/* ===== EFECTOS DE HOVER ===== */
+
+.hover-lift {
+    transition: transform var(--transition-speed) var(--transition-ease);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+
+/* ===== FOCUS STATES MEJORADOS ===== */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+
+/* ===== MODO IMPRESIÓN ===== */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .glass {
+        background: white;
+        backdrop-filter: none;
+    }
+}
+
+
+/* ===== RESPONSIVE HELPERS ===== */
+
+/* Ocultar scrollbar pero mantener funcionalidad */
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* ===== UTILIDADES ADICIONALES ===== */
+
+/* Texto con gradiente */
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Línea divisoria con gradiente */
+.divider-gradient {
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--color-primary) 50%,
+        transparent 100%
+    );
+}

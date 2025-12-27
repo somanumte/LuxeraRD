@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Acerca de{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12 animate-fade-in">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Acerca de Luxera
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-400">
+                Sistema de gestión moderno y eficiente
+            </p>
+        </div>
+        
+        <div class="card p-8">
+            <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
+                Luxera es un sistema de gestión web desarrollado con las últimas tecnologías.
+                Diseñado para ser rápido, seguro y fácil de usar.
+            </p>
+            
+            <div class="mt-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tecnologías utilizadas:</h2>
+                <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+                    <li>• Flask - Framework web de Python</li>
+                    <li>• PostgreSQL - Base de datos</li>
+                    <li>• Tailwind CSS - Framework de diseño</li>
+                    <li>• SQLAlchemy - ORM</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

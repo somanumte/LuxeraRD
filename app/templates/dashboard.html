@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- ===== HEADER ===== -->
+        <div class="mb-8 animate-fade-in">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                ¡Bienvenido, {{ current_user.username }}! 👋
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                {% if current_user.last_login %}
+                    Último acceso: {{ current_user.last_login.strftime('%d/%m/%Y a las %H:%M') }}
+                {% else %}
+                    Este es tu primer inicio de sesión
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- ===== GRID DE ESTADÍSTICAS ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-slide-in-left">
+
+            <!-- Card 1: Cuenta activa -->
+            <div class="card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Estado de Cuenta</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400">Activa</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 2: Rol de usuario -->
+            <div class="card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Rol</p>
+                        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                            {% if current_user.is_admin %}Admin{% else %}Usuario{% endif %}
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 3: Email verificado -->
+            <div class="card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Email</p>
+                        <p class="text-lg font-bold text-gray-900 dark:text-white truncate">
+                            {{ current_user.email }}
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 4: Miembro desde -->
+            <div class="card p-6 hover-lift">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Miembro desde</p>
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">
+                            {{ current_user.created_at.strftime('%d/%m/%Y') }}
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== GRID PRINCIPAL ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- ===== COLUMNA IZQUIERDA (2/3) ===== -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Card de información del usuario -->
+                <div class="card p-8 animate-slide-in-left">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                            Información de la Cuenta
+                        </h2>
+                        <a href="#" onclick="alert('Función próximamente disponible'); return false;" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-medium">                            Editar Perfil
+                        </a>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                                {{ current_user.username[0].upper() }}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    {% if current_user.full_name %}
+                                        {{ current_user.full_name }}
+                                    {% else %}
+                                        {{ current_user.username }}
+                                    {% endif %}
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400">@{{ current_user.username }}</p>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    {% if current_user.is_admin %}
+                                    <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold">
+                                        Administrador
+                                    </span>
+                                    {% endif %}
+                                    <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
+                                        Cuenta Activa
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <dt class="text-sm text-gray-600 dark:text-gray-400">Email</dt>
+                                    <dd class="text-base font-medium text-gray-900 dark:text-white">{{ current_user.email }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600 dark:text-gray-400">Nombre de usuario</dt>
+                                    <dd class="text-base font-medium text-gray-900 dark:text-white">{{ current_user.username }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600 dark:text-gray-400">Fecha de registro</dt>
+                                    <dd class="text-base font-medium text-gray-900 dark:text-white">
+                                        {{ current_user.created_at.strftime('%d de %B de %Y') }}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600 dark:text-gray-400">Último acceso</dt>
+                                    <dd class="text-base font-medium text-gray-900 dark:text-white">
+                                        {% if current_user.last_login %}
+                                            {{ current_user.last_login.strftime('%d/%m/%Y %H:%M') }}
+                                        {% else %}
+                                            Primer inicio de sesión
+                                        {% endif %}
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Acciones rápidas -->
+                <div class="card p-8 animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                        Acciones Rápidas
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-900 dark:text-white">Crear Nuevo</span>
+                        </button>
+                        
+                        <button class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-900 dark:text-white">Ver Reportes</span>
+                        </button>
+
+                        <button class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-900 dark:text-white">Configuración</span>
+                        </button>
+
+                        <button class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-900 dark:text-white">Ayuda y Soporte</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== COLUMNA DERECHA (1/3) ===== -->
+            <div class="space-y-8">
+
+                <!-- Panel de personalización -->
+                <div class="card p-6 animate-slide-in-right">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                        🎨 Personalización
+                    </h2>
+
+                    <!-- Selector de tema -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Tema de la Aplicación
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <button onclick="window.themeManager?.setTheme('light')" class="flex-1 p-3 bg-white border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-indigo-500 transition-colors">
+                                <svg class="w-6 h-6 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                                <p class="text-xs mt-2 text-gray-600 dark:text-gray-400">Claro</p>
+                            </button>
+                            <button onclick="window.themeManager?.setTheme('dark')" class="flex-1 p-3 bg-gray-800 border-2 border-gray-600 rounded-lg hover:border-indigo-500 transition-colors">
+                                <svg class="w-6 h-6 mx-auto text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                </svg>
+                                <p class="text-xs mt-2 text-gray-400">Oscuro</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Selector de color primario -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Color Primario
+                        </label>
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="color"
+                                id="color-picker"
+                                value="#6366f1"
+                                class="w-full h-12 rounded-lg cursor-pointer border-2 border-gray-300 dark:border-gray-600"
+                            >
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Personaliza el color principal de la interfaz
+                        </p>
+                    </div>
+
+                    <!-- Botón reset -->
+                    <button
+                        id="reset-colors"
+                        class="mt-4 w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    >
+                        Restablecer Colores
+                    </button>
+                </div>
+
+                <!-- Card de actividad reciente -->
+                <div class="card p-6 animate-fade-in">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        Actividad Reciente
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-sm text-gray-900 dark:text-white font-medium">Inicio de sesión exitoso</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Hace unos momentos</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-sm text-gray-900 dark:text-white font-medium">Cuenta creada</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ current_user.created_at.strftime('%d de %B de %Y') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips y ayuda -->
+                <div class="card p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 animate-fade-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-1">💡 Tip del día</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Puedes cambiar entre tema claro y oscuro usando el botón en la parte superior.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
