@@ -12,20 +12,36 @@ class InventoryService:
     @staticmethod
     def calculate_days_in_inventory(entry_date, sale_date=None):
         """
-        Calcula días en inventario
+        Calcula los días que una laptop ha estado en inventario
 
         Args:
-            entry_date: Fecha de ingreso
-            sale_date: Fecha de venta (None si aún no se vendió)
+            entry_date: Fecha de ingreso (datetime.date o datetime.datetime)
+            sale_date: Fecha de venta (datetime.date o datetime.datetime), opcional
 
         Returns:
-            Número de días
+            int: Días en inventario
         """
-        if sale_date:
-            delta = sale_date - entry_date
-        else:
-            delta = datetime.utcnow() - entry_date
+        from datetime import datetime, date
 
+        if not entry_date:
+            return 0
+
+        # Convertir entry_date a date si es datetime
+        if isinstance(entry_date, datetime):
+            entry_date = entry_date.date()
+
+        # Si hay fecha de venta, calcular días hasta la venta
+        if sale_date:
+            # Convertir sale_date a date si es datetime
+            if isinstance(sale_date, datetime):
+                sale_date = sale_date.date()
+
+            delta = sale_date - entry_date
+            return delta.days
+
+        # Si no hay fecha de venta, calcular días hasta hoy
+        today = date.today()
+        delta = today - entry_date
         return delta.days
 
     @staticmethod

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Header: Título y Botón Agregar -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
             <div>
@@ -16,7 +16,7 @@
                     Gestiona tu inventario de manera eficiente
                 </p>
             </div>
-            
+
             {% if current_user.is_admin %}
             <a href="{{ url_for('inventory.laptop_add') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +26,7 @@
             </a>
             {% endif %}
         </div>
-        
+
         <!-- Estadísticas Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Laptops -->
@@ -43,13 +43,13 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Valor Total -->
+
+            <!-- Valor Total Inventario -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Valor Total</p>
-                        <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">${{ "%.2f"|format(stats.total_value) }}</p>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Valor Total Inventario</p>
+                        <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">${{ "{:,.2f}".format(stats.total_value) }}</p>
                     </div>
                     <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
                         <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Stock Bajo -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
@@ -73,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Rotación Lenta -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
@@ -89,54 +89,145 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Filtros y Búsqueda -->
+
+        <!-- Filtros Avanzados -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">
-            <form method="GET" action="{{ url_for('inventory.laptops_list') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- Búsqueda -->
-                <div class="lg:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Buscar
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
-                        <input type="text" name="search" value="{{ search_query }}" placeholder="SKU, marca, modelo..." class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                Filtros de Búsqueda
+            </h3>
+
+            <form method="GET" action="{{ url_for('inventory.laptops_list') }}" class="space-y-4">
+
+                <!-- Fila 1: Tienda, Marca, Categoría -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Tienda -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            🏪 Tienda
+                        </label>
+                        <select name="store" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="0">Todas las tiendas</option>
+                            {% for store in filter_form.store_id.choices[1:] %}
+                                <option value="{{ store[0] }}" {% if request.args.get('store', '0')|int == store[0] %}selected{% endif %}>{{ store[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Marca -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            🏷️ Marca
+                        </label>
+                        <select name="brand" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="0">Todas las marcas</option>
+                            {% for brand in filter_form.brand_id.choices[1:] %}
+                                <option value="{{ brand[0] }}" {% if request.args.get('brand', '0')|int == brand[0] %}selected{% endif %}>{{ brand[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Categoría -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            📂 Categoría
+                        </label>
+                        <select name="category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Todas</option>
+                            <option value="gamer" {% if request.args.get('category') == 'gamer' %}selected{% endif %}>🎮 Gamer</option>
+                            <option value="working" {% if request.args.get('category') == 'working' %}selected{% endif %}>💼 Trabajo</option>
+                            <option value="home" {% if request.args.get('category') == 'home' %}selected{% endif %}>🏠 Hogar</option>
+                        </select>
                     </div>
                 </div>
-                
-                <!-- Categoría -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Categoría
-                    </label>
-                    <select name="category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Todas</option>
-                        <option value="gamer" {% if request.args.get('category') == 'gamer' %}selected{% endif %}>🎮 Gamer</option>
-                        <option value="working" {% if request.args.get('category') == 'working' %}selected{% endif %}>💼 Trabajo</option>
-                        <option value="home" {% if request.args.get('category') == 'home' %}selected{% endif %}>🏠 Hogar</option>
-                    </select>
+
+                <!-- Fila 2: Procesador, GPU, Pantalla -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Procesador -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            ⚡ Procesador
+                        </label>
+                        <select name="processor" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="0">Todos los procesadores</option>
+                            {% for processor in filter_form.processor_id.choices[1:] %}
+                                <option value="{{ processor[0] }}" {% if request.args.get('processor', '0')|int == processor[0] %}selected{% endif %}>{{ processor[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Tarjeta Gráfica -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            🎮 Tarjeta Gráfica
+                        </label>
+                        <select name="gpu" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="0">Todas las GPUs</option>
+                            {% for gpu in filter_form.graphics_card_id.choices[1:] %}
+                                <option value="{{ gpu[0] }}" {% if request.args.get('gpu', '0')|int == gpu[0] %}selected{% endif %}>{{ gpu[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Pantalla -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            🖥️ Pantalla
+                        </label>
+                        <select name="screen" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="0">Todas las pantallas</option>
+                            {% for screen in filter_form.screen_id.choices[1:] %}
+                                <option value="{{ screen[0] }}" {% if request.args.get('screen', '0')|int == screen[0] %}selected{% endif %}>{{ screen[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                
-                <!-- Rotación -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Rotación
-                    </label>
-                    <select name="rotation" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Todas</option>
-                        <option value="fast" {% if request.args.get('rotation') == 'fast' %}selected{% endif %}>🚀 Rápida</option>
-                        <option value="medium" {% if request.args.get('rotation') == 'medium' %}selected{% endif %}>⚡ Media</option>
-                        <option value="slow" {% if request.args.get('rotation') == 'slow' %}selected{% endif %}>🐌 Lenta</option>
-                    </select>
+
+                <!-- Fila 3: Condición y Rango de Precio -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Condición -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            📋 Condición
+                        </label>
+                        <select name="condition" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Todas</option>
+                            <option value="new" {% if request.args.get('condition') == 'new' %}selected{% endif %}>✨ Nuevo</option>
+                            <option value="used" {% if request.args.get('condition') == 'used' %}selected{% endif %}>📦 Usado</option>
+                            <option value="refurbished" {% if request.args.get('condition') == 'refurbished' %}selected{% endif %}>♻️ Refurbished</option>
+                        </select>
+                    </div>
+
+                    <!-- Rango de Precio con Slider -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            💰 Rango de Precio
+                        </label>
+                        <div class="px-2">
+                            <!-- Slider Container -->
+                            <div id="price-slider" class="mb-4"></div>
+
+                            <!-- Display Values -->
+                            <div class="flex justify-between items-center text-sm">
+                                <div class="text-gray-600 dark:text-gray-400">
+                                    Mín: <span id="price-min-display" class="font-semibold text-indigo-600 dark:text-indigo-400">$0</span>
+                                </div>
+                                <div class="text-gray-600 dark:text-gray-400">
+                                    Máx: <span id="price-max-display" class="font-semibold text-indigo-600 dark:text-indigo-400">$0</span>
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs para enviar con el form -->
+                            <input type="hidden" name="min_price" id="min_price_input" value="{{ request.args.get('min_price', min_db_price) }}">
+                            <input type="hidden" name="max_price" id="max_price_input" value="{{ request.args.get('max_price', max_db_price) }}">
+                        </div>
+                    </div>
                 </div>
-                
+
                 <!-- Botones -->
-                <div class="lg:col-span-4 flex space-x-3">
+                <div class="flex space-x-3">
                     <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
                         Aplicar Filtros
                     </button>
@@ -146,7 +237,7 @@
                 </div>
             </form>
         </div>
-        
+
         <!-- Tabla de Laptops -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
             <div class="overflow-x-auto">
@@ -170,7 +261,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm font-mono text-gray-900 dark:text-gray-100">{{ laptop.sku }}</span>
                                 </td>
-                                
+
                                 <!-- Laptop Info -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
@@ -189,7 +280,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                
+
                                 <!-- Categoría -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {% if laptop.category == 'gamer' %}
@@ -206,13 +297,13 @@
                                         </span>
                                     {% endif %}
                                 </td>
-                                
+
                                 <!-- Precio -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-white font-semibold">${{ "%.2f"|format(laptop.sale_price) }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">Margen: {{ "%.1f"|format(laptop.margin_percentage) }}%</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">Margen: {{ "%.1f"|format(laptop.margin_percentage if laptop.margin_percentage else 0) }}%</div>
                                 </td>
-                                
+
                                 <!-- Stock -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {% if laptop.quantity <= 0 %}
@@ -229,7 +320,7 @@
                                         </span>
                                     {% endif %}
                                 </td>
-                                
+
                                 <!-- Rotación -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {% if laptop.rotation_status == 'fast' %}
@@ -246,7 +337,7 @@
                                         </span>
                                     {% endif %}
                                 </td>
-                                
+
                                 <!-- Acciones -->
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ url_for('inventory.laptop_detail', id=laptop.id) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3" title="Ver detalle">
@@ -281,14 +372,14 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <!-- Paginación -->
             {% if pagination.pages > 1 %}
             <div class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-700 dark:text-gray-300">
-                        Mostrando <span class="font-medium">{{ pagination.per_page * (pagination.page - 1) + 1 }}</span> a 
-                        <span class="font-medium">{{ [pagination.per_page * pagination.page, pagination.total]|min }}</span> de 
+                        Mostrando <span class="font-medium">{{ pagination.per_page * (pagination.page - 1) + 1 }}</span> a
+                        <span class="font-medium">{{ [pagination.per_page * pagination.page, pagination.total]|min }}</span> de
                         <span class="font-medium">{{ pagination.total }}</span> resultados
                     </div>
                     <div class="flex space-x-2">
@@ -309,4 +400,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/price-slider.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/inventory/price-slider.js') }}"></script>
+<script>
+// Inicializar el slider de precios cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    new PriceSlider({
+        dbMinPrice: {{ min_db_price }},
+        dbMaxPrice: {{ max_db_price }},
+        currentMinPrice: {{ request.args.get('min_price', min_db_price) }},
+        currentMaxPrice: {{ request.args.get('max_price', max_db_price) }}
+    });
+});
+</script>
 {% endblock %}

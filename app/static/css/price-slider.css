@@ -1,0 +1,80 @@
+/* ============================================
+   PRICE RANGE SLIDER STYLES
+   ============================================ */
+
+#price-slider {
+    height: 8px;
+    background: linear-gradient(to right, #e5e7eb 0%, #e5e7eb 100%);
+    border-radius: 4px;
+    position: relative;
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+.dark #price-slider {
+    background: linear-gradient(to right, #4b5563 0%, #4b5563 100%);
+}
+
+#price-slider .slider-track {
+    position: absolute;
+    height: 8px;
+    background: linear-gradient(to right, #6366f1, #8b5cf6);
+    border-radius: 4px;
+    top: 0;
+    pointer-events: none;
+}
+
+#price-slider .slider-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #6366f1;
+    border-radius: 50%;
+    cursor: grab;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+#price-slider .slider-handle:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4);
+    border-width: 4px;
+}
+
+#price-slider .slider-handle:active {
+    cursor: grabbing;
+    background: #6366f1;
+    box-shadow: 0 6px 12px rgba(99, 102, 241, 0.6);
+}
+
+.dark #price-slider .slider-handle {
+    background: #1f2937;
+    border-color: #818cf8;
+}
+
+.dark #price-slider .slider-handle:hover {
+    box-shadow: 0 4px 8px rgba(129, 140, 248, 0.4);
+}
+
+.dark #price-slider .slider-handle:active {
+    background: #818cf8;
+    box-shadow: 0 6px 12px rgba(129, 140, 248, 0.6);
+}
+
+/* Display values styling */
+#price-min-display,
+#price-max-display {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6366f1;
+    transition: color 0.2s;
+}
+
+.dark #price-min-display,
+.dark #price-max-display {
+    color: #818cf8;
+}

@@ -4,53 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Luxera.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/forms/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/forms/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/forms/laptop_forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models/laptop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models/mixins.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models/user.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/api/catalog_api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/inventory.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/ai_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/financial_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/inventory_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/sku_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/css/custom.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/js/theme.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/about.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/auth/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/auth/register.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/contact.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/errors/403.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/errors/404.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/errors/500.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/inventory/laptop_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/laptop_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/decorators.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/validators.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
+    <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.01">
+      <change afterPath="$PROJECT_DIR$/app/services/catalog_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/static/css/price-slider.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/static/js/inventory/price-slider.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/forms/laptop_forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/laptop_forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/inventory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/inventory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/ai_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/inventory_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/inventory_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/laptop_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/inventory/laptop_detail.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,9 +25,10 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Flask Main" />
+        <option value="HTML File" />
+        <option value="CSS File" />
         <option value="JavaScript File" />
         <option value="Python Script" />
-        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -81,6 +46,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "somanumte"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/somanumte/LuxeraRD",
+    "accountId": "e8b290a2-5aab-409f-af43-e6c1b253407d"
+  }
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -120,6 +97,7 @@
     "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "C:/Users/felix/PycharmProjects/Luxera/app/routes",
+    "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -137,6 +115,7 @@
       <recent name="C:\Users\felix\PycharmProjects\Luxera\app\models" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\felix\PycharmProjects\Luxera\app\templates\inventory" />
       <recent name="C:\Users\felix\PycharmProjects\Luxera\app" />
     </key>
   </component>
@@ -206,15 +185,28 @@
       <updated>1766790089262</updated>
       <workItem from="1766790090283" duration="582000" />
       <workItem from="1766790689463" duration="5072000" />
-      <workItem from="1766796380412" duration="17071000" />
+      <workItem from="1766796380412" duration="28660000" />
     </task>
+    <task id="LOCAL-00001" summary="Proyecto Luxera, V.01">
+      <option name="closed" value="true" />
+      <created>1766835488189</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1766835488189</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Proyecto Luxera, V.01" />
+    <option name="LAST_COMMIT_MESSAGE" value="Proyecto Luxera, V.01" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1766834860568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1766850053609" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1766812336842" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1766812318026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$config.coverage" NAME="config Coverage Results" MODIFIED="1766811118244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

@@ -410,6 +410,12 @@ class LaptopForm(FlaskForm):
             if field.data < self.entry_date.data:
                 raise ValidationError('La fecha de venta no puede ser anterior a la fecha de ingreso')
 
+    def validate_aesthetic_grade(self, field):
+        """El grado estético solo es requerido para productos refurbished"""
+        if self.condition.data == 'refurbished':
+            if not field.data or field.data == '':
+                raise ValidationError('El grado estético es requerido para productos refurbished')
+
 
 class QuickSearchForm(FlaskForm):
     """Formulario de búsqueda rápida"""
@@ -430,38 +436,9 @@ class QuickSearchForm(FlaskForm):
 class FilterForm(FlaskForm):
     """Formulario de filtros avanzados"""
 
-    category = SelectField(
-        'Categoría',
-        choices=[
-            ('', 'Todas'),
-            ('gamer', 'Gamer'),
-            ('working', 'Trabajo'),
-            ('home', 'Hogar')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    condition = SelectField(
-        'Condición',
-        choices=[
-            ('', 'Todas'),
-            ('new', 'Nuevo'),
-            ('used', 'Usado'),
-            ('refurbished', 'Refurbished')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    rotation_status = SelectField(
-        'Rotación',
-        choices=[
-            ('', 'Todas'),
-            ('fast', 'Rápida'),
-            ('medium', 'Media'),
-            ('slow', 'Lenta')
-        ],
+    store_id = SelectField(
+        'Tienda',
+        coerce=int,
         validators=[Optional()],
         render_kw={'class': 'form-input'}
     )
@@ -473,13 +450,58 @@ class FilterForm(FlaskForm):
         render_kw={'class': 'form-input'}
     )
 
+    category = SelectField(
+        'Categoría',
+        choices=[
+            ('', 'Todas'),
+            ('gamer', '🎮 Gamer'),
+            ('working', '💼 Trabajo'),
+            ('home', '🏠 Hogar')
+        ],
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    processor_id = SelectField(
+        'Procesador',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    graphics_card_id = SelectField(
+        'Tarjeta Gráfica',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+    # NUEVO: Filtro por pantalla
+    screen_id = SelectField(
+        'Pantalla',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+    condition = SelectField(
+        'Condición',
+        choices=[
+            ('', 'Todas'),
+            ('new', '✨ Nuevo'),
+            ('used', '📦 Usado'),
+            ('refurbished', '♻️ Refurbished')
+        ],
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
     min_price = DecimalField(
         'Precio Mínimo',
         places=2,
         validators=[Optional(), PositiveOrZero()],
         render_kw={
             'placeholder': '0.00',
-            'class': 'form-input'
+            'class': 'form-input',
+            'step': '0.01'
         }
     )
 
@@ -489,7 +511,8 @@ class FilterForm(FlaskForm):
         validators=[Optional(), PositiveOrZero()],
         render_kw={
             'placeholder': '9999.99',
-            'class': 'form-input'
+            'class': 'form-input',
+            'step': '0.01'
         }
     )
 
@@ -498,11 +521,29 @@ class FilterForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
 
-        # Cargar marcas para el filtro
+        # Cargar tiendas
+        self.store_id.choices = [(0, 'Todas las tiendas')] + [
+            (s.id, s.name) for s in Store.query.filter_by(is_active=True).order_by(Store.name).all()
+        ]
+
+        # Cargar marcas
         self.brand_id.choices = [(0, 'Todas las marcas')] + [
             (b.id, b.name) for b in Brand.query.filter_by(is_active=True).order_by(Brand.name).all()
         ]
 
+        # Cargar procesadores
+        self.processor_id.choices = [(0, 'Todos los procesadores')] + [
+            (p.id, p.name) for p in Processor.query.filter_by(is_active=True).order_by(Processor.name).all()
+        ]
+
+        # Cargar tarjetas gráficas
+        self.graphics_card_id.choices = [(0, 'Todas las GPUs')] + [
+            (g.id, g.name) for g in GraphicsCard.query.filter_by(is_active=True).order_by(GraphicsCard.name).all()
+        ]
+        # Cargar pantallas
+        self.screen_id.choices = [(0, 'Todas las pantallas')] + [
+            (s.id, s.name) for s in Screen.query.filter_by(is_active=True).order_by(Screen.name).all()
+        ]
 
 # Importar ValidationError al final para evitar importación circular
 from wtforms.validators import ValidationError

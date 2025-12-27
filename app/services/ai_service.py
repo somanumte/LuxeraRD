@@ -12,185 +12,147 @@ class AIService:
     @staticmethod
     def generate_recommendations(laptop):
         """
-        Genera recomendaciones inteligentes basadas en múltiples factores
+        Genera recomendaciones basadas en el análisis de la laptop
 
         Args:
-            laptop: Objeto Laptop con todos sus datos
+            laptop: Objeto Laptop
 
         Returns:
-            str: Recomendaciones en formato texto
+            list: Lista de diccionarios con recomendaciones
         """
         recommendations = []
 
-        # === ANÁLISIS DE MARGEN ===
-        if laptop.margin_percentage:
-            margin = float(laptop.margin_percentage)
+        # Validar que laptop tenga los datos mínimos
+        if not laptop:
+            return recommendations
 
-            if margin < 10:
+        # 1. Análisis de margen
+        if laptop.margin_percentage is not None:
+            if laptop.margin_percentage < 15:
                 recommendations.append({
                     'level': 'danger',
-                    'icon': '🔴',
-                    'title': 'Margen crítico',
-                    'message': f'Margen muy bajo ({margin:.1f}%). Considera aumentar precio o reducir costos.'
+                    'title': 'Margen Muy Bajo',
+                    'message': f'El margen de {laptop.margin_percentage:.1f}% está por debajo del mínimo recomendado (15%).',
+                    'action': 'Considera aumentar el precio de venta o negociar mejor precio de compra.'
                 })
-            elif margin < 15:
+            elif laptop.margin_percentage < 25:
                 recommendations.append({
                     'level': 'warning',
-                    'icon': '⚠️',
-                    'title': 'Margen bajo',
-                    'message': f'Margen de {margin:.1f}% es bajo. Objetivo recomendado: 20-30%.'
-                })
-            elif margin > 40:
-                recommendations.append({
-                    'level': 'success',
-                    'icon': '💰',
-                    'title': 'Excelente margen',
-                    'message': f'Margen excepcional de {margin:.1f}%. Producto muy rentable.'
-                })
-            elif margin >= 20:
-                recommendations.append({
-                    'level': 'success',
-                    'icon': '✅',
-                    'title': 'Margen saludable',
-                    'message': f'Margen de {margin:.1f}% está en rango óptimo.'
-                })
-
-        # === ANÁLISIS DE ROTACIÓN ===
-        if laptop.rotation_status == 'slow' and laptop.days_in_inventory:
-            days = laptop.days_in_inventory
-            recommendations.append({
-                'level': 'warning',
-                'icon': '🐌',
-                'title': 'Rotación lenta',
-                'message': f'{days} días en inventario. Acciones sugeridas:',
-                'actions': [
-                    f'Reducir precio en 5-10% (aprox. ${float(laptop.sale_price) * 0.05:.2f})',
-                    'Crear promoción o bundle',
-                    'Destacar en redes sociales',
-                    'Ofrecer financiamiento'
-                ]
-            })
-        elif laptop.rotation_status == 'fast':
-            recommendations.append({
-                'level': 'success',
-                'icon': '🚀',
-                'title': 'Rotación rápida',
-                'message': f'Producto con alta demanda. Considera:',
-                'actions': [
-                    'Reabastecer pronto',
-                    'Aumentar stock de seguridad',
-                    'Evaluar aumento de precio'
-                ]
-            })
-
-        # === ANÁLISIS DE INVENTARIO ===
-        if laptop.quantity <= 0:
-            recommendations.append({
-                'level': 'danger',
-                'icon': '❌',
-                'title': 'Sin stock',
-                'message': 'Producto agotado. Reordenar urgentemente.'
-            })
-        elif laptop.quantity <= laptop.min_alert:
-            recommendations.append({
-                'level': 'warning',
-                'icon': '📦',
-                'title': 'Stock bajo',
-                'message': f'Solo {laptop.quantity} unidades. Alerta mínima: {laptop.min_alert}.',
-                'actions': ['Generar orden de compra', 'Contactar proveedor']
-            })
-
-        # === ANÁLISIS POR CATEGORÍA ===
-        if laptop.category == 'gamer':
-            if laptop.sale_price and float(laptop.sale_price) < 800:
-                recommendations.append({
-                    'level': 'info',
-                    'icon': '🎮',
-                    'title': 'Precio competitivo - Gamer',
-                    'message': 'Laptop gamer con precio atractivo. Destaca en marketing.'
-                })
-
-            if laptop.graphics_card and 'RTX' in laptop.graphics_card.name.upper():
-                recommendations.append({
-                    'level': 'info',
-                    'icon': '💎',
-                    'title': 'GPU Premium',
-                    'message': 'RTX detectada. Enfatiza rendimiento en gaming y streaming.'
-                })
-
-        elif laptop.category == 'working':
-            if laptop.processor and 'i7' in laptop.processor.name or 'Ryzen 7' in laptop.processor.name:
-                recommendations.append({
-                    'level': 'info',
-                    'icon': '💼',
-                    'title': 'Ideal para profesionales',
-                    'message': 'Procesador potente. Mercado objetivo: diseñadores, developers, editores.'
-                })
-
-        elif laptop.category == 'home':
-            if laptop.sale_price and float(laptop.sale_price) < 500:
-                recommendations.append({
-                    'level': 'info',
-                    'icon': '🏠',
-                    'title': 'Precio accesible',
-                    'message': 'Perfecto para estudiantes y uso básico. Destaca portabilidad y batería.'
-                })
-
-        # === ANÁLISIS DE CONDICIÓN ===
-        if laptop.condition == 'refurbished':
-            if laptop.aesthetic_grade in ['A+', 'A']:
-                recommendations.append({
-                    'level': 'success',
-                    'icon': '♻️',
-                    'title': 'Refurbished Premium',
-                    'message': f'Grado estético {laptop.aesthetic_grade}. Destaca "como nuevo" y garantía.',
-                    'actions': [
-                        'Incluir fotos detalladas',
-                        'Ofrecer garantía extendida',
-                        'Destacar ahorro vs nuevo'
-                    ]
+                    'title': 'Margen Aceptable',
+                    'message': f'El margen de {laptop.margin_percentage:.1f}% está en rango aceptable pero puede mejorar.',
+                    'action': 'Busca oportunidades para optimizar costos o ajustar precio.'
                 })
             else:
                 recommendations.append({
-                    'level': 'info',
-                    'icon': '♻️',
-                    'title': 'Refurbished - Transparencia',
-                    'message': f'Grado {laptop.aesthetic_grade}. Ser transparente sobre condición cosmética.'
+                    'level': 'success',
+                    'title': 'Margen Excelente',
+                    'message': f'El margen de {laptop.margin_percentage:.1f}% está muy bien posicionado.',
+                    'action': 'Mantén esta estrategia de precios.'
                 })
 
-        # === ANÁLISIS DE UPGRADABILIDAD ===
-        upgrade_options = []
-        if laptop.storage_upgradeable:
-            upgrade_options.append('almacenamiento')
-        if laptop.ram_upgradeable:
-            upgrade_options.append('RAM')
+        # 2. Análisis de stock
+        if laptop.quantity is not None and laptop.min_alert is not None:
+            if laptop.quantity <= 0:
+                recommendations.append({
+                    'level': 'danger',
+                    'title': 'Sin Stock',
+                    'message': 'El producto está agotado.',
+                    'action': 'Reabastece urgentemente si hay demanda.'
+                })
+            elif laptop.quantity <= laptop.min_alert:
+                recommendations.append({
+                    'level': 'warning',
+                    'title': 'Stock Bajo',
+                    'message': f'Solo quedan {laptop.quantity} unidades (mínimo: {laptop.min_alert}).',
+                    'action': 'Planifica reabastecimiento pronto.'
+                })
 
-        if upgrade_options:
-            recommendations.append({
-                'level': 'info',
-                'icon': '🔧',
-                'title': 'Ampliable',
-                'message': f'Se puede ampliar: {", ".join(upgrade_options)}. Úsalo como argumento de venta.'
-            })
+        # 3. Análisis de rotación
+        if laptop.rotation_status:
+            if laptop.rotation_status == 'slow' and laptop.days_in_inventory:
+                recommendations.append({
+                    'level': 'warning',
+                    'title': 'Rotación Lenta',
+                    'message': f'El producto lleva {laptop.days_in_inventory} días en inventario.',
+                    'action': 'Considera promociones o descuentos para acelerar la venta.'
+                })
+            elif laptop.rotation_status == 'fast':
+                recommendations.append({
+                    'level': 'success',
+                    'title': 'Alta Rotación',
+                    'message': 'El producto se vende rápidamente.',
+                    'action': 'Asegura disponibilidad constante de este modelo.'
+                })
 
-        # === ANÁLISIS DE ESPECIFICACIONES ===
-        if laptop.npu:
-            recommendations.append({
-                'level': 'info',
-                'icon': '🤖',
-                'title': 'NPU disponible',
-                'message': 'Procesamiento AI integrado. Ideal para IA local y Copilot+.'
-            })
+        # 4. Análisis de categoría vs especificaciones
+        if laptop.category:
+            category_name = laptop.category
 
-        # === RECOMENDACIÓN DE PRECIO ===
-        if laptop.margin_percentage and float(laptop.margin_percentage) < 20:
-            from app.services.financial_service import FinancialService
-            suggested = FinancialService.suggest_sale_price(laptop.purchase_cost, 25)
+            # Para laptops gamer
+            if category_name == 'gamer':
+                # Verificar GPU
+                if laptop.graphics_card and laptop.graphics_card.name:
+                    gpu_name = laptop.graphics_card.name.lower()
+                    if 'integrated' in gpu_name or 'intel' in gpu_name or 'uhd' in gpu_name or 'iris' in gpu_name:
+                        recommendations.append({
+                            'level': 'info',
+                            'title': 'GPU No Óptima para Gaming',
+                            'message': 'La GPU integrada puede no ser ideal para gaming exigente.',
+                            'action': 'Considera recategorizar o ajustar precio según rendimiento real.'
+                        })
+
+                # Verificar RAM - CORREGIDO CON TRY-EXCEPT
+                if laptop.ram_type and laptop.ram_type.name:
+                    try:
+                        ram_str = ''.join(filter(str.isdigit, laptop.ram_type.name))
+                        if ram_str:
+                            ram_value = int(ram_str)
+                            if ram_value < 16:
+                                recommendations.append({
+                                    'level': 'info',
+                                    'title': 'RAM Limitada para Gaming',
+                                    'message': f'{laptop.ram_type.name} puede ser insuficiente para gaming moderno.',
+                                    'action': 'Recomienda upgrade de RAM si es posible.'
+                                })
+                    except (ValueError, AttributeError):
+                        pass  # Si no se puede extraer el valor, ignorar
+
+            # Para laptops de trabajo
+            elif category_name == 'working':
+                if laptop.processor and laptop.processor.name:
+                    proc_name = laptop.processor.name.lower()
+                    if 'i3' in proc_name or 'ryzen 3' in proc_name or 'celeron' in proc_name or 'pentium' in proc_name:
+                        recommendations.append({
+                            'level': 'info',
+                            'title': 'Procesador de Nivel Básico',
+                            'message': 'El procesador es adecuado para tareas básicas de oficina.',
+                            'action': 'Enfoca marketing en uso ligero de oficina.'
+                        })
+
+        # 5. Análisis de condición vs precio
+        if laptop.condition and laptop.sale_price:
+            if laptop.condition == 'used' and laptop.margin_percentage and laptop.margin_percentage > 35:
+                recommendations.append({
+                    'level': 'info',
+                    'title': 'Margen Alto en Producto Usado',
+                    'message': 'El margen es alto para un producto usado.',
+                    'action': 'Verifica que el precio sea competitivo en el mercado.'
+                })
+            elif laptop.condition == 'refurbished':
+                recommendations.append({
+                    'level': 'info',
+                    'title': 'Producto Refurbished',
+                    'message': 'Destaca la garantía y proceso de renovación en marketing.',
+                    'action': 'Comunica claramente el valor agregado del refurbishing.'
+                })
+
+        # Si no hay recomendaciones, agregar una genérica positiva
+        if not recommendations:
             recommendations.append({
-                'level': 'info',
-                'icon': '💡',
-                'title': 'Sugerencia de precio',
-                'message': f'Para margen 25%, considera precio: ${suggested}'
+                'level': 'success',
+                'title': 'Producto Bien Configurado',
+                'message': 'El producto está correctamente configurado.',
+                'action': 'Monitorea regularmente el rendimiento de ventas.'
             })
 
         return recommendations
@@ -212,17 +174,24 @@ class AIService:
         text_parts = []
 
         for rec in recommendations:
+            # Emojis por nivel
+            level_icons = {
+                'danger': '🔴',
+                'warning': '⚠️',
+                'success': '✅',
+                'info': 'ℹ️'
+            }
+            icon = level_icons.get(rec.get('level', 'info'), 'ℹ️')
+
             # Header
-            header = f"{rec['icon']} {rec['title']}"
-            message = rec['message']
+            header = f"{icon} {rec.get('title', 'Recomendación')}"
+            message = rec.get('message', '')
 
             text_parts.append(f"{header}\n{message}")
 
             # Actions si existen
-            if 'actions' in rec and rec['actions']:
-                text_parts.append("Acciones sugeridas:")
-                for action in rec['actions']:
-                    text_parts.append(f"  • {action}")
+            if 'action' in rec and rec['action']:
+                text_parts.append(f"→ {rec['action']}")
 
             text_parts.append("")  # Línea en blanco
 
@@ -321,17 +290,20 @@ class AIService:
             else:
                 score_home += 25
 
-        # Analizar RAM
+        # Analizar RAM - CORREGIDO: usa laptop.ram_type consistentemente
         if laptop.ram_type:
-            ram_name = laptop.ram_type.name.upper()
-            if '32GB' in ram_name or '64GB' in ram_name:
-                score_gamer += 20
-                score_working += 25
-            elif '16GB' in ram_name:
-                score_working += 15
-                score_gamer += 10
-            else:
-                score_home += 20
+            try:
+                ram_name = laptop.ram_type.name.upper()
+                if '32GB' in ram_name or '64GB' in ram_name:
+                    score_gamer += 20
+                    score_working += 25
+                elif '16GB' in ram_name:
+                    score_working += 15
+                    score_gamer += 10
+                else:
+                    score_home += 20
+            except AttributeError:
+                pass  # Si no hay RAM, ignorar
 
         # Analizar precio
         if laptop.sale_price:
@@ -378,9 +350,11 @@ class AIService:
         if laptop.processor:
             points.append(f"Procesador {laptop.processor.name}")
 
+        # CORREGIDO: usa laptop.ram_type consistentemente
         if laptop.ram_type:
             points.append(f"Memoria {laptop.ram_type.name}")
 
+        # CORREGIDO: usa laptop.storage_type consistentemente
         if laptop.storage_type:
             points.append(f"Almacenamiento {laptop.storage_type.name}")
 
@@ -392,7 +366,7 @@ class AIService:
 
         # Características especiales
         if laptop.npu:
-            points.append("🤖 NPU para IA")
+            points.append(f"🤖 NPU: {laptop.npu}")
 
         if laptop.storage_upgradeable or laptop.ram_upgradeable:
             points.append("🔧 Ampliable")

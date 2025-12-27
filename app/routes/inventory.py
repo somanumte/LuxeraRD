@@ -12,6 +12,7 @@ from app.services.sku_service import SKUService
 from app.services.financial_service import FinancialService
 from app.services.inventory_service import InventoryService
 from app.services.ai_service import AIService
+from app.services.catalog_service import CatalogService
 from app.utils.decorators import admin_required
 from datetime import datetime
 from sqlalchemy import or_
@@ -28,12 +29,16 @@ def laptops_list():
     """
     Muestra el listado principal de laptops con filtros y búsqueda
     """
-    # Obtener parámetros de búsqueda y filtros
-    search_query = request.args.get('search', '').strip()
-    category_filter = request.args.get('category', '')
-    condition_filter = request.args.get('condition', '')
-    rotation_filter = request.args.get('rotation', '')
+    # Obtener parámetros de filtros
+    store_filter = request.args.get('store', type=int, default=0)
     brand_filter = request.args.get('brand', type=int, default=0)
+    category_filter = request.args.get('category', '')
+    processor_filter = request.args.get('processor', type=int, default=0)
+    gpu_filter = request.args.get('gpu', type=int, default=0)
+    screen_filter = request.args.get('screen', type=int, default=0)
+    condition_filter = request.args.get('condition', '')
+    min_price = request.args.get('min_price', type=float, default=0)
+    max_price = request.args.get('max_price', type=float, default=0)
 
     # Paginación
     page = request.args.get('page', 1, type=int)
@@ -43,27 +48,32 @@ def laptops_list():
     query = Laptop.query
 
     # Aplicar filtros
-    if search_query:
-        search_pattern = f'%{search_query}%'
-        query = query.join(Brand).join(LaptopModel).filter(
-            or_(
-                Laptop.sku.ilike(search_pattern),
-                Brand.name.ilike(search_pattern),
-                LaptopModel.name.ilike(search_pattern)
-            )
-        )
+    if store_filter and store_filter > 0:
+        query = query.filter(Laptop.store_id == store_filter)
+
+    if brand_filter and brand_filter > 0:
+        query = query.filter(Laptop.brand_id == brand_filter)
 
     if category_filter:
         query = query.filter(Laptop.category == category_filter)
 
+    if processor_filter and processor_filter > 0:
+        query = query.filter(Laptop.processor_id == processor_filter)
+
+    if gpu_filter and gpu_filter > 0:
+        query = query.filter(Laptop.graphics_card_id == gpu_filter)
+
+    if screen_filter and screen_filter > 0:
+        query = query.filter(Laptop.screen_id == screen_filter)
+
     if condition_filter:
         query = query.filter(Laptop.condition == condition_filter)
 
-    if rotation_filter:
-        query = query.filter(Laptop.rotation_status == rotation_filter)
+    if min_price > 0:
+        query = query.filter(Laptop.sale_price >= min_price)
 
-    if brand_filter and brand_filter > 0:
-        query = query.filter(Laptop.brand_id == brand_filter)
+    if max_price > 0:
+        query = query.filter(Laptop.sale_price <= max_price)
 
     # Ordenar por fecha de ingreso (más recientes primero)
     query = query.order_by(Laptop.entry_date.desc())
@@ -72,27 +82,43 @@ def laptops_list():
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     laptops = pagination.items
 
-    # Calcular estadísticas generales
+    # Calcular estadísticas GLOBALES (todas las laptops, no solo filtradas)
     all_laptops = Laptop.query.all()
+
+    # VALOR TOTAL = suma del precio de venta * cantidad de TODAS las laptops
+    total_inventory_value = sum(
+        float(laptop.sale_price * laptop.quantity)
+        for laptop in all_laptops
+        if laptop.sale_price and laptop.quantity
+    )
+
     stats = {
         'total': len(all_laptops),
-        'total_value': sum(float(l.sale_price * l.quantity) if l.sale_price else 0 for l in all_laptops),
+        'total_value': total_inventory_value,
         'low_stock': len([l for l in all_laptops if l.quantity <= l.min_alert]),
         'slow_rotation': len([l for l in all_laptops if l.rotation_status == 'slow'])
     }
 
     # Formularios
-    search_form = QuickSearchForm()
     filter_form = FilterForm()
+
+    # Obtener rango de precios de la base de datos
+    price_range = db.session.query(
+        db.func.min(Laptop.sale_price),
+        db.func.max(Laptop.sale_price)
+    ).first()
+
+    min_db_price = float(price_range[0]) if price_range[0] else 0
+    max_db_price = float(price_range[1]) if price_range[1] else 10000
 
     return render_template(
         'inventory/laptops_list.html',
         laptops=laptops,
         pagination=pagination,
         stats=stats,
-        search_form=search_form,
         filter_form=filter_form,
-        search_query=search_query
+        min_db_price=min_db_price,
+        max_db_price=max_db_price
     )
 
 
@@ -109,6 +135,18 @@ def laptop_add():
 
     if form.validate_on_submit():
         try:
+            # Procesar catálogos dinámicos (crear si son strings)
+            catalog_data = CatalogService.process_laptop_form_data({
+                'brand_id': form.brand_id.data,
+                'model_id': form.model_id.data,
+                'processor_id': form.processor_id.data,
+                'os_id': form.os_id.data,
+                'screen_id': form.screen_id.data,
+                'graphics_card_id': form.graphics_card_id.data,
+                'storage_id': form.storage_id.data,
+                'ram_id': form.ram_id.data
+            })
+
             # Generar SKU automáticamente
             sku = SKUService.generate_laptop_sku()
 
@@ -121,15 +159,15 @@ def laptop_add():
             # Crear nueva laptop
             laptop = Laptop(
                 sku=sku,
-                brand_id=form.brand_id.data if form.brand_id.data != 0 else None,
-                model_id=form.model_id.data if form.model_id.data != 0 else None,
-                processor_id=form.processor_id.data if form.processor_id.data != 0 else None,
-                os_id=form.os_id.data if form.os_id.data != 0 else None,
-                screen_id=form.screen_id.data if form.screen_id.data != 0 else None,
-                graphics_card_id=form.graphics_card_id.data if form.graphics_card_id.data != 0 else None,
-                storage_id=form.storage_id.data if form.storage_id.data != 0 else None,
+                brand_id=catalog_data['brand_id'],
+                model_id=catalog_data['model_id'],
+                processor_id=catalog_data['processor_id'],
+                os_id=catalog_data['os_id'],
+                screen_id=catalog_data['screen_id'],
+                graphics_card_id=catalog_data['graphics_card_id'],
+                storage_id=catalog_data['storage_id'],
                 storage_upgradeable=form.storage_upgradeable.data,
-                ram_id=form.ram_id.data if form.ram_id.data != 0 else None,
+                ram_id=catalog_data['ram_id'],
                 ram_upgradeable=form.ram_upgradeable.data,
                 npu=form.npu.data,
                 purchase_cost=form.purchase_cost.data,
@@ -241,16 +279,28 @@ def laptop_edit(id):
 
     if form.validate_on_submit():
         try:
+            # Procesar catálogos dinámicos (crear si son strings)
+            catalog_data = CatalogService.process_laptop_form_data({
+                'brand_id': form.brand_id.data,
+                'model_id': form.model_id.data,
+                'processor_id': form.processor_id.data,
+                'os_id': form.os_id.data,
+                'screen_id': form.screen_id.data,
+                'graphics_card_id': form.graphics_card_id.data,
+                'storage_id': form.storage_id.data,
+                'ram_id': form.ram_id.data
+            })
+
             # Actualizar campos
-            laptop.brand_id = form.brand_id.data if form.brand_id.data != 0 else None
-            laptop.model_id = form.model_id.data if form.model_id.data != 0 else None
-            laptop.processor_id = form.processor_id.data if form.processor_id.data != 0 else None
-            laptop.os_id = form.os_id.data if form.os_id.data != 0 else None
-            laptop.screen_id = form.screen_id.data if form.screen_id.data != 0 else None
-            laptop.graphics_card_id = form.graphics_card_id.data if form.graphics_card_id.data != 0 else None
-            laptop.storage_id = form.storage_id.data if form.storage_id.data != 0 else None
+            laptop.brand_id = catalog_data['brand_id']
+            laptop.model_id = catalog_data['model_id']
+            laptop.processor_id = catalog_data['processor_id']
+            laptop.os_id = catalog_data['os_id']
+            laptop.screen_id = catalog_data['screen_id']
+            laptop.graphics_card_id = catalog_data['graphics_card_id']
+            laptop.storage_id = catalog_data['storage_id']
             laptop.storage_upgradeable = form.storage_upgradeable.data
-            laptop.ram_id = form.ram_id.data if form.ram_id.data != 0 else None
+            laptop.ram_id = catalog_data['ram_id']
             laptop.ram_upgradeable = form.ram_upgradeable.data
             laptop.npu = form.npu.data
             laptop.purchase_cost = form.purchase_cost.data

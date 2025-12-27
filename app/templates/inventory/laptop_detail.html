@@ -22,7 +22,7 @@
                 SKU: <span class="font-mono font-semibold">{{ laptop.sku }}</span>
             </p>
         </div>
-        
+
         <!-- Acciones Rápidas -->
         {% if current_user.is_admin %}
         <div class="flex flex-wrap gap-3 mb-6">
@@ -32,7 +32,7 @@
                 </svg>
                 Editar
             </a>
-            
+
             <form action="{{ url_for('inventory.laptop_duplicate', id=laptop.id) }}" method="POST" class="inline">
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@
                     Duplicar
                 </button>
             </form>
-            
+
             <form action="{{ url_for('inventory.laptop_delete', id=laptop.id) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de eliminar esta laptop? Esta acción no se puede deshacer.');">
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,12 +52,12 @@
             </form>
         </div>
         {% endif %}
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             <!-- Columna Izquierda: Info Principal -->
             <div class="lg:col-span-2 space-y-6">
-                
+
                 <!-- Card: Especificaciones Técnicas -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
@@ -66,38 +66,38 @@
                         </svg>
                         Especificaciones Técnicas
                     </h2>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Marca</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.brand.name if laptop.brand else 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Modelo</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.model.name if laptop.model else 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Procesador</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.processor.name if laptop.processor else 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Sistema Operativo</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.operating_system.name if laptop.operating_system else 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Pantalla</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.screen.name if laptop.screen else 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Tarjeta Gráfica</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.graphics_card.name if laptop.graphics_card else 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Almacenamiento</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">
@@ -107,7 +107,7 @@
                                 {% endif %}
                             </p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">RAM</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">
@@ -117,7 +117,7 @@
                                 {% endif %}
                             </p>
                         </div>
-                        
+
                         {% if laptop.npu %}
                         <div class="col-span-2">
                             <p class="text-sm text-gray-500 dark:text-gray-400">NPU (IA)</p>
@@ -126,7 +126,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <!-- Card: Información Financiera -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
@@ -135,23 +135,23 @@
                         </svg>
                         Información Financiera
                     </h2>
-                    
+
                     <div class="grid grid-cols-2 gap-6">
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Costo de Compra</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ "%.2f"|format(laptop.purchase_cost) }}</p>
                         </div>
-                        
+
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Precio de Venta</p>
                             <p class="text-2xl font-bold text-green-600 dark:text-green-400">${{ "%.2f"|format(laptop.sale_price) }}</p>
                         </div>
-                        
+
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Ganancia Bruta</p>
                             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${{ "%.2f"|format(laptop.gross_profit) if laptop.gross_profit else '0.00' }}</p>
                         </div>
-                        
+
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Margen</p>
                             <p class="text-2xl font-bold {% if laptop.margin_percentage < 15 %}text-red-600 dark:text-red-400{% elif laptop.margin_percentage < 25 %}text-yellow-600 dark:text-yellow-400{% else %}text-green-600 dark:text-green-400{% endif %}">
@@ -159,7 +159,7 @@
                             </p>
                         </div>
                     </div>
-                    
+
                     {% if price_analysis %}
                     <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         <p class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">📊 Análisis de Precio</p>
@@ -167,7 +167,7 @@
                     </div>
                     {% endif %}
                 </div>
-                
+
                 <!-- Card: Recomendaciones IA -->
                 {% if recommendations %}
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
@@ -177,10 +177,10 @@
                         </svg>
                         Recomendaciones Inteligentes
                     </h2>
-                    
+
                     <div class="space-y-3">
                         {% for rec in recommendations %}
-                        <div class="p-4 rounded-lg border-l-4 
+                        <div class="p-4 rounded-lg border-l-4
                             {% if rec.level == 'danger' %}bg-red-50 dark:bg-red-900/20 border-red-500 dark:border-red-600
                             {% elif rec.level == 'warning' %}bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500 dark:border-yellow-600
                             {% elif rec.level == 'success' %}bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-600
@@ -206,7 +206,7 @@
                     </div>
                 </div>
                 {% endif %}
-                
+
                 <!-- Card: Notas -->
                 {% if laptop.notes %}
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
@@ -220,14 +220,14 @@
                 </div>
                 {% endif %}
             </div>
-            
+
             <!-- Columna Derecha: Info Secundaria -->
             <div class="space-y-6">
-                
+
                 <!-- Card: Estado de Inventario -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Estado de Inventario</h3>
-                    
+
                     <div class="space-y-4">
                         <!-- Cantidad -->
                         <div>
@@ -244,7 +244,7 @@
                             <p class="mt-2 text-xs text-yellow-600 dark:text-yellow-400 font-medium">⚠️ Stock bajo - Reabastecer pronto</p>
                             {% endif %}
                         </div>
-                        
+
                         <!-- Categoría -->
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Categoría</p>
@@ -262,7 +262,7 @@
                                 </span>
                             {% endif %}
                         </div>
-                        
+
                         <!-- Condición -->
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Condición</p>
@@ -274,13 +274,13 @@
                                 {% else %}
                                     <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">📦 Usado</span>
                                 {% endif %}
-                                
+
                                 {% if laptop.aesthetic_grade %}
                                     <span class="px-2 py-1 text-xs font-mono bg-gray-200 dark:bg-gray-700 rounded">{{ laptop.aesthetic_grade }}</span>
                                 {% endif %}
                             </div>
                         </div>
-                        
+
                         <!-- Rotación -->
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Rotación</p>
@@ -300,53 +300,53 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Card: Ubicación -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ubicación</h3>
-                    
+
                     <div class="space-y-3">
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Tienda</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.store.name if laptop.store else 'No asignada' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Ubicación Específica</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.location.name if laptop.location else 'No asignada' }}</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Card: Fechas -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Fechas</h3>
-                    
+
                     <div class="space-y-3">
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Fecha de Ingreso</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.entry_date.strftime('%d/%m/%Y') if laptop.entry_date else 'N/A' }}</p>
                         </div>
-                        
+
                         {% if laptop.sale_date %}
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Fecha de Venta</p>
                             <p class="text-base font-semibold text-green-600 dark:text-green-400">{{ laptop.sale_date.strftime('%d/%m/%Y') }}</p>
                         </div>
                         {% endif %}
-                        
+
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Días en Inventario</p>
                             <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ laptop.days_in_inventory if laptop.days_in_inventory else 0 }}</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Card: Laptops Similares -->
                 {% if similar_laptops %}
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Productos Similares</h3>
-                    
+
                     <div class="space-y-3">
                         {% for similar in similar_laptops %}
                         <a href="{{ url_for('inventory.laptop_detail', id=similar.id) }}" class="block p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
