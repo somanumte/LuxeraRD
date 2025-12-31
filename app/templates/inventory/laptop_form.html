@@ -48,13 +48,31 @@
     .dark .select2-results__option--highlighted {
         background-color: #4f46e5 !important;
     }
+
+    .dark .select2-search__field {
+        background-color: #374151;
+        color: #f3f4f6;
+    }
+
+    /* Estilos para márgenes y precios */
+    .margin-good {
+        color: #10b981 !important;
+    }
+
+    .margin-warning {
+        color: #f59e0b !important;
+    }
+
+    .margin-danger {
+        color: #ef4444 !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Header -->
         <div class="mb-8">
             <div class="flex items-center space-x-3 mb-4">
@@ -64,7 +82,11 @@
                     </svg>
                 </a>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                    {{ '✏️ Editar Laptop' if mode == 'edit' else '➕ Agregar Nueva Laptop' }}
+                    {% if mode == 'edit' %}
+                        Editar Laptop
+                    {% else %}
+                        Agregar Nueva Laptop
+                    {% endif %}
                 </h1>
             </div>
             {% if mode == 'edit' and laptop %}
@@ -73,122 +95,161 @@
             </p>
             {% endif %}
         </div>
-        
+
         <!-- Formulario -->
-        <form method="POST" id="laptop-form" class="space-y-6">
+        <form method="POST" id="laptop-form" class="space-y-6" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
-            
-            <!-- Card: Especificaciones Técnicas -->
+
+            <!-- Card: Informacion del Producto -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    Informacion del Producto
+                </h2>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Nombre Comercial (display_name) - AUTO-GENERADO -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {{ form.display_name.label.text }} <span class="text-red-500">*</span>
+                            <span class="text-xs font-normal text-indigo-600 dark:text-indigo-400 ml-2">(Generado automáticamente)</span>
+                        </label>
+                        {{ form.display_name(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20", id="display_name") }}
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Se genera automáticamente: Marca + Modelo + Procesador + RAM + Almacenamiento + Pantalla + Categoria
+                            <span class="text-indigo-600 dark:text-indigo-400">(Puedes editarlo manualmente)</span>
+                        </p>
+                        {% if form.display_name.errors %}
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.display_name.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Descripcion Corta (opcional) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {{ form.short_description.label.text }}
+                        </label>
+                        {{ form.short_description(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
+                        {% if form.short_description.errors %}
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.short_description.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Especificaciones Tecnicas -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
-                    Especificaciones Técnicas
+                    Especificaciones Tecnicas
                 </h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
+
                     <!-- Marca -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.brand_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.brand_id(class="select2-ajax w-full") }}
+                        {{ form.brand_id(class="select2-ajax w-full", id="brand_id") }}
                         {% if form.brand_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.brand_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Modelo -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.model_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.model_id(class="select2-ajax w-full") }}
+                        {{ form.model_id(class="select2-ajax w-full", id="model_id") }}
                         {% if form.model_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.model_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Procesador -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.processor_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.processor_id(class="select2-ajax w-full") }}
+                        {{ form.processor_id(class="select2-ajax w-full", id="processor_id") }}
                         {% if form.processor_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.processor_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Sistema Operativo -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.os_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.os_id(class="select2-ajax w-full") }}
+                        {{ form.os_id(class="select2-ajax w-full", id="os_id") }}
                         {% if form.os_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.os_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Pantalla -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.screen_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.screen_id(class="select2-ajax w-full") }}
+                        {{ form.screen_id(class="select2-ajax w-full", id="screen_id") }}
                         {% if form.screen_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.screen_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
-                    <!-- Tarjeta Gráfica -->
+
+                    <!-- Tarjeta Grafica -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.graphics_card_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.graphics_card_id(class="select2-ajax w-full") }}
+                        {{ form.graphics_card_id(class="select2-ajax w-full", id="graphics_card_id") }}
                         {% if form.graphics_card_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.graphics_card_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Almacenamiento -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.storage_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.storage_id(class="select2-ajax w-full") }}
+                        {{ form.storage_id(class="select2-ajax w-full", id="storage_id") }}
                         <div class="mt-2">
                             <label class="inline-flex items-center">
                                 {{ form.storage_upgradeable }}
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">🔧 Ampliable</span>
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Ampliable</span>
                             </label>
                         </div>
                         {% if form.storage_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.storage_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- RAM -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.ram_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.ram_id(class="select2-ajax w-full") }}
+                        {{ form.ram_id(class="select2-ajax w-full", id="ram_id") }}
                         <div class="mt-2">
                             <label class="inline-flex items-center">
                                 {{ form.ram_upgradeable }}
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">🔧 Ampliable</span>
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Ampliable</span>
                             </label>
                         </div>
                         {% if form.ram_id.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.ram_id.errors[0] }}</p>
                         {% endif %}
                     </div>
-                    
+
                     <!-- NPU (opcional) -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
@@ -197,7 +258,7 @@
                         <div class="flex items-center mt-2">
                             <label class="inline-flex items-center">
                                 {{ form.npu(class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">🧠 Tiene NPU</span>
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Tiene NPU</span>
                             </label>
                         </div>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Intel AI Boost, AMD Ryzen AI, etc.</p>
@@ -263,13 +324,13 @@
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Opcional - precio promocional</p>
                     </div>
 
-                    <!-- Margen (calculado automáticamente) -->
+                    <!-- Margen (calculado automaticamente) -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             Margen de Ganancia
                         </label>
                         <div class="px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-xl border-2 border-gray-200 dark:border-gray-700">
-                            <p id="margin-display" class="text-2xl font-bold text-green-600 dark:text-green-400">
+                            <p id="margin-display" class="text-2xl font-bold margin-good">
                                 0%
                             </p>
                             <p id="profit-display" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -280,13 +341,13 @@
                 </div>
             </div>
 
-            <!-- Card: Inventario y Categoría -->
+            <!-- Card: Inventario y Categoria -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
-                    Inventario y Categoría
+                    Inventario y Categoria
                 </h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -301,7 +362,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Alerta Mínima -->
+                    <!-- Alerta Minima -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.min_alert.label.text }} <span class="text-red-500">*</span>
@@ -312,59 +373,62 @@
                         {% endif %}
                     </div>
 
-                    <!-- Categoría -->
+                    <!-- Categoria -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.category.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.category(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
+                        {{ form.category(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20", id="category") }}
                         {% if form.category.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.category.errors[0] }}</p>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Opciones de Publicación -->
+                <!-- Opciones de Publicacion -->
                 <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <h3 class="text-md font-semibold text-gray-900 dark:text-white mb-4">Opciones de Publicación</h3>
+                    <h3 class="text-md font-semibold text-gray-900 dark:text-white mb-4">Opciones de Publicacion</h3>
                     <div class="flex flex-wrap gap-6">
                         <label class="inline-flex items-center">
                             {{ form.is_published(class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">📢 Publicado (visible al público)</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Publicado (visible al publico)</span>
                         </label>
                         <label class="inline-flex items-center">
                             {{ form.is_featured(class="h-5 w-5 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded") }}
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">⭐ Destacado</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Destacado</span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- Card: Ubicación y Estado -->
+            <!-- Card: Ubicacion y Estado -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    Ubicación y Estado
+                    Ubicacion y Estado
                 </h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Tienda -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.store_id.label.text }}
+                            {{ form.store_id.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.store_id(class="select2-ajax w-full") }}
+                        {{ form.store_id(class="select2-ajax w-full", id="store_id") }}
+                        {% if form.store_id.errors %}
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.store_id.errors[0] }}</p>
+                        {% endif %}
                     </div>
 
-                    <!-- Ubicación -->
+                    <!-- Ubicacion -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.location_id.label.text }}
                         </label>
-                        {{ form.location_id(class="select2-ajax w-full") }}
+                        {{ form.location_id(class="select2-ajax w-full", id="location_id") }}
                     </div>
 
                     <!-- Proveedor -->
@@ -372,10 +436,10 @@
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.supplier_id.label.text }}
                         </label>
-                        {{ form.supplier_id(class="select2-ajax w-full") }}
+                        {{ form.supplier_id(class="select2-ajax w-full", id="supplier_id") }}
                     </div>
 
-                    <!-- Condición -->
+                    <!-- Condicion -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.condition.label.text }} <span class="text-red-500">*</span>
@@ -384,26 +448,6 @@
                         {% if form.condition.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.condition.errors[0] }}</p>
                         {% endif %}
-                    </div>
-
-                    <!-- Fecha de Ingreso -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.entry_date.label.text }} <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.entry_date(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        {% if form.entry_date.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.entry_date.errors[0] }}</p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Fecha de Venta -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.sale_date.label.text }}
-                        </label>
-                        {{ form.sale_date(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dejar vacío si aún no se ha vendido</p>
                     </div>
                 </div>
             </div>
@@ -418,16 +462,18 @@
                 </h2>
 
                 {{ form.internal_notes(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estas notas son internas y no se muestran al público</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estas notas son internas y no se muestran al publico</p>
             </div>
-            
+
             <!-- Botones -->
             <div class="flex items-center justify-between">
                 <a href="{{ url_for('inventory.laptops_list') }}" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold">
                     Cancelar
                 </a>
-                
-                {{ form.submit(class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300") }}
+
+                <button type="submit" id="submit-btn" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                    {{ form.submit.label.text or 'Guardar Laptop' }}
+                </button>
             </div>
         </form>
     </div>
@@ -440,58 +486,32 @@
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<!-- Scripts separados para mejor organización -->
+<script src="{{ url_for('static', filename='js/laptop_form.js') }}"></script>
+<script src="{{ url_for('static', filename='js/laptop_form_submit.js') }}"></script>
+
+<!-- Mensajes de error del formulario -->
 <script>
-// Inicializar Select2 en todos los campos
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        $(document).ready(function() {
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    alert('Error: {{ message }}');
+                {% elif category == 'success' %}
+                    console.log('Éxito: {{ message }}');
+                {% endif %}
+            {% endfor %}
+        });
+    {% endif %}
+{% endwith %}
+
+// Manejar el caso cuando hay errores de validación en campos específicos
 $(document).ready(function() {
-    $('.select2-ajax').select2({
-        tags: true,
-        createTag: function (params) {
-            var term = $.trim(params.term);
-            if (term === '') {
-                return null;
-            }
-            return {
-                id: 'new:' + term,
-                text: '➕ Crear: "' + term + '"',
-                newTag: true
-            }
-        },
-        placeholder: 'Selecciona o escribe para crear...',
-        allowClear: true,
-        width: '100%'
+    // Si hay errores, mostrar el formulario con los errores
+    $('.is-invalid').each(function() {
+        $(this).addClass('border-red-500');
     });
-    
-    // Calcular margen automáticamente
-    function calculateMargin() {
-        const purchaseCost = parseFloat($('#purchase_cost').val()) || 0;
-        const salePrice = parseFloat($('#sale_price').val()) || 0;
-        
-        if (salePrice > 0 && purchaseCost > 0) {
-            const profit = salePrice - purchaseCost;
-            const margin = (profit / salePrice) * 100;
-            
-            $('#margin-display').text(margin.toFixed(1) + '%');
-            $('#profit-display').text('Ganancia: $' + profit.toFixed(2));
-            
-            // Cambiar color según el margen
-            if (margin < 15) {
-                $('#margin-display').removeClass('text-green-600 text-yellow-600').addClass('text-red-600');
-            } else if (margin < 25) {
-                $('#margin-display').removeClass('text-green-600 text-red-600').addClass('text-yellow-600');
-            } else {
-                $('#margin-display').removeClass('text-red-600 text-yellow-600').addClass('text-green-600');
-            }
-        } else {
-            $('#margin-display').text('0%');
-            $('#profit-display').text('Ganancia: $0.00');
-        }
-    }
-    
-    // Eventos de cambio en precios
-    $('#purchase_cost, #sale_price').on('input', calculateMargin);
-    
-    // Calcular al cargar la página si hay valores
-    calculateMargin();
 });
 </script>
 {% endblock %}

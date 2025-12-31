@@ -42,16 +42,16 @@ CONNECTIVITY_PORTS_CHOICES = [
 
 # ===== OPCIONES DE KEYBOARD LAYOUT =====
 KEYBOARD_LAYOUT_CHOICES = [
-    ('US', 'US - Inglés'),
-    ('UK', 'UK - Inglés británico'),
-    ('ES', 'ES - Español España'),
-    ('LATAM', 'LATAM - Español Latinoamérica'),
-    ('DE', 'DE - Alemán'),
-    ('FR', 'FR - Francés'),
+    ('US', 'US - Ingles'),
+    ('UK', 'UK - Ingles britanico'),
+    ('ES', 'ES - Espanol Espana'),
+    ('LATAM', 'LATAM - Espanol Latinoamerica'),
+    ('DE', 'DE - Aleman'),
+    ('FR', 'FR - Frances'),
     ('IT', 'IT - Italiano'),
-    ('PT', 'PT - Portugués'),
-    ('BR', 'BR - Portugués Brasil'),
-    ('JP', 'JP - Japonés'),
+    ('PT', 'PT - Portugues'),
+    ('BR', 'BR - Portugues Brasil'),
+    ('JP', 'JP - Japones'),
     ('KR', 'KR - Coreano'),
     ('CN', 'CN - Chino'),
 ]
@@ -67,7 +67,7 @@ class LaptopForm(FlaskForm):
         'SKU',
         validators=[Optional(), SKUValidator()],
         render_kw={
-            'placeholder': 'Se generará automáticamente',
+            'placeholder': 'Se generara automaticamente',
             'class': 'form-input',
             'readonly': True
         }
@@ -78,10 +78,10 @@ class LaptopForm(FlaskForm):
         validators=[
             Optional(),
             Length(max=255),
-            Regexp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$', message='Solo letras minúsculas, números y guiones')
+            Regexp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$', message='Solo letras minusculas, numeros y guiones')
         ],
         render_kw={
-            'placeholder': 'Se generará automáticamente del nombre',
+            'placeholder': 'Se generara automaticamente del nombre',
             'class': 'form-input'
         }
     )
@@ -100,20 +100,20 @@ class LaptopForm(FlaskForm):
     )
 
     short_description = TextAreaField(
-        'Descripción Corta',
+        'Descripcion Corta',
         validators=[Optional(), Length(max=300)],
         render_kw={
-            'placeholder': 'Descripción breve para tarjetas de producto (máx. 300 caracteres)',
+            'placeholder': 'Descripcion breve para tarjetas de producto (max. 300 caracteres)',
             'class': 'form-input',
             'rows': '2'
         }
     )
 
     long_description_html = TextAreaField(
-        'Descripción Completa (HTML/Markdown)',
+        'Descripcion Completa (HTML/Markdown)',
         validators=[Optional()],
         render_kw={
-            'placeholder': 'Descripción detallada del producto. Soporta HTML y Markdown.',
+            'placeholder': 'Descripcion detallada del producto. Soporta HTML y Markdown.',
             'class': 'form-input',
             'rows': '6'
         }
@@ -136,24 +136,24 @@ class LaptopForm(FlaskForm):
     )
 
     seo_title = StringField(
-        'Título SEO',
+        'Titulo SEO',
         validators=[Optional(), Length(max=70)],
         render_kw={
-            'placeholder': 'Título para motores de búsqueda (máx. 70 caracteres)',
+            'placeholder': 'Titulo para motores de busqueda (max. 70 caracteres)',
             'class': 'form-input'
         }
     )
 
     seo_description = StringField(
-        'Descripción SEO',
+        'Descripcion SEO',
         validators=[Optional(), Length(max=160)],
         render_kw={
-            'placeholder': 'Meta descripción para SEO (máx. 160 caracteres)',
+            'placeholder': 'Meta descripcion para SEO (max. 160 caracteres)',
             'class': 'form-input'
         }
     )
 
-    # ===== 3. ESPECIFICACIONES TÉCNICAS =====
+    # ===== 3. ESPECIFICACIONES TA‰CNICAS =====
     brand_id = SelectField(
         'Marca',
         coerce=int,
@@ -215,9 +215,9 @@ class LaptopForm(FlaskForm):
     )
 
     graphics_card_id = SelectField(
-        'Tarjeta Gráfica',
+        'Tarjeta Grafica',
         coerce=int,
-        validators=[DataRequired(message='La tarjeta gráfica es requerida')],
+        validators=[DataRequired(message='La tarjeta grafica es requerida')],
         render_kw={
             'class': 'form-input select2-dynamic',
             'data-placeholder': 'Ej: NVIDIA RTX 4060',
@@ -266,7 +266,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 4. DETALLES TÉCNICOS ESPECÍFICOS =====
+    # ===== 4. DETALLES TA‰CNICOS ESPECAFICOS =====
     npu = BooleanField(
         'Tiene NPU (Procesador de IA)',
         default=False,
@@ -276,10 +276,10 @@ class LaptopForm(FlaskForm):
     )
 
     keyboard_layout = SelectField(
-        'Distribución del Teclado',
+        'Distribucion del Teclado',
         choices=KEYBOARD_LAYOUT_CHOICES,
         default='US',
-        validators=[DataRequired(message='La distribución del teclado es requerida')],
+        validators=[DataRequired(message='La distribucion del teclado es requerida')],
         render_kw={
             'class': 'form-input'
         }
@@ -296,30 +296,30 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 5. ESTADO Y CATEGORÍA =====
+    # ===== 5. ESTADO Y CATEGORAA =====
     category = SelectField(
-        'Categoría',
+        'Categoria',
         choices=[
-            ('', 'Selecciona una categoría'),
-            ('laptop', '💻 Laptop'),
-            ('workstation', '🖥️ Workstation'),
-            ('gaming', '🎮 Gaming')
+            ('', 'Selecciona una categoria'),
+            ('laptop', ' Laptop'),
+            ('workstation', ' Workstation'),
+            ('gaming', ' Gaming')
         ],
-        validators=[DataRequired(message='La categoría es requerida')],
+        validators=[DataRequired(message='La categoria es requerida')],
         render_kw={
             'class': 'form-input'
         }
     )
 
     condition = SelectField(
-        'Condición',
+        'Condicion',
         choices=[
-            ('', 'Selecciona condición'),
-            ('new', '✨ Nuevo'),
-            ('used', '📦 Usado'),
-            ('refurbished', '♻️ Reacondicionado')
+            ('', 'Selecciona condicion'),
+            ('new', ' Nuevo'),
+            ('used', ' Usado'),
+            ('refurbished', ' Reacondicionado')
         ],
-        validators=[DataRequired(message='La condición es requerida')],
+        validators=[DataRequired(message='La condicion es requerida')],
         default='used',
         render_kw={
             'class': 'form-input',
@@ -369,7 +369,7 @@ class LaptopForm(FlaskForm):
             PositiveOrZero(message='El precio de descuento debe ser 0 o mayor')
         ],
         render_kw={
-            'placeholder': '0.00 (dejar vacío si no hay descuento)',
+            'placeholder': '0.00 (dejar vacio si no hay descuento)',
             'class': 'form-input',
             'step': '0.01',
             'min': '0'
@@ -427,9 +427,9 @@ class LaptopForm(FlaskForm):
     )
 
     min_alert = IntegerField(
-        'Alerta Mínima',
+        'Alerta Minima',
         validators=[
-            DataRequired(message='La alerta mínima es requerida'),
+            DataRequired(message='La alerta minima es requerida'),
             PositiveOrZero(message='La alerta debe ser 0 o mayor')
         ],
         default=1,
@@ -440,7 +440,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== UBICACIÓN Y LOGÍSTICA =====
+    # ===== UBICACIA“N Y LOGASTICA =====
     store_id = SelectField(
         'Tienda',
         coerce=int,
@@ -454,7 +454,7 @@ class LaptopForm(FlaskForm):
     )
 
     location_id = SelectField(
-        'Ubicación',
+        'Ubicacion',
         coerce=int,
         validators=[Optional()],
         render_kw={
@@ -478,32 +478,15 @@ class LaptopForm(FlaskForm):
     )
 
     # ===== 8. TIMESTAMPS =====
-    entry_date = DateField(
-        'Fecha de Ingreso',
-        validators=[DataRequired(message='La fecha de ingreso es requerida')],
-        format='%Y-%m-%d',
-        render_kw={
-            'class': 'form-input',
-            'type': 'date'
-        }
-    )
-
-    sale_date = DateField(
-        'Fecha de Venta',
-        validators=[Optional()],
-        format='%Y-%m-%d',
-        render_kw={
-            'class': 'form-input',
-            'type': 'date'
-        }
-    )
+    # entry_date se establece automaticamente en el backend (date.today())
+    # sale_date se establece cuando se realiza una venta
 
     # ===== NOTAS =====
     internal_notes = TextAreaField(
         'Notas Internas',
         validators=[Optional(), Length(max=2000)],
         render_kw={
-            'placeholder': 'Notas internas, observaciones, etc. (no visibles al público)',
+            'placeholder': 'Notas internas, observaciones, etc. (no visibles al publico)',
             'class': 'form-input',
             'rows': '4'
         }
@@ -522,7 +505,7 @@ class LaptopForm(FlaskForm):
         super(LaptopForm, self).__init__(*args, **kwargs)
 
         # Cargar opciones para los SelectFields desde la base de datos
-        # Solo cargamos las opciones iniciales, Select2 manejará la búsqueda dinámica
+        # Solo cargamos las opciones iniciales, Select2 manejara la busqueda dinamica
 
         # Brands
         self.brand_id.choices = [(0, 'Selecciona o crea una marca')] + [
@@ -571,7 +554,7 @@ class LaptopForm(FlaskForm):
         ]
 
         # Locations
-        self.location_id.choices = [(0, 'Selecciona o crea una ubicación')] + [
+        self.location_id.choices = [(0, 'Selecciona o crea una ubicacion')] + [
             (l.id, l.name) for l in Location.query.filter_by(is_active=True).order_by(Location.name).all()
         ]
 
@@ -579,12 +562,6 @@ class LaptopForm(FlaskForm):
         self.supplier_id.choices = [(0, 'Selecciona o crea un proveedor')] + [
             (s.id, s.name) for s in Supplier.query.filter_by(is_active=True).order_by(Supplier.name).all()
         ]
-
-    def validate_sale_date(self, field):
-        """Valida que la fecha de venta sea posterior a la de ingreso"""
-        if field.data and self.entry_date.data:
-            if field.data < self.entry_date.data:
-                raise ValidationError('La fecha de venta no puede ser anterior a la fecha de ingreso')
 
     def validate_reserved_quantity(self, field):
         """Valida que la cantidad reservada no exceda la cantidad total"""
@@ -600,13 +577,13 @@ class LaptopForm(FlaskForm):
 
 
 class LaptopImageForm(FlaskForm):
-    """Formulario para agregar imágenes a una laptop"""
+    """Formulario para agregar imagenes a una laptop"""
 
     image = FileField(
         'Imagen',
         validators=[
             DataRequired(message='La imagen es requerida'),
-            FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif'], 'Solo imágenes (jpg, png, webp, gif)')
+            FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif'], 'Solo imagenes (jpg, png, webp, gif)')
         ]
     )
 
@@ -614,7 +591,7 @@ class LaptopImageForm(FlaskForm):
         'Texto Alternativo (SEO)',
         validators=[Optional(), Length(max=255)],
         render_kw={
-            'placeholder': 'Descripción de la imagen para SEO',
+            'placeholder': 'Descripcion de la imagen para SEO',
             'class': 'form-input'
         }
     )
@@ -631,7 +608,7 @@ class LaptopImageForm(FlaskForm):
 
 
 class QuickSearchForm(FlaskForm):
-    """Formulario de búsqueda rápida"""
+    """Formulario de busqueda rapida"""
 
     search = StringField(
         'Buscar',
@@ -664,12 +641,12 @@ class FilterForm(FlaskForm):
     )
 
     category = SelectField(
-        'Categoría',
+        'Categoria',
         choices=[
             ('', 'Todas'),
-            ('laptop', '💻 Laptop'),
-            ('workstation', '🖥️ Workstation'),
-            ('gaming', '🎮 Gaming')
+            ('laptop', ' Laptop'),
+            ('workstation', ' Workstation'),
+            ('gaming', ' Gaming')
         ],
         validators=[Optional()],
         render_kw={'class': 'form-input'}
@@ -683,7 +660,7 @@ class FilterForm(FlaskForm):
     )
 
     graphics_card_id = SelectField(
-        'Tarjeta Gráfica',
+        'Tarjeta Grafica',
         coerce=int,
         validators=[Optional()],
         render_kw={'class': 'form-input'}
@@ -697,19 +674,19 @@ class FilterForm(FlaskForm):
     )
 
     condition = SelectField(
-        'Condición',
+        'Condicion',
         choices=[
             ('', 'Todas'),
-            ('new', '✨ Nuevo'),
-            ('used', '📦 Usado'),
-            ('refurbished', '♻️ Reacondicionado')
+            ('new', ' Nuevo'),
+            ('used', ' Usado'),
+            ('refurbished', ' Reacondicionado')
         ],
         validators=[Optional()],
         render_kw={'class': 'form-input'}
     )
 
     is_published = SelectField(
-        'Estado de Publicación',
+        'Estado de Publicacion',
         choices=[
             ('', 'Todos'),
             ('1', 'Publicados'),
@@ -738,7 +715,7 @@ class FilterForm(FlaskForm):
     )
 
     min_price = DecimalField(
-        'Precio Mínimo',
+        'Precio Minimo',
         places=2,
         validators=[Optional(), PositiveOrZero()],
         render_kw={
@@ -749,7 +726,7 @@ class FilterForm(FlaskForm):
     )
 
     max_price = DecimalField(
-        'Precio Máximo',
+        'Precio Maximo',
         places=2,
         validators=[Optional(), PositiveOrZero()],
         render_kw={
@@ -790,7 +767,7 @@ class FilterForm(FlaskForm):
             (p.id, p.name) for p in Processor.query.filter_by(is_active=True).order_by(Processor.name).all()
         ]
 
-        # Cargar tarjetas gráficas
+        # Cargar tarjetas graficas
         self.graphics_card_id.choices = [(0, 'Todas las GPUs')] + [
             (g.id, g.name) for g in GraphicsCard.query.filter_by(is_active=True).order_by(GraphicsCard.name).all()
         ]
@@ -841,7 +818,7 @@ class SupplierForm(FlaskForm):
     )
 
     phone = StringField(
-        'Teléfono',
+        'Telefono',
         validators=[Optional(), Length(max=20)],
         render_kw={
             'placeholder': '+1 234 567 8900',
@@ -850,10 +827,10 @@ class SupplierForm(FlaskForm):
     )
 
     address = TextAreaField(
-        'Dirección',
+        'Direccion',
         validators=[Optional(), Length(max=300)],
         render_kw={
-            'placeholder': 'Dirección completa',
+            'placeholder': 'Direccion completa',
             'class': 'form-input',
             'rows': '2'
         }
@@ -861,7 +838,7 @@ class SupplierForm(FlaskForm):
 
     website = StringField(
         'Sitio Web',
-        validators=[Optional(), Length(max=200), URL(message='URL inválida')],
+        validators=[Optional(), Length(max=200), URL(message='URL invalida')],
         render_kw={
             'placeholder': 'https://www.proveedor.com',
             'class': 'form-input'

@@ -36,11 +36,11 @@ def generate_slug(text):
     Returns:
         str: Slug generado
     """
-    # Convertir a minúsculas y reemplazar espacios
+    # Convertir a minusculas y reemplazar espacios
     slug = text.lower().strip()
-    # Eliminar caracteres especiales, mantener solo alfanuméricos y espacios
+    # Eliminar caracteres especiales, mantener solo alfanumericos y espacios
     slug = re.sub(r'[^\w\s-]', '', slug)
-    # Reemplazar espacios y guiones múltiples con un solo guion
+    # Reemplazar espacios y guiones multiples con un solo guion
     slug = re.sub(r'[-\s]+', '-', slug)
     # Eliminar guiones al inicio y final
     slug = slug.strip('-')
@@ -49,14 +49,14 @@ def generate_slug(text):
 
 def ensure_unique_slug(base_slug, laptop_id=None):
     """
-    Asegura que el slug sea único
+    Asegura que el slug sea unico
 
     Args:
         base_slug: Slug base
-        laptop_id: ID de la laptop actual (para edición)
+        laptop_id: ID de la laptop actual (para edicion)
 
     Returns:
-        str: Slug único
+        str: Slug unico
     """
     slug = base_slug
     counter = 1
@@ -100,9 +100,9 @@ def process_connectivity_ports(form_data):
 @login_required
 def laptops_list():
     """
-    Muestra el listado principal de laptops con filtros y búsqueda
+    Muestra el listado principal de laptops con filtros y busqueda
     """
-    # Obtener parámetros de filtros
+    # Obtener parametros de filtros
     store_filter = request.args.get('store', type=int, default=0)
     brand_filter = request.args.get('brand', type=int, default=0)
     category_filter = request.args.get('category', '')
@@ -118,14 +118,14 @@ def laptops_list():
     max_price = request.args.get('max_price', type=float, default=0)
     search_query = request.args.get('q', '').strip()
 
-    # Paginación
+    # Paginacion
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
 
     # Query base
     query = Laptop.query
 
-    # Búsqueda por texto
+    # Busqueda por texto
     if search_query:
         search_pattern = f'%{search_query}%'
         query = query.filter(
@@ -177,14 +177,14 @@ def laptops_list():
     if max_price > 0:
         query = query.filter(Laptop.sale_price <= max_price)
 
-    # Ordenar por fecha de ingreso (más recientes primero)
+    # Ordenar por fecha de ingreso (mas recientes primero)
     query = query.order_by(Laptop.entry_date.desc())
 
     # Paginar
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     laptops = pagination.items
 
-    # Calcular estadísticas GLOBALES (todas las laptops, no solo filtradas)
+    # Calcular estadisticas GLOBALES (todas las laptops, no solo filtradas)
     all_laptops = Laptop.query.all()
 
     # VALOR TOTAL = suma del precio de venta * cantidad de TODAS las laptops
@@ -240,13 +240,13 @@ def laptops_list():
 @admin_required
 def laptop_add():
     """
-    Muestra el formulario y procesa la creación de una nueva laptop
+    Muestra el formulario y procesa la creacion de una nueva laptop
     """
     form = LaptopForm()
 
     if form.validate_on_submit():
         try:
-            # Procesar catálogos dinámicos (crear si son strings)
+            # Procesar catalogos dinamicos (crear si son strings)
             catalog_data = CatalogService.process_laptop_form_data({
                 'brand_id': form.brand_id.data,
                 'model_id': form.model_id.data,
@@ -261,7 +261,7 @@ def laptop_add():
                 'supplier_id': form.supplier_id.data
             })
 
-            # Generar SKU automáticamente
+            # Generar SKU automaticamente
             sku = SKUService.generate_laptop_sku()
 
             # Generar slug
@@ -299,14 +299,14 @@ def laptop_add():
                 location_id=catalog_data.get('location_id'),
                 supplier_id=catalog_data.get('supplier_id'),
 
-                # Detalles técnicos
+                # Detalles tecnicos
                 npu=form.npu.data,
                 storage_upgradeable=form.storage_upgradeable.data,
                 ram_upgradeable=form.ram_upgradeable.data,
                 keyboard_layout=form.keyboard_layout.data,
                 connectivity_ports=connectivity_ports,
 
-                # Estado y categoría
+                # Estado y categoria
                 category=form.category.data,
                 condition=form.condition.data,
 
@@ -322,11 +322,11 @@ def laptop_add():
                 min_alert=form.min_alert.data,
 
                 # Timestamps
-                entry_date=form.entry_date.data,
-                sale_date=form.sale_date.data,
+                entry_date=date.today(),  # Fecha automatica de ingreso
+                sale_date=None,  # Se establece cuando se vende
                 internal_notes=form.internal_notes.data,
 
-                # Auditoría
+                # Auditoria
                 created_by_id=current_user.id
             )
 
@@ -334,12 +334,12 @@ def laptop_add():
             db.session.add(laptop)
             db.session.commit()
 
-            flash(f'✅ Laptop {sku} agregada exitosamente', 'success')
+            flash(f'âœ… Laptop {sku} agregada exitosamente', 'success')
             return redirect(url_for('inventory.laptop_detail', id=laptop.id))
 
         except Exception as e:
             db.session.rollback()
-            flash(f'❌ Error al agregar laptop: {str(e)}', 'error')
+            flash(f'âŒ Error al agregar laptop: {str(e)}', 'error')
 
     # Si hay errores en el formulario
     if form.errors:
@@ -360,7 +360,7 @@ def laptop_detail(id):
     """
     laptop = Laptop.query.get_or_404(id)
 
-    # Obtener laptops similares (misma categoría y marca)
+    # Obtener laptops similares (misma categoria y marca)
     similar_laptops = Laptop.query.filter(
         Laptop.category == laptop.category,
         Laptop.brand_id == laptop.brand_id,
@@ -368,7 +368,7 @@ def laptop_detail(id):
         Laptop.is_published == True
     ).limit(5).all()
 
-    # Obtener imágenes de la laptop
+    # Obtener imagenes de la laptop
     images = laptop.images.order_by(LaptopImage.ordering).all()
 
     # Imagen de portada
@@ -383,12 +383,12 @@ def laptop_detail(id):
     )
 
 
-# ===== VER LAPTOP POR SLUG (para URLs públicas) =====
+# ===== VER LAPTOP POR SLUG (para URLs publicas) =====
 
 @inventory_bp.route('/p/<slug>')
 def laptop_by_slug(slug):
     """
-    Muestra el detalle de una laptop por su slug (URL pública)
+    Muestra el detalle de una laptop por su slug (URL publica)
     """
     laptop = Laptop.query.filter_by(slug=slug, is_published=True).first_or_404()
 
@@ -400,7 +400,7 @@ def laptop_by_slug(slug):
         Laptop.is_published == True
     ).limit(5).all()
 
-    # Obtener imágenes
+    # Obtener imagenes
     images = laptop.images.order_by(LaptopImage.ordering).all()
     cover_image = laptop.images.filter_by(is_cover=True).first()
 
@@ -431,7 +431,7 @@ def laptop_edit(id):
 
     if form.validate_on_submit():
         try:
-            # Procesar catálogos dinámicos
+            # Procesar catalogos dinamicos
             catalog_data = CatalogService.process_laptop_form_data({
                 'brand_id': form.brand_id.data,
                 'model_id': form.model_id.data,
@@ -446,7 +446,7 @@ def laptop_edit(id):
                 'supplier_id': form.supplier_id.data
             })
 
-            # Actualizar slug si cambió el nombre
+            # Actualizar slug si cambio el nombre
             if form.slug.data:
                 laptop.slug = ensure_unique_slug(form.slug.data, laptop.id)
             elif form.display_name.data != laptop.display_name:
@@ -479,14 +479,14 @@ def laptop_edit(id):
             laptop.location_id = catalog_data.get('location_id')
             laptop.supplier_id = catalog_data.get('supplier_id')
 
-            # Detalles técnicos
+            # Detalles tecnicos
             laptop.npu = form.npu.data
             laptop.storage_upgradeable = form.storage_upgradeable.data
             laptop.ram_upgradeable = form.ram_upgradeable.data
             laptop.keyboard_layout = form.keyboard_layout.data
             laptop.connectivity_ports = connectivity_ports
 
-            # Estado y categoría
+            # Estado y categoria
             laptop.category = form.category.data
             laptop.condition = form.condition.data
 
@@ -501,21 +501,21 @@ def laptop_edit(id):
             laptop.reserved_quantity = form.reserved_quantity.data if form.reserved_quantity.data else 0
             laptop.min_alert = form.min_alert.data
 
-            # Timestamps
-            laptop.entry_date = form.entry_date.data
-            laptop.sale_date = form.sale_date.data
+            # Notas
             laptop.internal_notes = form.internal_notes.data
+            # entry_date no se modifica (se establecio al crear)
+            # sale_date se establece desde otro proceso cuando se vende
 
             laptop.updated_at = datetime.utcnow()
 
             db.session.commit()
 
-            flash(f'✅ Laptop {laptop.sku} actualizada exitosamente', 'success')
+            flash(f'âœ… Laptop {laptop.sku} actualizada exitosamente', 'success')
             return redirect(url_for('inventory.laptop_detail', id=laptop.id))
 
         except Exception as e:
             db.session.rollback()
-            flash(f'❌ Error al actualizar laptop: {str(e)}', 'error')
+            flash(f'âŒ Error al actualizar laptop: {str(e)}', 'error')
 
     # Si hay errores en el formulario
     if form.errors:
@@ -533,19 +533,19 @@ def laptop_edit(id):
 @admin_required
 def laptop_delete(id):
     """
-    Elimina una laptop (borrado físico)
+    Elimina una laptop (borrado fisico)
     """
     laptop = Laptop.query.get_or_404(id)
     sku = laptop.sku
 
     try:
-        # Las imágenes se eliminarán automáticamente por cascade
+        # Las imagenes se eliminaran automaticamente por cascade
         db.session.delete(laptop)
         db.session.commit()
-        flash(f'🗑️ Laptop {sku} eliminada exitosamente', 'success')
+        flash(f'ðŸ—‘ï¸ Laptop {sku} eliminada exitosamente', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'❌ Error al eliminar laptop: {str(e)}', 'error')
+        flash(f'âŒ Error al eliminar laptop: {str(e)}', 'error')
 
     return redirect(url_for('inventory.laptops_list'))
 
@@ -576,7 +576,7 @@ def laptop_duplicate(id):
             display_name=f"{original.display_name} (Copia)",
             short_description=original.short_description,
             long_description_html=original.long_description_html,
-            is_published=False,  # No publicar automáticamente
+            is_published=False,  # No publicar automaticamente
             is_featured=False,
             seo_title=original.seo_title,
             seo_description=original.seo_description,
@@ -613,23 +613,23 @@ def laptop_duplicate(id):
         db.session.add(duplicate)
         db.session.commit()
 
-        flash(f'✅ Laptop duplicada con SKU: {new_sku}', 'success')
+        flash(f'âœ… Laptop duplicada con SKU: {new_sku}', 'success')
         return redirect(url_for('inventory.laptop_detail', id=duplicate.id))
 
     except Exception as e:
         db.session.rollback()
-        flash(f'❌ Error al duplicar laptop: {str(e)}', 'error')
+        flash(f'âŒ Error al duplicar laptop: {str(e)}', 'error')
         return redirect(url_for('inventory.laptop_detail', id=id))
 
 
-# ===== GESTIÓN DE IMÁGENES =====
+# ===== GESTIÃ“N DE IMÃGENES =====
 
 @inventory_bp.route('/<int:id>/images', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def laptop_images(id):
     """
-    Gestiona las imágenes de una laptop
+    Gestiona las imagenes de una laptop
     """
     laptop = Laptop.query.get_or_404(id)
     form = LaptopImageForm()
@@ -655,7 +655,7 @@ def laptop_images(id):
                 # Ruta relativa para la base de datos
                 relative_path = f"uploads/laptops/{laptop.id}/{filename}"
 
-                # Si es portada, quitar portada de otras imágenes
+                # Si es portada, quitar portada de otras imagenes
                 if form.is_cover.data:
                     LaptopImage.query.filter_by(laptop_id=laptop.id, is_cover=True).update({'is_cover': False})
 
@@ -676,11 +676,11 @@ def laptop_images(id):
                 db.session.add(image)
                 db.session.commit()
 
-                flash('✅ Imagen agregada exitosamente', 'success')
+                flash('âœ… Imagen agregada exitosamente', 'success')
 
         except Exception as e:
             db.session.rollback()
-            flash(f'❌ Error al subir imagen: {str(e)}', 'error')
+            flash(f'âŒ Error al subir imagen: {str(e)}', 'error')
 
     images = laptop.images.order_by(LaptopImage.ordering).all()
 
@@ -703,7 +703,7 @@ def delete_image(image_id):
     laptop_id = image.laptop_id
 
     try:
-        # Eliminar archivo físico
+        # Eliminar archivo fisico
         filepath = os.path.join('app', 'static', image.image_path)
         if os.path.exists(filepath):
             os.remove(filepath)
@@ -712,10 +712,10 @@ def delete_image(image_id):
         db.session.delete(image)
         db.session.commit()
 
-        flash('✅ Imagen eliminada exitosamente', 'success')
+        flash('âœ… Imagen eliminada exitosamente', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'❌ Error al eliminar imagen: {str(e)}', 'error')
+        flash(f'âŒ Error al eliminar imagen: {str(e)}', 'error')
 
     return redirect(url_for('inventory.laptop_images', id=laptop_id))
 
@@ -730,17 +730,17 @@ def set_cover_image(image_id):
     image = LaptopImage.query.get_or_404(image_id)
 
     try:
-        # Quitar portada de otras imágenes
+        # Quitar portada de otras imagenes
         LaptopImage.query.filter_by(laptop_id=image.laptop_id, is_cover=True).update({'is_cover': False})
 
         # Establecer esta como portada
         image.is_cover = True
         db.session.commit()
 
-        flash('✅ Imagen de portada actualizada', 'success')
+        flash('âœ… Imagen de portada actualizada', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'❌ Error al actualizar portada: {str(e)}', 'error')
+        flash(f'âŒ Error al actualizar portada: {str(e)}', 'error')
 
     return redirect(url_for('inventory.laptop_images', id=image.laptop_id))
 
@@ -752,12 +752,12 @@ def set_cover_image(image_id):
 @admin_required
 def bulk_publish():
     """
-    Publica múltiples laptops
+    Publica multiples laptops
     """
     laptop_ids = request.form.getlist('laptop_ids')
 
     if not laptop_ids:
-        flash('❌ No se seleccionaron laptops', 'error')
+        flash('âŒ No se seleccionaron laptops', 'error')
         return redirect(url_for('inventory.laptops_list'))
 
     try:
@@ -766,10 +766,10 @@ def bulk_publish():
             synchronize_session=False
         )
         db.session.commit()
-        flash(f'✅ {len(laptop_ids)} laptops publicadas', 'success')
+        flash(f'âœ… {len(laptop_ids)} laptops publicadas', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'❌ Error: {str(e)}', 'error')
+        flash(f'âŒ Error: {str(e)}', 'error')
 
     return redirect(url_for('inventory.laptops_list'))
 
@@ -779,12 +779,12 @@ def bulk_publish():
 @admin_required
 def bulk_unpublish():
     """
-    Despublica múltiples laptops
+    Despublica multiples laptops
     """
     laptop_ids = request.form.getlist('laptop_ids')
 
     if not laptop_ids:
-        flash('❌ No se seleccionaron laptops', 'error')
+        flash('âŒ No se seleccionaron laptops', 'error')
         return redirect(url_for('inventory.laptops_list'))
 
     try:
@@ -793,9 +793,9 @@ def bulk_unpublish():
             synchronize_session=False
         )
         db.session.commit()
-        flash(f'✅ {len(laptop_ids)} laptops despublicadas', 'success')
+        flash(f'âœ… {len(laptop_ids)} laptops despublicadas', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'❌ Error: {str(e)}', 'error')
+        flash(f'âŒ Error: {str(e)}', 'error')
 
     return redirect(url_for('inventory.laptops_list'))
