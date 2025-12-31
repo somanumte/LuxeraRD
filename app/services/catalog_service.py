@@ -1,10 +1,11 @@
 """
 Servicio para manejar la creación dinámica de catálogos
+Actualizado al nuevo modelo de datos
 """
 from app import db
 from app.models.laptop import (
     Brand, LaptopModel, Processor, OperatingSystem,
-    Screen, GraphicsCard, StorageType, RAMType
+    Screen, GraphicsCard, Storage, Ram, Store, Location, Supplier
 )
 
 
@@ -12,15 +13,17 @@ class CatalogService:
     """Servicio para gestión dinámica de catálogos"""
 
     @staticmethod
-    def get_or_create_brand(value):
+    def _get_or_create_generic(model, value, **extra_fields):
         """
-        Obtiene o crea una marca
+        Método genérico para obtener o crear items de catálogo
 
         Args:
-            value: ID (int) o nombre (str) de la marca
+            model: Modelo de SQLAlchemy
+            value: ID (int) o nombre (str)
+            **extra_fields: Campos adicionales para el modelo
 
         Returns:
-            int: ID de la marca, o None si value es inválido
+            int: ID del item, o None si value es inválido
         """
         if not value or value == 0 or value == '0':
             return None
@@ -37,20 +40,33 @@ class CatalogService:
                 return None
 
             # Buscar si ya existe (case-insensitive)
-            existing = Brand.query.filter(
-                db.func.lower(Brand.name) == name.lower()
+            existing = model.query.filter(
+                db.func.lower(model.name) == name.lower()
             ).first()
 
             if existing:
                 return existing.id
 
-            # Crear nueva marca
-            new_brand = Brand(name=name, is_active=True)
-            db.session.add(new_brand)
+            # Crear nuevo item
+            new_item = model(name=name, is_active=True, **extra_fields)
+            db.session.add(new_item)
             db.session.flush()  # Para obtener el ID sin commit
-            return new_brand.id
+            return new_item.id
 
         return None
+
+    @staticmethod
+    def get_or_create_brand(value):
+        """
+        Obtiene o crea una marca
+
+        Args:
+            value: ID (int) o nombre (str) de la marca
+
+        Returns:
+            int: ID de la marca, o None si value es inválido
+        """
+        return CatalogService._get_or_create_generic(Brand, value)
 
     @staticmethod
     def get_or_create_model(value, brand_id=None):
@@ -110,31 +126,7 @@ class CatalogService:
         Returns:
             int: ID del procesador, o None si value es inválido
         """
-        if not value or value == 0 or value == '0':
-            return None
-
-        if isinstance(value, int) and value > 0:
-            return value
-
-        if isinstance(value, str):
-            name = value.strip()
-
-            if not name:
-                return None
-
-            existing = Processor.query.filter(
-                db.func.lower(Processor.name) == name.lower()
-            ).first()
-
-            if existing:
-                return existing.id
-
-            new_processor = Processor(name=name, is_active=True)
-            db.session.add(new_processor)
-            db.session.flush()
-            return new_processor.id
-
-        return None
+        return CatalogService._get_or_create_generic(Processor, value)
 
     @staticmethod
     def get_or_create_os(value):
@@ -147,31 +139,7 @@ class CatalogService:
         Returns:
             int: ID del sistema operativo, o None si value es inválido
         """
-        if not value or value == 0 or value == '0':
-            return None
-
-        if isinstance(value, int) and value > 0:
-            return value
-
-        if isinstance(value, str):
-            name = value.strip()
-
-            if not name:
-                return None
-
-            existing = OperatingSystem.query.filter(
-                db.func.lower(OperatingSystem.name) == name.lower()
-            ).first()
-
-            if existing:
-                return existing.id
-
-            new_os = OperatingSystem(name=name, is_active=True)
-            db.session.add(new_os)
-            db.session.flush()
-            return new_os.id
-
-        return None
+        return CatalogService._get_or_create_generic(OperatingSystem, value)
 
     @staticmethod
     def get_or_create_screen(value):
@@ -184,31 +152,7 @@ class CatalogService:
         Returns:
             int: ID de la pantalla, o None si value es inválido
         """
-        if not value or value == 0 or value == '0':
-            return None
-
-        if isinstance(value, int) and value > 0:
-            return value
-
-        if isinstance(value, str):
-            name = value.strip()
-
-            if not name:
-                return None
-
-            existing = Screen.query.filter(
-                db.func.lower(Screen.name) == name.lower()
-            ).first()
-
-            if existing:
-                return existing.id
-
-            new_screen = Screen(name=name, is_active=True)
-            db.session.add(new_screen)
-            db.session.flush()
-            return new_screen.id
-
-        return None
+        return CatalogService._get_or_create_generic(Screen, value)
 
     @staticmethod
     def get_or_create_graphics_card(value):
@@ -221,31 +165,7 @@ class CatalogService:
         Returns:
             int: ID de la tarjeta gráfica, o None si value es inválido
         """
-        if not value or value == 0 or value == '0':
-            return None
-
-        if isinstance(value, int) and value > 0:
-            return value
-
-        if isinstance(value, str):
-            name = value.strip()
-
-            if not name:
-                return None
-
-            existing = GraphicsCard.query.filter(
-                db.func.lower(GraphicsCard.name) == name.lower()
-            ).first()
-
-            if existing:
-                return existing.id
-
-            new_gpu = GraphicsCard(name=name, is_active=True)
-            db.session.add(new_gpu)
-            db.session.flush()
-            return new_gpu.id
-
-        return None
+        return CatalogService._get_or_create_generic(GraphicsCard, value)
 
     @staticmethod
     def get_or_create_storage(value):
@@ -258,31 +178,7 @@ class CatalogService:
         Returns:
             int: ID del almacenamiento, o None si value es inválido
         """
-        if not value or value == 0 or value == '0':
-            return None
-
-        if isinstance(value, int) and value > 0:
-            return value
-
-        if isinstance(value, str):
-            name = value.strip()
-
-            if not name:
-                return None
-
-            existing = StorageType.query.filter(
-                db.func.lower(StorageType.name) == name.lower()
-            ).first()
-
-            if existing:
-                return existing.id
-
-            new_storage = StorageType(name=name, is_active=True)
-            db.session.add(new_storage)
-            db.session.flush()
-            return new_storage.id
-
-        return None
+        return CatalogService._get_or_create_generic(Storage, value)
 
     @staticmethod
     def get_or_create_ram(value):
@@ -295,31 +191,80 @@ class CatalogService:
         Returns:
             int: ID de la RAM, o None si value es inválido
         """
+        return CatalogService._get_or_create_generic(Ram, value)
+
+    @staticmethod
+    def get_or_create_store(value):
+        """
+        Obtiene o crea una tienda
+
+        Args:
+            value: ID (int) o nombre (str) de la tienda
+
+        Returns:
+            int: ID de la tienda, o None si value es inválido
+        """
+        return CatalogService._get_or_create_generic(Store, value)
+
+    @staticmethod
+    def get_or_create_location(value, store_id=None):
+        """
+        Obtiene o crea una ubicación
+
+        Args:
+            value: ID (int) o nombre (str) de la ubicación
+            store_id: ID de la tienda asociada
+
+        Returns:
+            int: ID de la ubicación, o None si value es inválido
+        """
         if not value or value == 0 or value == '0':
             return None
 
+        # Si es un ID existente
         if isinstance(value, int) and value > 0:
             return value
 
+        # Si es un string (nuevo valor)
         if isinstance(value, str):
             name = value.strip()
 
             if not name:
                 return None
 
-            existing = RAMType.query.filter(
-                db.func.lower(RAMType.name) == name.lower()
-            ).first()
+            # Buscar si ya existe en la misma tienda
+            query = Location.query.filter(
+                db.func.lower(Location.name) == name.lower()
+            )
+
+            if store_id:
+                query = query.filter(Location.store_id == store_id)
+
+            existing = query.first()
 
             if existing:
                 return existing.id
 
-            new_ram = RAMType(name=name, is_active=True)
-            db.session.add(new_ram)
+            # Crear nueva ubicación
+            new_location = Location(name=name, store_id=store_id, is_active=True)
+            db.session.add(new_location)
             db.session.flush()
-            return new_ram.id
+            return new_location.id
 
         return None
+
+    @staticmethod
+    def get_or_create_supplier(value):
+        """
+        Obtiene o crea un proveedor
+
+        Args:
+            value: ID (int) o nombre (str) del proveedor
+
+        Returns:
+            int: ID del proveedor, o None si value es inválido
+        """
+        return CatalogService._get_or_create_generic(Supplier, value)
 
     @staticmethod
     def process_laptop_form_data(form_data):
@@ -346,7 +291,7 @@ class CatalogService:
         )
         processed_data['model_id'] = model_id
 
-        # Procesar otros catálogos
+        # Procesar otros catálogos de especificaciones
         processed_data['processor_id'] = CatalogService.get_or_create_processor(
             form_data.get('processor_id')
         )
@@ -371,4 +316,134 @@ class CatalogService:
             form_data.get('ram_id')
         )
 
+        # Procesar tienda primero (se necesita para ubicación)
+        store_id = CatalogService.get_or_create_store(form_data.get('store_id'))
+        processed_data['store_id'] = store_id
+
+        # Procesar ubicación (puede necesitar store_id)
+        location_id = CatalogService.get_or_create_location(
+            form_data.get('location_id'),
+            store_id
+        )
+        processed_data['location_id'] = location_id
+
+        # Procesar proveedor
+        processed_data['supplier_id'] = CatalogService.get_or_create_supplier(
+            form_data.get('supplier_id')
+        )
+
         return processed_data
+
+    @staticmethod
+    def get_catalog_stats():
+        """
+        Obtiene estadísticas de todos los catálogos
+
+        Returns:
+            dict: Diccionario con conteos de cada catálogo
+        """
+        return {
+            'brands': Brand.query.filter_by(is_active=True).count(),
+            'models': LaptopModel.query.filter_by(is_active=True).count(),
+            'processors': Processor.query.filter_by(is_active=True).count(),
+            'operating_systems': OperatingSystem.query.filter_by(is_active=True).count(),
+            'screens': Screen.query.filter_by(is_active=True).count(),
+            'graphics_cards': GraphicsCard.query.filter_by(is_active=True).count(),
+            'storage': Storage.query.filter_by(is_active=True).count(),
+            'ram': Ram.query.filter_by(is_active=True).count(),
+            'stores': Store.query.filter_by(is_active=True).count(),
+            'locations': Location.query.filter_by(is_active=True).count(),
+            'suppliers': Supplier.query.filter_by(is_active=True).count()
+        }
+
+    @staticmethod
+    def deactivate_item(model, item_id):
+        """
+        Desactiva un item de catálogo (soft delete)
+
+        Args:
+            model: Modelo de SQLAlchemy
+            item_id: ID del item a desactivar
+
+        Returns:
+            bool: True si se desactivó exitosamente
+        """
+        item = model.query.get(item_id)
+        if item:
+            item.is_active = False
+            db.session.commit()
+            return True
+        return False
+
+    @staticmethod
+    def reactivate_item(model, item_id):
+        """
+        Reactiva un item de catálogo
+
+        Args:
+            model: Modelo de SQLAlchemy
+            item_id: ID del item a reactivar
+
+        Returns:
+            bool: True si se reactivó exitosamente
+        """
+        item = model.query.get(item_id)
+        if item:
+            item.is_active = True
+            db.session.commit()
+            return True
+        return False
+
+    @staticmethod
+    def merge_items(model, source_id, target_id, update_laptops=True):
+        """
+        Fusiona dos items de catálogo, moviendo todas las referencias
+        del source al target y desactivando el source
+
+        Args:
+            model: Modelo de SQLAlchemy
+            source_id: ID del item a fusionar (será desactivado)
+            target_id: ID del item destino
+            update_laptops: Si actualizar las laptops que referencian al source
+
+        Returns:
+            int: Número de laptops actualizadas
+        """
+        from app.models.laptop import Laptop
+
+        source = model.query.get(source_id)
+        target = model.query.get(target_id)
+
+        if not source or not target:
+            return 0
+
+        updated_count = 0
+
+        if update_laptops:
+            # Determinar el campo de FK basado en el modelo
+            field_mapping = {
+                Brand: 'brand_id',
+                LaptopModel: 'model_id',
+                Processor: 'processor_id',
+                OperatingSystem: 'os_id',
+                Screen: 'screen_id',
+                GraphicsCard: 'graphics_card_id',
+                Storage: 'storage_id',
+                Ram: 'ram_id',
+                Store: 'store_id',
+                Location: 'location_id',
+                Supplier: 'supplier_id'
+            }
+
+            field_name = field_mapping.get(model)
+            if field_name:
+                # Actualizar todas las laptops que usan el source
+                updated_count = Laptop.query.filter(
+                    getattr(Laptop, field_name) == source_id
+                ).update({field_name: target_id}, synchronize_session=False)
+
+        # Desactivar el source
+        source.is_active = False
+        db.session.commit()
+
+        return updated_count

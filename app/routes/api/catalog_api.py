@@ -1,14 +1,14 @@
 # ============================================
 # API DE CATÁLOGOS - Endpoints para Select2
 # ============================================
-# Endpoints JSON para dropdowns dinámicos
+# Actualizado al nuevo modelo de datos
 
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from app import db
 from app.models.laptop import (
     Brand, LaptopModel, Processor, OperatingSystem,
-    Screen, GraphicsCard, StorageType, RAMType, Store, Location
+    Screen, GraphicsCard, Storage, Ram, Store, Location, Supplier
 )
 from app.utils.decorators import admin_required, json_response, handle_exceptions
 from sqlalchemy import or_
@@ -67,13 +67,14 @@ def get_catalog_items(model, search_term='', page=1, page_size=20):
     }
 
 
-def create_catalog_item(model, name):
+def create_catalog_item(model, name, **extra_fields):
     """
     Crea un nuevo item en el catálogo
 
     Args:
         model: Modelo de SQLAlchemy
         name: Nombre del nuevo item
+        **extra_fields: Campos adicionales para el modelo
 
     Returns:
         tuple: (item, created) donde created es True si fue creado
@@ -87,7 +88,7 @@ def create_catalog_item(model, name):
         return existing, False
 
     # Crear nuevo
-    new_item = model(name=name.strip())
+    new_item = model(name=name.strip(), **extra_fields)
     db.session.add(new_item)
     db.session.commit()
 
@@ -158,8 +159,29 @@ def get_models():
     """GET: Obtener lista de modelos"""
     search = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
+    brand_id = request.args.get('brand_id', type=int)
 
-    return get_catalog_items(LaptopModel, search, page)
+    query = LaptopModel.query.filter_by(is_active=True)
+
+    if brand_id:
+        query = query.filter_by(brand_id=brand_id)
+
+    if search:
+        query = query.filter(LaptopModel.name.ilike(f'%{search}%'))
+
+    query = query.order_by(LaptopModel.name)
+
+    total = query.count()
+    page_size = 20
+    offset = (page - 1) * page_size
+    items = query.offset(offset).limit(page_size).all()
+
+    results = [{'id': item.id, 'text': item.name} for item in items]
+
+    return {
+        'results': results,
+        'pagination': {'more': (offset + page_size) < total}
+    }
 
 
 @catalog_api_bp.route('/models', methods=['POST'])
@@ -175,6 +197,7 @@ def create_model():
         return {'error': 'El nombre es requerido'}, 400
 
     name = data['name'].strip()
+    brand_id = data.get('brand_id')
 
     if not name:
         return {'error': 'El nombre no puede estar vacío'}, 400
@@ -182,7 +205,8 @@ def create_model():
     if len(name) > 200:
         return {'error': 'El nombre es demasiado largo (máximo 200 caracteres)'}, 400
 
-    model, created = create_catalog_item(LaptopModel, name)
+    extra_fields = {'brand_id': brand_id} if brand_id else {}
+    model, created = create_catalog_item(LaptopModel, name, **extra_fields)
 
     return {
         'id': model.id,
@@ -356,26 +380,26 @@ def create_graphics_card():
     }, 201 if created else 200
 
 
-# ===== STORAGE TYPES =====
+# ===== STORAGE =====
 
-@catalog_api_bp.route('/storage-types', methods=['GET'])
+@catalog_api_bp.route('/storage', methods=['GET'])
 @login_required
 @json_response
 @handle_exceptions
-def get_storage_types():
+def get_storage():
     """GET: Obtener lista de tipos de almacenamiento"""
     search = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
 
-    return get_catalog_items(StorageType, search, page)
+    return get_catalog_items(Storage, search, page)
 
 
-@catalog_api_bp.route('/storage-types', methods=['POST'])
+@catalog_api_bp.route('/storage', methods=['POST'])
 @login_required
 @admin_required
 @json_response
 @handle_exceptions
-def create_storage_type():
+def create_storage():
     """POST: Crear nuevo tipo de almacenamiento"""
     data = request.get_json()
 
@@ -387,7 +411,7 @@ def create_storage_type():
     if not name:
         return {'error': 'El nombre no puede estar vacío'}, 400
 
-    storage, created = create_catalog_item(StorageType, name)
+    storage, created = create_catalog_item(Storage, name)
 
     return {
         'id': storage.id,
@@ -397,26 +421,26 @@ def create_storage_type():
     }, 201 if created else 200
 
 
-# ===== RAM TYPES =====
+# ===== RAM =====
 
-@catalog_api_bp.route('/ram-types', methods=['GET'])
+@catalog_api_bp.route('/ram', methods=['GET'])
 @login_required
 @json_response
 @handle_exceptions
-def get_ram_types():
+def get_ram():
     """GET: Obtener lista de tipos de RAM"""
     search = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
 
-    return get_catalog_items(RAMType, search, page)
+    return get_catalog_items(Ram, search, page)
 
 
-@catalog_api_bp.route('/ram-types', methods=['POST'])
+@catalog_api_bp.route('/ram', methods=['POST'])
 @login_required
 @admin_required
 @json_response
 @handle_exceptions
-def create_ram_type():
+def create_ram():
     """POST: Crear nuevo tipo de RAM"""
     data = request.get_json()
 
@@ -428,7 +452,7 @@ def create_ram_type():
     if not name:
         return {'error': 'El nombre no puede estar vacío'}, 400
 
-    ram, created = create_catalog_item(RAMType, name)
+    ram, created = create_catalog_item(Ram, name)
 
     return {
         'id': ram.id,
@@ -489,8 +513,29 @@ def get_locations():
     """GET: Obtener lista de ubicaciones"""
     search = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
+    store_id = request.args.get('store_id', type=int)
 
-    return get_catalog_items(Location, search, page)
+    query = Location.query.filter_by(is_active=True)
+
+    if store_id:
+        query = query.filter_by(store_id=store_id)
+
+    if search:
+        query = query.filter(Location.name.ilike(f'%{search}%'))
+
+    query = query.order_by(Location.name)
+
+    total = query.count()
+    page_size = 20
+    offset = (page - 1) * page_size
+    items = query.offset(offset).limit(page_size).all()
+
+    results = [{'id': item.id, 'text': item.name} for item in items]
+
+    return {
+        'results': results,
+        'pagination': {'more': (offset + page_size) < total}
+    }
 
 
 @catalog_api_bp.route('/locations', methods=['POST'])
@@ -506,11 +551,13 @@ def create_location():
         return {'error': 'El nombre es requerido'}, 400
 
     name = data['name'].strip()
+    store_id = data.get('store_id')
 
     if not name:
         return {'error': 'El nombre no puede estar vacío'}, 400
 
-    location, created = create_catalog_item(Location, name)
+    extra_fields = {'store_id': store_id} if store_id else {}
+    location, created = create_catalog_item(Location, name, **extra_fields)
 
     return {
         'id': location.id,
@@ -518,6 +565,113 @@ def create_location():
         'created': created,
         'message': f'Ubicación "{location.name}" {"creada" if created else "ya existe"}'
     }, 201 if created else 200
+
+
+# ===== SUPPLIERS =====
+
+@catalog_api_bp.route('/suppliers', methods=['GET'])
+@login_required
+@json_response
+@handle_exceptions
+def get_suppliers():
+    """GET: Obtener lista de proveedores"""
+    search = request.args.get('q', '')
+    page = request.args.get('page', 1, type=int)
+
+    return get_catalog_items(Supplier, search, page)
+
+
+@catalog_api_bp.route('/suppliers', methods=['POST'])
+@login_required
+@admin_required
+@json_response
+@handle_exceptions
+def create_supplier():
+    """POST: Crear nuevo proveedor"""
+    data = request.get_json()
+
+    if not data or 'name' not in data:
+        return {'error': 'El nombre es requerido'}, 400
+
+    name = data['name'].strip()
+
+    if not name:
+        return {'error': 'El nombre no puede estar vacío'}, 400
+
+    # Campos adicionales opcionales
+    extra_fields = {}
+    if data.get('contact_name'):
+        extra_fields['contact_name'] = data['contact_name'].strip()
+    if data.get('email'):
+        extra_fields['email'] = data['email'].strip()
+    if data.get('phone'):
+        extra_fields['phone'] = data['phone'].strip()
+
+    supplier, created = create_catalog_item(Supplier, name, **extra_fields)
+
+    return {
+        'id': supplier.id,
+        'text': supplier.name,
+        'created': created,
+        'message': f'Proveedor "{supplier.name}" {"creado" if created else "ya existe"}'
+    }, 201 if created else 200
+
+
+@catalog_api_bp.route('/suppliers/<int:id>', methods=['GET'])
+@login_required
+@json_response
+@handle_exceptions
+def get_supplier_detail(id):
+    """GET: Obtener detalle de un proveedor"""
+    supplier = Supplier.query.get_or_404(id)
+
+    return {
+        'id': supplier.id,
+        'name': supplier.name,
+        'contact_name': supplier.contact_name,
+        'email': supplier.email,
+        'phone': supplier.phone,
+        'address': supplier.address,
+        'website': supplier.website,
+        'notes': supplier.notes,
+        'is_active': supplier.is_active
+    }
+
+
+@catalog_api_bp.route('/suppliers/<int:id>', methods=['PUT'])
+@login_required
+@admin_required
+@json_response
+@handle_exceptions
+def update_supplier(id):
+    """PUT: Actualizar proveedor"""
+    supplier = Supplier.query.get_or_404(id)
+    data = request.get_json()
+
+    if 'name' in data:
+        supplier.name = data['name'].strip()
+    if 'contact_name' in data:
+        supplier.contact_name = data['contact_name'].strip() if data['contact_name'] else None
+    if 'email' in data:
+        supplier.email = data['email'].strip() if data['email'] else None
+    if 'phone' in data:
+        supplier.phone = data['phone'].strip() if data['phone'] else None
+    if 'address' in data:
+        supplier.address = data['address'].strip() if data['address'] else None
+    if 'website' in data:
+        supplier.website = data['website'].strip() if data['website'] else None
+    if 'notes' in data:
+        supplier.notes = data['notes'].strip() if data['notes'] else None
+    if 'is_active' in data:
+        supplier.is_active = data['is_active']
+
+    db.session.commit()
+
+    return {
+        'id': supplier.id,
+        'text': supplier.name,
+        'message': f'Proveedor "{supplier.name}" actualizado exitosamente'
+    }
 
 
 # ===== ENDPOINT DE BÚSQUEDA GLOBAL =====
@@ -546,10 +700,11 @@ def global_search():
         'os': OperatingSystem,
         'screens': Screen,
         'gpus': GraphicsCard,
-        'storage': StorageType,
-        'ram': RAMType,
+        'storage': Storage,
+        'ram': Ram,
         'stores': Store,
-        'locations': Location
+        'locations': Location,
+        'suppliers': Supplier
     }
 
     if catalog == 'all':
@@ -577,3 +732,30 @@ def global_search():
             ]
 
     return {'results': results}, 200
+
+
+# ===== ESTADÍSTICAS DE CATÁLOGOS =====
+
+@catalog_api_bp.route('/stats', methods=['GET'])
+@login_required
+@json_response
+@handle_exceptions
+def catalog_stats():
+    """
+    Obtiene estadísticas de todos los catálogos
+    """
+    stats = {
+        'brands': Brand.query.filter_by(is_active=True).count(),
+        'models': LaptopModel.query.filter_by(is_active=True).count(),
+        'processors': Processor.query.filter_by(is_active=True).count(),
+        'operating_systems': OperatingSystem.query.filter_by(is_active=True).count(),
+        'screens': Screen.query.filter_by(is_active=True).count(),
+        'graphics_cards': GraphicsCard.query.filter_by(is_active=True).count(),
+        'storage': Storage.query.filter_by(is_active=True).count(),
+        'ram': Ram.query.filter_by(is_active=True).count(),
+        'stores': Store.query.filter_by(is_active=True).count(),
+        'locations': Location.query.filter_by(is_active=True).count(),
+        'suppliers': Supplier.query.filter_by(is_active=True).count()
+    }
+
+    return stats

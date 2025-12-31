@@ -33,7 +33,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Laptops</p>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total SKUs</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ stats.total }}</p>
                     </div>
                     <div class="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
@@ -74,16 +74,17 @@
                 </div>
             </div>
 
-            <!-- Rotación Lenta -->
+            <!-- Publicadas -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Rotación Lenta</p>
-                        <p class="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">{{ stats.slow_rotation }}</p>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Publicadas</p>
+                        <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{{ stats.published if stats.published is defined else '—' }}</p>
                     </div>
-                    <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg">
-                        <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
+                        <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                     </div>
                 </div>
@@ -136,9 +137,9 @@
                         </label>
                         <select name="category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="">Todas</option>
-                            <option value="gamer" {% if request.args.get('category') == 'gamer' %}selected{% endif %}>🎮 Gamer</option>
-                            <option value="working" {% if request.args.get('category') == 'working' %}selected{% endif %}>💼 Trabajo</option>
-                            <option value="home" {% if request.args.get('category') == 'home' %}selected{% endif %}>🏠 Hogar</option>
+                            <option value="laptop" {% if request.args.get('category') == 'laptop' %}selected{% endif %}>💻 Laptop</option>
+                            <option value="workstation" {% if request.args.get('category') == 'workstation' %}selected{% endif %}>💼 Workstation</option>
+                            <option value="gaming" {% if request.args.get('category') == 'gaming' %}selected{% endif %}>🎮 Gaming</option>
                         </select>
                     </div>
                 </div>
@@ -249,7 +250,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categoría</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precio</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rotación</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
@@ -283,17 +284,17 @@
 
                                 <!-- Categoría -->
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {% if laptop.category == 'gamer' %}
+                                    {% if laptop.category == 'gaming' %}
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                                            🎮 Gamer
+                                            🎮 Gaming
                                         </span>
-                                    {% elif laptop.category == 'working' %}
+                                    {% elif laptop.category == 'workstation' %}
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                            💼 Trabajo
+                                            💼 Workstation
                                         </span>
                                     {% else %}
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                            🏠 Hogar
+                                            💻 Laptop
                                         </span>
                                     {% endif %}
                                 </td>
@@ -301,7 +302,9 @@
                                 <!-- Precio -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-white font-semibold">${{ "%.2f"|format(laptop.sale_price) }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">Margen: {{ "%.1f"|format(laptop.margin_percentage if laptop.margin_percentage else 0) }}%</div>
+                                    {% if laptop.discount_price %}
+                                    <div class="text-xs text-green-600 dark:text-green-400">Descuento: ${{ "%.2f"|format(laptop.discount_price) }}</div>
+                                    {% endif %}
                                 </td>
 
                                 <!-- Stock -->
@@ -321,21 +324,24 @@
                                     {% endif %}
                                 </td>
 
-                                <!-- Rotación -->
+                                <!-- Estado (Publicado/Destacado) -->
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {% if laptop.rotation_status == 'fast' %}
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                            🚀 Rápida
-                                        </span>
-                                    {% elif laptop.rotation_status == 'medium' %}
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                                            ⚡ Media
-                                        </span>
-                                    {% else %}
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
-                                            🐌 Lenta
-                                        </span>
-                                    {% endif %}
+                                    <div class="flex flex-col space-y-1">
+                                        {% if laptop.is_published %}
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                                📢 Publicado
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                📝 Borrador
+                                            </span>
+                                        {% endif %}
+                                        {% if laptop.is_featured %}
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                                                ⭐ Destacado
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                 </td>
 
                                 <!-- Acciones -->

@@ -1,24 +1,97 @@
 # ============================================
 # RUTAS DE INVENTARIO - LAPTOPS
 # ============================================
+# Actualizado al nuevo modelo de datos
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app import db
-from app.models.laptop import Laptop, Brand, LaptopModel, Processor, OperatingSystem, Screen, GraphicsCard, StorageType, \
-    RAMType, Store, Location
-from app.forms.laptop_forms import LaptopForm, QuickSearchForm, FilterForm
+from app.models.laptop import (
+    Laptop, LaptopImage, Brand, LaptopModel, Processor, OperatingSystem,
+    Screen, GraphicsCard, Storage, Ram, Store, Location, Supplier
+)
+from app.forms.laptop_forms import LaptopForm, LaptopImageForm, QuickSearchForm, FilterForm
 from app.services.sku_service import SKUService
-from app.services.financial_service import FinancialService
-from app.services.inventory_service import InventoryService
-from app.services.ai_service import AIService
 from app.services.catalog_service import CatalogService
 from app.utils.decorators import admin_required
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import or_
+import re
+import os
+from werkzeug.utils import secure_filename
 
 # Crear Blueprint
 inventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')
+
+
+# ===== UTILIDADES =====
+
+def generate_slug(text):
+    """
+    Genera un slug URL-friendly a partir de texto
+
+    Args:
+        text: Texto a convertir en slug
+
+    Returns:
+        str: Slug generado
+    """
+    # Convertir a minúsculas y reemplazar espacios
+    slug = text.lower().strip()
+    # Eliminar caracteres especiales, mantener solo alfanuméricos y espacios
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    # Reemplazar espacios y guiones múltiples con un solo guion
+    slug = re.sub(r'[-\s]+', '-', slug)
+    # Eliminar guiones al inicio y final
+    slug = slug.strip('-')
+    return slug
+
+
+def ensure_unique_slug(base_slug, laptop_id=None):
+    """
+    Asegura que el slug sea único
+
+    Args:
+        base_slug: Slug base
+        laptop_id: ID de la laptop actual (para edición)
+
+    Returns:
+        str: Slug único
+    """
+    slug = base_slug
+    counter = 1
+
+    while True:
+        query = Laptop.query.filter_by(slug=slug)
+        if laptop_id:
+            query = query.filter(Laptop.id != laptop_id)
+
+        if not query.first():
+            return slug
+
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
+
+def process_connectivity_ports(form_data):
+    """
+    Procesa los puertos de conectividad del formulario
+
+    Args:
+        form_data: Lista de puertos seleccionados
+
+    Returns:
+        dict: Diccionario con los puertos y sus cantidades
+    """
+    if not form_data:
+        return {}
+
+    # Convertir lista a diccionario con conteo
+    ports = {}
+    for port in form_data:
+        ports[port] = ports.get(port, 0) + 1
+
+    return ports
 
 
 # ===== RUTA PRINCIPAL: LISTADO DE LAPTOPS =====
@@ -37,8 +110,13 @@ def laptops_list():
     gpu_filter = request.args.get('gpu', type=int, default=0)
     screen_filter = request.args.get('screen', type=int, default=0)
     condition_filter = request.args.get('condition', '')
+    supplier_filter = request.args.get('supplier', type=int, default=0)
+    is_published_filter = request.args.get('is_published', '')
+    is_featured_filter = request.args.get('is_featured', '')
+    has_npu_filter = request.args.get('has_npu', '')
     min_price = request.args.get('min_price', type=float, default=0)
     max_price = request.args.get('max_price', type=float, default=0)
+    search_query = request.args.get('q', '').strip()
 
     # Paginación
     page = request.args.get('page', 1, type=int)
@@ -46,6 +124,18 @@ def laptops_list():
 
     # Query base
     query = Laptop.query
+
+    # Búsqueda por texto
+    if search_query:
+        search_pattern = f'%{search_query}%'
+        query = query.filter(
+            or_(
+                Laptop.sku.ilike(search_pattern),
+                Laptop.display_name.ilike(search_pattern),
+                Laptop.slug.ilike(search_pattern),
+                Laptop.short_description.ilike(search_pattern)
+            )
+        )
 
     # Aplicar filtros
     if store_filter and store_filter > 0:
@@ -68,6 +158,18 @@ def laptops_list():
 
     if condition_filter:
         query = query.filter(Laptop.condition == condition_filter)
+
+    if supplier_filter and supplier_filter > 0:
+        query = query.filter(Laptop.supplier_id == supplier_filter)
+
+    if is_published_filter:
+        query = query.filter(Laptop.is_published == (is_published_filter == '1'))
+
+    if is_featured_filter:
+        query = query.filter(Laptop.is_featured == (is_featured_filter == '1'))
+
+    if has_npu_filter:
+        query = query.filter(Laptop.npu == (has_npu_filter == '1'))
 
     if min_price > 0:
         query = query.filter(Laptop.sale_price >= min_price)
@@ -92,11 +194,19 @@ def laptops_list():
         if laptop.sale_price and laptop.quantity
     )
 
+    # Contar laptops con stock bajo
+    low_stock_count = len([l for l in all_laptops if l.is_low_stock])
+
+    # Contar publicadas y destacadas
+    published_count = len([l for l in all_laptops if l.is_published])
+    featured_count = len([l for l in all_laptops if l.is_featured])
+
     stats = {
         'total': len(all_laptops),
         'total_value': total_inventory_value,
-        'low_stock': len([l for l in all_laptops if l.quantity <= l.min_alert]),
-        'slow_rotation': len([l for l in all_laptops if l.rotation_status == 'slow'])
+        'low_stock': low_stock_count,
+        'published': published_count,
+        'featured': featured_count
     }
 
     # Formularios
@@ -118,7 +228,8 @@ def laptops_list():
         stats=stats,
         filter_form=filter_form,
         min_db_price=min_db_price,
-        max_db_price=max_db_price
+        max_db_price=max_db_price,
+        search_query=search_query
     )
 
 
@@ -144,21 +255,38 @@ def laptop_add():
                 'screen_id': form.screen_id.data,
                 'graphics_card_id': form.graphics_card_id.data,
                 'storage_id': form.storage_id.data,
-                'ram_id': form.ram_id.data
+                'ram_id': form.ram_id.data,
+                'store_id': form.store_id.data,
+                'location_id': form.location_id.data,
+                'supplier_id': form.supplier_id.data
             })
 
             # Generar SKU automáticamente
             sku = SKUService.generate_laptop_sku()
 
-            # Calcular campos financieros
-            financial_data = FinancialService.calculate_margin(
-                form.purchase_cost.data,
-                form.sale_price.data
-            )
+            # Generar slug
+            base_slug = generate_slug(form.display_name.data)
+            slug = form.slug.data if form.slug.data else ensure_unique_slug(base_slug)
+
+            # Procesar puertos de conectividad
+            connectivity_ports = process_connectivity_ports(form.connectivity_ports.data)
 
             # Crear nueva laptop
             laptop = Laptop(
+                # Identificadores
                 sku=sku,
+                slug=slug,
+
+                # Marketing y SEO
+                display_name=form.display_name.data,
+                short_description=form.short_description.data,
+                long_description_html=form.long_description_html.data,
+                is_published=form.is_published.data,
+                is_featured=form.is_featured.data,
+                seo_title=form.seo_title.data,
+                seo_description=form.seo_description.data,
+
+                # Relaciones
                 brand_id=catalog_data['brand_id'],
                 model_id=catalog_data['model_id'],
                 processor_id=catalog_data['processor_id'],
@@ -166,42 +294,41 @@ def laptop_add():
                 screen_id=catalog_data['screen_id'],
                 graphics_card_id=catalog_data['graphics_card_id'],
                 storage_id=catalog_data['storage_id'],
-                storage_upgradeable=form.storage_upgradeable.data,
                 ram_id=catalog_data['ram_id'],
-                ram_upgradeable=form.ram_upgradeable.data,
+                store_id=catalog_data['store_id'],
+                location_id=catalog_data.get('location_id'),
+                supplier_id=catalog_data.get('supplier_id'),
+
+                # Detalles técnicos
                 npu=form.npu.data,
+                storage_upgradeable=form.storage_upgradeable.data,
+                ram_upgradeable=form.ram_upgradeable.data,
+                keyboard_layout=form.keyboard_layout.data,
+                connectivity_ports=connectivity_ports,
+
+                # Estado y categoría
+                category=form.category.data,
+                condition=form.condition.data,
+
+                # Financieros
                 purchase_cost=form.purchase_cost.data,
                 sale_price=form.sale_price.data,
-                total_cost=financial_data['total_cost'],
-                gross_profit=financial_data['gross_profit'],
-                margin_percentage=financial_data['margin_percentage'],
+                discount_price=form.discount_price.data if form.discount_price.data else None,
+                tax_percent=form.tax_percent.data if form.tax_percent.data else 0,
+
+                # Inventario
                 quantity=form.quantity.data,
+                reserved_quantity=form.reserved_quantity.data if form.reserved_quantity.data else 0,
                 min_alert=form.min_alert.data,
-                category=form.category.data,
-                store_id=form.store_id.data if form.store_id.data != 0 else None,
-                location_id=form.location_id.data if form.location_id.data != 0 else None,
-                condition=form.condition.data,
-                aesthetic_grade=form.aesthetic_grade.data if form.aesthetic_grade.data else None,
+
+                # Timestamps
                 entry_date=form.entry_date.data,
                 sale_date=form.sale_date.data,
-                notes=form.notes.data,
+                internal_notes=form.internal_notes.data,
+
+                # Auditoría
                 created_by_id=current_user.id
             )
-
-            # Calcular días en inventario
-            laptop.days_in_inventory = InventoryService.calculate_days_in_inventory(
-                laptop.entry_date,
-                laptop.sale_date
-            )
-
-            # Determinar estado de rotación
-            laptop.rotation_status = InventoryService.determine_rotation_status(
-                laptop.days_in_inventory
-            )
-
-            # Generar recomendaciones IA
-            recommendations = AIService.generate_recommendations(laptop)
-            laptop.ai_recommendation = AIService.format_recommendations_text(recommendations)
 
             # Guardar en base de datos
             db.session.add(laptop)
@@ -233,35 +360,56 @@ def laptop_detail(id):
     """
     laptop = Laptop.query.get_or_404(id)
 
-    # Recalcular datos en tiempo real
-    laptop.days_in_inventory = InventoryService.calculate_days_in_inventory(
-        laptop.entry_date,
-        laptop.sale_date
-    )
-    laptop.rotation_status = InventoryService.determine_rotation_status(
-        laptop.days_in_inventory
-    )
-
-    # Regenerar recomendaciones
-    recommendations = AIService.generate_recommendations(laptop)
-    laptop.ai_recommendation = AIService.format_recommendations_text(recommendations)
-
     # Obtener laptops similares (misma categoría y marca)
     similar_laptops = Laptop.query.filter(
         Laptop.category == laptop.category,
         Laptop.brand_id == laptop.brand_id,
-        Laptop.id != laptop.id
+        Laptop.id != laptop.id,
+        Laptop.is_published == True
     ).limit(5).all()
 
-    # Análisis de precios
-    price_analysis = AIService.analyze_pricing_strategy(laptop, similar_laptops)
+    # Obtener imágenes de la laptop
+    images = laptop.images.order_by(LaptopImage.ordering).all()
+
+    # Imagen de portada
+    cover_image = laptop.images.filter_by(is_cover=True).first()
 
     return render_template(
         'inventory/laptop_detail.html',
         laptop=laptop,
-        recommendations=recommendations,
         similar_laptops=similar_laptops,
-        price_analysis=price_analysis
+        images=images,
+        cover_image=cover_image
+    )
+
+
+# ===== VER LAPTOP POR SLUG (para URLs públicas) =====
+
+@inventory_bp.route('/p/<slug>')
+def laptop_by_slug(slug):
+    """
+    Muestra el detalle de una laptop por su slug (URL pública)
+    """
+    laptop = Laptop.query.filter_by(slug=slug, is_published=True).first_or_404()
+
+    # Obtener laptops similares
+    similar_laptops = Laptop.query.filter(
+        Laptop.category == laptop.category,
+        Laptop.brand_id == laptop.brand_id,
+        Laptop.id != laptop.id,
+        Laptop.is_published == True
+    ).limit(5).all()
+
+    # Obtener imágenes
+    images = laptop.images.order_by(LaptopImage.ordering).all()
+    cover_image = laptop.images.filter_by(is_cover=True).first()
+
+    return render_template(
+        'inventory/laptop_public.html',
+        laptop=laptop,
+        similar_laptops=similar_laptops,
+        images=images,
+        cover_image=cover_image
     )
 
 
@@ -277,9 +425,13 @@ def laptop_edit(id):
     laptop = Laptop.query.get_or_404(id)
     form = LaptopForm(obj=laptop)
 
+    # Pre-poblar connectivity_ports si existe
+    if request.method == 'GET' and laptop.connectivity_ports:
+        form.connectivity_ports.data = list(laptop.connectivity_ports.keys())
+
     if form.validate_on_submit():
         try:
-            # Procesar catálogos dinámicos (crear si son strings)
+            # Procesar catálogos dinámicos
             catalog_data = CatalogService.process_laptop_form_data({
                 'brand_id': form.brand_id.data,
                 'model_id': form.model_id.data,
@@ -288,10 +440,33 @@ def laptop_edit(id):
                 'screen_id': form.screen_id.data,
                 'graphics_card_id': form.graphics_card_id.data,
                 'storage_id': form.storage_id.data,
-                'ram_id': form.ram_id.data
+                'ram_id': form.ram_id.data,
+                'store_id': form.store_id.data,
+                'location_id': form.location_id.data,
+                'supplier_id': form.supplier_id.data
             })
 
+            # Actualizar slug si cambió el nombre
+            if form.slug.data:
+                laptop.slug = ensure_unique_slug(form.slug.data, laptop.id)
+            elif form.display_name.data != laptop.display_name:
+                base_slug = generate_slug(form.display_name.data)
+                laptop.slug = ensure_unique_slug(base_slug, laptop.id)
+
+            # Procesar puertos de conectividad
+            connectivity_ports = process_connectivity_ports(form.connectivity_ports.data)
+
             # Actualizar campos
+            # Marketing y SEO
+            laptop.display_name = form.display_name.data
+            laptop.short_description = form.short_description.data
+            laptop.long_description_html = form.long_description_html.data
+            laptop.is_published = form.is_published.data
+            laptop.is_featured = form.is_featured.data
+            laptop.seo_title = form.seo_title.data
+            laptop.seo_description = form.seo_description.data
+
+            # Relaciones
             laptop.brand_id = catalog_data['brand_id']
             laptop.model_id = catalog_data['model_id']
             laptop.processor_id = catalog_data['processor_id']
@@ -299,44 +474,37 @@ def laptop_edit(id):
             laptop.screen_id = catalog_data['screen_id']
             laptop.graphics_card_id = catalog_data['graphics_card_id']
             laptop.storage_id = catalog_data['storage_id']
-            laptop.storage_upgradeable = form.storage_upgradeable.data
             laptop.ram_id = catalog_data['ram_id']
-            laptop.ram_upgradeable = form.ram_upgradeable.data
+            laptop.store_id = catalog_data['store_id']
+            laptop.location_id = catalog_data.get('location_id')
+            laptop.supplier_id = catalog_data.get('supplier_id')
+
+            # Detalles técnicos
             laptop.npu = form.npu.data
+            laptop.storage_upgradeable = form.storage_upgradeable.data
+            laptop.ram_upgradeable = form.ram_upgradeable.data
+            laptop.keyboard_layout = form.keyboard_layout.data
+            laptop.connectivity_ports = connectivity_ports
+
+            # Estado y categoría
+            laptop.category = form.category.data
+            laptop.condition = form.condition.data
+
+            # Financieros
             laptop.purchase_cost = form.purchase_cost.data
             laptop.sale_price = form.sale_price.data
+            laptop.discount_price = form.discount_price.data if form.discount_price.data else None
+            laptop.tax_percent = form.tax_percent.data if form.tax_percent.data else 0
+
+            # Inventario
             laptop.quantity = form.quantity.data
+            laptop.reserved_quantity = form.reserved_quantity.data if form.reserved_quantity.data else 0
             laptop.min_alert = form.min_alert.data
-            laptop.category = form.category.data
-            laptop.store_id = form.store_id.data if form.store_id.data != 0 else None
-            laptop.location_id = form.location_id.data if form.location_id.data != 0 else None
-            laptop.condition = form.condition.data
-            laptop.aesthetic_grade = form.aesthetic_grade.data if form.aesthetic_grade.data else None
+
+            # Timestamps
             laptop.entry_date = form.entry_date.data
             laptop.sale_date = form.sale_date.data
-            laptop.notes = form.notes.data
-
-            # Recalcular campos financieros
-            financial_data = FinancialService.calculate_margin(
-                laptop.purchase_cost,
-                laptop.sale_price
-            )
-            laptop.total_cost = financial_data['total_cost']
-            laptop.gross_profit = financial_data['gross_profit']
-            laptop.margin_percentage = financial_data['margin_percentage']
-
-            # Recalcular rotación
-            laptop.days_in_inventory = InventoryService.calculate_days_in_inventory(
-                laptop.entry_date,
-                laptop.sale_date
-            )
-            laptop.rotation_status = InventoryService.determine_rotation_status(
-                laptop.days_in_inventory
-            )
-
-            # Regenerar recomendaciones
-            recommendations = AIService.generate_recommendations(laptop)
-            laptop.ai_recommendation = AIService.format_recommendations_text(recommendations)
+            laptop.internal_notes = form.internal_notes.data
 
             laptop.updated_at = datetime.utcnow()
 
@@ -371,6 +539,7 @@ def laptop_delete(id):
     sku = laptop.sku
 
     try:
+        # Las imágenes se eliminarán automáticamente por cascade
         db.session.delete(laptop)
         db.session.commit()
         flash(f'🗑️ Laptop {sku} eliminada exitosamente', 'success')
@@ -396,9 +565,21 @@ def laptop_duplicate(id):
         # Generar nuevo SKU
         new_sku = SKUService.generate_laptop_sku()
 
+        # Generar nuevo slug
+        base_slug = generate_slug(f"{original.display_name} copia")
+        new_slug = ensure_unique_slug(base_slug)
+
         # Crear copia
         duplicate = Laptop(
             sku=new_sku,
+            slug=new_slug,
+            display_name=f"{original.display_name} (Copia)",
+            short_description=original.short_description,
+            long_description_html=original.long_description_html,
+            is_published=False,  # No publicar automáticamente
+            is_featured=False,
+            seo_title=original.seo_title,
+            seo_description=original.seo_description,
             brand_id=original.brand_id,
             model_id=original.model_id,
             processor_id=original.processor_id,
@@ -406,33 +587,28 @@ def laptop_duplicate(id):
             screen_id=original.screen_id,
             graphics_card_id=original.graphics_card_id,
             storage_id=original.storage_id,
-            storage_upgradeable=original.storage_upgradeable,
             ram_id=original.ram_id,
-            ram_upgradeable=original.ram_upgradeable,
-            npu=original.npu,
-            purchase_cost=original.purchase_cost,
-            sale_price=original.sale_price,
-            total_cost=original.total_cost,
-            gross_profit=original.gross_profit,
-            margin_percentage=original.margin_percentage,
-            quantity=1,  # Nueva laptop, cantidad 1
-            min_alert=original.min_alert,
-            category=original.category,
             store_id=original.store_id,
             location_id=original.location_id,
+            supplier_id=original.supplier_id,
+            npu=original.npu,
+            storage_upgradeable=original.storage_upgradeable,
+            ram_upgradeable=original.ram_upgradeable,
+            keyboard_layout=original.keyboard_layout,
+            connectivity_ports=original.connectivity_ports.copy() if original.connectivity_ports else {},
+            category=original.category,
             condition=original.condition,
-            aesthetic_grade=original.aesthetic_grade,
-            entry_date=datetime.utcnow(),  # Fecha actual
-            notes=f"Duplicado de {original.sku}",
+            purchase_cost=original.purchase_cost,
+            sale_price=original.sale_price,
+            discount_price=original.discount_price,
+            tax_percent=original.tax_percent,
+            quantity=1,  # Nueva laptop, cantidad 1
+            reserved_quantity=0,
+            min_alert=original.min_alert,
+            entry_date=date.today(),  # Fecha actual
+            internal_notes=f"Duplicado de {original.sku}",
             created_by_id=current_user.id
         )
-
-        # Recalcular campos
-        duplicate.days_in_inventory = 0
-        duplicate.rotation_status = 'fast'
-
-        recommendations = AIService.generate_recommendations(duplicate)
-        duplicate.ai_recommendation = AIService.format_recommendations_text(recommendations)
 
         db.session.add(duplicate)
         db.session.commit()
@@ -444,3 +620,182 @@ def laptop_duplicate(id):
         db.session.rollback()
         flash(f'❌ Error al duplicar laptop: {str(e)}', 'error')
         return redirect(url_for('inventory.laptop_detail', id=id))
+
+
+# ===== GESTIÓN DE IMÁGENES =====
+
+@inventory_bp.route('/<int:id>/images', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def laptop_images(id):
+    """
+    Gestiona las imágenes de una laptop
+    """
+    laptop = Laptop.query.get_or_404(id)
+    form = LaptopImageForm()
+
+    if form.validate_on_submit():
+        try:
+            file = form.image.data
+            if file:
+                # Generar nombre seguro para el archivo
+                filename = secure_filename(file.filename)
+                # Agregar timestamp para evitar colisiones
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"{laptop.sku}_{timestamp}_{filename}"
+
+                # Crear directorio si no existe
+                upload_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
+                os.makedirs(upload_folder, exist_ok=True)
+
+                # Guardar archivo
+                filepath = os.path.join(upload_folder, filename)
+                file.save(filepath)
+
+                # Ruta relativa para la base de datos
+                relative_path = f"uploads/laptops/{laptop.id}/{filename}"
+
+                # Si es portada, quitar portada de otras imágenes
+                if form.is_cover.data:
+                    LaptopImage.query.filter_by(laptop_id=laptop.id, is_cover=True).update({'is_cover': False})
+
+                # Obtener siguiente orden
+                max_order = db.session.query(db.func.max(LaptopImage.ordering)).filter_by(
+                    laptop_id=laptop.id
+                ).scalar() or 0
+
+                # Crear registro de imagen
+                image = LaptopImage(
+                    laptop_id=laptop.id,
+                    image_path=relative_path,
+                    alt_text=form.alt_text.data,
+                    is_cover=form.is_cover.data,
+                    ordering=max_order + 1
+                )
+
+                db.session.add(image)
+                db.session.commit()
+
+                flash('✅ Imagen agregada exitosamente', 'success')
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'❌ Error al subir imagen: {str(e)}', 'error')
+
+    images = laptop.images.order_by(LaptopImage.ordering).all()
+
+    return render_template(
+        'inventory/laptop_images.html',
+        laptop=laptop,
+        form=form,
+        images=images
+    )
+
+
+@inventory_bp.route('/images/<int:image_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_image(image_id):
+    """
+    Elimina una imagen de laptop
+    """
+    image = LaptopImage.query.get_or_404(image_id)
+    laptop_id = image.laptop_id
+
+    try:
+        # Eliminar archivo físico
+        filepath = os.path.join('app', 'static', image.image_path)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+        # Eliminar registro
+        db.session.delete(image)
+        db.session.commit()
+
+        flash('✅ Imagen eliminada exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Error al eliminar imagen: {str(e)}', 'error')
+
+    return redirect(url_for('inventory.laptop_images', id=laptop_id))
+
+
+@inventory_bp.route('/images/<int:image_id>/set-cover', methods=['POST'])
+@login_required
+@admin_required
+def set_cover_image(image_id):
+    """
+    Establece una imagen como portada
+    """
+    image = LaptopImage.query.get_or_404(image_id)
+
+    try:
+        # Quitar portada de otras imágenes
+        LaptopImage.query.filter_by(laptop_id=image.laptop_id, is_cover=True).update({'is_cover': False})
+
+        # Establecer esta como portada
+        image.is_cover = True
+        db.session.commit()
+
+        flash('✅ Imagen de portada actualizada', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Error al actualizar portada: {str(e)}', 'error')
+
+    return redirect(url_for('inventory.laptop_images', id=image.laptop_id))
+
+
+# ===== ACCIONES MASIVAS =====
+
+@inventory_bp.route('/bulk/publish', methods=['POST'])
+@login_required
+@admin_required
+def bulk_publish():
+    """
+    Publica múltiples laptops
+    """
+    laptop_ids = request.form.getlist('laptop_ids')
+
+    if not laptop_ids:
+        flash('❌ No se seleccionaron laptops', 'error')
+        return redirect(url_for('inventory.laptops_list'))
+
+    try:
+        Laptop.query.filter(Laptop.id.in_(laptop_ids)).update(
+            {'is_published': True, 'updated_at': datetime.utcnow()},
+            synchronize_session=False
+        )
+        db.session.commit()
+        flash(f'✅ {len(laptop_ids)} laptops publicadas', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Error: {str(e)}', 'error')
+
+    return redirect(url_for('inventory.laptops_list'))
+
+
+@inventory_bp.route('/bulk/unpublish', methods=['POST'])
+@login_required
+@admin_required
+def bulk_unpublish():
+    """
+    Despublica múltiples laptops
+    """
+    laptop_ids = request.form.getlist('laptop_ids')
+
+    if not laptop_ids:
+        flash('❌ No se seleccionaron laptops', 'error')
+        return redirect(url_for('inventory.laptops_list'))
+
+    try:
+        Laptop.query.filter(Laptop.id.in_(laptop_ids)).update(
+            {'is_published': False, 'updated_at': datetime.utcnow()},
+            synchronize_session=False
+        )
+        db.session.commit()
+        flash(f'✅ {len(laptop_ids)} laptops despublicadas', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'❌ Error: {str(e)}', 'error')
+
+    return redirect(url_for('inventory.laptops_list'))

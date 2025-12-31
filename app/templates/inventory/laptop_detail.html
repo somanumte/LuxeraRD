@@ -15,12 +15,20 @@
                     </svg>
                 </a>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                    {{ laptop.brand.name if laptop.brand else 'N/A' }} {{ laptop.model.name if laptop.model else 'N/A' }}
+                    {{ laptop.display_name if laptop.display_name else (laptop.brand.name if laptop.brand else 'N/A') ~ ' ' ~ (laptop.model.name if laptop.model else 'N/A') }}
                 </h1>
             </div>
-            <p class="text-gray-600 dark:text-gray-400">
-                SKU: <span class="font-mono font-semibold">{{ laptop.sku }}</span>
-            </p>
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="font-mono text-sm text-gray-600 dark:text-gray-400">SKU: {{ laptop.sku }}</span>
+                {% if laptop.is_published %}
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">📢 Publicado</span>
+                {% else %}
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">📝 Borrador</span>
+                {% endif %}
+                {% if laptop.is_featured %}
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">⭐ Destacado</span>
+                {% endif %}
+            </div>
         </div>
 
         <!-- Acciones Rápidas -->
@@ -101,7 +109,7 @@
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Almacenamiento</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">
-                                {{ laptop.storage_type.name if laptop.storage_type else 'N/A' }}
+                                {{ laptop.storage.name if laptop.storage else 'N/A' }}
                                 {% if laptop.storage_upgradeable %}
                                 <span class="ml-2 text-xs text-green-600 dark:text-green-400">🔧 Ampliable</span>
                                 {% endif %}
@@ -111,7 +119,7 @@
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">RAM</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">
-                                {{ laptop.ram_type.name if laptop.ram_type else 'N/A' }}
+                                {{ laptop.ram.name if laptop.ram else 'N/A' }}
                                 {% if laptop.ram_upgradeable %}
                                 <span class="ml-2 text-xs text-green-600 dark:text-green-400">🔧 Ampliable</span>
                                 {% endif %}
@@ -119,9 +127,16 @@
                         </div>
 
                         {% if laptop.npu %}
-                        <div class="col-span-2">
+                        <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">NPU (IA)</p>
-                            <p class="text-base font-semibold text-purple-600 dark:text-purple-400">🤖 {{ laptop.npu }}</p>
+                            <p class="text-base font-semibold text-purple-600 dark:text-purple-400">🧠 Sí</p>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.keyboard_layout %}
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Teclado</p>
+                            <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.keyboard_layout }}</p>
                         </div>
                         {% endif %}
                     </div>
@@ -136,7 +151,7 @@
                         Información Financiera
                     </h2>
 
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Costo de Compra</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white">${{ "%.2f"|format(laptop.purchase_cost) }}</p>
@@ -147,76 +162,33 @@
                             <p class="text-2xl font-bold text-green-600 dark:text-green-400">${{ "%.2f"|format(laptop.sale_price) }}</p>
                         </div>
 
+                        {% if laptop.discount_price %}
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Ganancia Bruta</p>
-                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${{ "%.2f"|format(laptop.gross_profit) if laptop.gross_profit else '0.00' }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Precio Descuento</p>
+                            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">${{ "%.2f"|format(laptop.discount_price) }}</p>
                         </div>
+                        {% endif %}
 
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Margen</p>
-                            <p class="text-2xl font-bold {% if laptop.margin_percentage < 15 %}text-red-600 dark:text-red-400{% elif laptop.margin_percentage < 25 %}text-yellow-600 dark:text-yellow-400{% else %}text-green-600 dark:text-green-400{% endif %}">
-                                {{ "%.1f"|format(laptop.margin_percentage) if laptop.margin_percentage else '0.0' }}%
-                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Ganancia Estimada</p>
+                            {% set profit = laptop.sale_price - laptop.purchase_cost %}
+                            {% set margin = ((profit / laptop.sale_price) * 100) if laptop.sale_price else 0 %}
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${{ "%.2f"|format(profit) }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Margen: {{ "%.1f"|format(margin) }}%</p>
                         </div>
                     </div>
-
-                    {% if price_analysis %}
-                    <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">📊 Análisis de Precio</p>
-                        <p class="text-sm text-blue-800 dark:text-blue-400">{{ price_analysis.recommendation }}</p>
-                    </div>
-                    {% endif %}
                 </div>
 
-                <!-- Card: Recomendaciones IA -->
-                {% if recommendations %}
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                        </svg>
-                        Recomendaciones Inteligentes
-                    </h2>
-
-                    <div class="space-y-3">
-                        {% for rec in recommendations %}
-                        <div class="p-4 rounded-lg border-l-4
-                            {% if rec.level == 'danger' %}bg-red-50 dark:bg-red-900/20 border-red-500 dark:border-red-600
-                            {% elif rec.level == 'warning' %}bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500 dark:border-yellow-600
-                            {% elif rec.level == 'success' %}bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-600
-                            {% else %}bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-600{% endif %}">
-                            <div class="flex items-start">
-                                <span class="text-2xl mr-3">{{ rec.icon }}</span>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900 dark:text-white">{{ rec.title }}</p>
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ rec.message }}</p>
-                                    {% if rec.actions %}
-                                    <div class="mt-2 flex flex-wrap gap-2">
-                                        {% for action in rec.actions %}
-                                        <span class="text-xs px-2 py-1 bg-white dark:bg-gray-800 rounded-full border border-gray-300 dark:border-gray-600">
-                                            {{ action }}
-                                        </span>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Card: Notas -->
-                {% if laptop.notes %}
+                <!-- Card: Notas Internas -->
+                {% if laptop.internal_notes %}
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                         <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
                         </svg>
-                        Notas
+                        Notas Internas
                     </h2>
-                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ laptop.notes }}</p>
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ laptop.internal_notes }}</p>
                 </div>
                 {% endif %}
             </div>
@@ -248,17 +220,17 @@
                         <!-- Categoría -->
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Categoría</p>
-                            {% if laptop.category == 'gamer' %}
+                            {% if laptop.category == 'gaming' %}
                                 <span class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                                    🎮 Gamer
+                                    🎮 Gaming
                                 </span>
-                            {% elif laptop.category == 'working' %}
+                            {% elif laptop.category == 'workstation' %}
                                 <span class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                    💼 Trabajo
+                                    💼 Workstation
                                 </span>
                             {% else %}
                                 <span class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                    🏠 Hogar
+                                    💻 Laptop
                                 </span>
                             {% endif %}
                         </div>
@@ -274,29 +246,7 @@
                                 {% else %}
                                     <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">📦 Usado</span>
                                 {% endif %}
-
-                                {% if laptop.aesthetic_grade %}
-                                    <span class="px-2 py-1 text-xs font-mono bg-gray-200 dark:bg-gray-700 rounded">{{ laptop.aesthetic_grade }}</span>
-                                {% endif %}
                             </div>
-                        </div>
-
-                        <!-- Rotación -->
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Rotación</p>
-                            {% if laptop.rotation_status == 'fast' %}
-                                <span class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                    🚀 Rápida ({{ laptop.days_in_inventory }} días)
-                                </span>
-                            {% elif laptop.rotation_status == 'medium' %}
-                                <span class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                                    ⚡ Media ({{ laptop.days_in_inventory }} días)
-                                </span>
-                            {% else %}
-                                <span class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
-                                    🐌 Lenta ({{ laptop.days_in_inventory }} días)
-                                </span>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -315,6 +265,13 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">Ubicación Específica</p>
                             <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.location.name if laptop.location else 'No asignada' }}</p>
                         </div>
+
+                        {% if laptop.supplier %}
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Proveedor</p>
+                            <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.supplier.name }}</p>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -336,8 +293,8 @@
                         {% endif %}
 
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Días en Inventario</p>
-                            <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ laptop.days_in_inventory if laptop.days_in_inventory else 0 }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Creado</p>
+                            <p class="text-base font-semibold text-gray-900 dark:text-white">{{ laptop.created_at.strftime('%d/%m/%Y %H:%M') if laptop.created_at else 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
