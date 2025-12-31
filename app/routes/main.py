@@ -39,42 +39,6 @@ def index():
 
     return render_template('index.html')
 
-
-# ============================================
-# RUTA: DASHBOARD
-# ============================================
-
-@main_bp.route('/dashboard')
-@login_required
-def dashboard():
-    """
-    Panel principal del usuario logueado
-
-    URL: /dashboard
-
-    Decorador:
-    @login_required: Solo usuarios logueados pueden acceder
-    Si no está logueado, Flask-Login redirige a /auth/login?next=/dashboard
-
-    Returns:
-        Template dashboard.html con información del usuario
-    """
-
-    # current_user es el usuario actualmente logueado
-    # Tiene todos los atributos del modelo User:
-    # - current_user.username
-    # - current_user.email
-    # - current_user.is_admin
-    # - etc.
-
-    return render_template(
-        'dashboard.html',
-        user=current_user
-        # Pasamos el usuario al template
-        # En el template podemos usar: {{ user.username }}
-    )
-
-
 # ============================================
 # RUTA: PÁGINA "ACERCA DE"
 # ============================================

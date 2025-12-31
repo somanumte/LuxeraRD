@@ -50,7 +50,7 @@ def login():
         # current_user.is_authenticated = True si hay sesión activa
         # No tiene sentido que un usuario logueado vea la página de login
         flash('Ya has iniciado sesión', 'info')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('inventory.laptops_list'))
         # url_for('main.dashboard') genera la URL: /dashboard
 
     # ===== CREAR INSTANCIA DEL FORMULARIO =====
@@ -127,7 +127,7 @@ def login():
                 return redirect(next_page)
             else:
                 # Si no hay 'next' o no es seguro, ir al dashboard
-                return redirect(url_for('main.dashboard'))
+                return redirect(url_for('inventory.laptops_list'))
 
 
         # --- PASO 8: LOGIN FALLIDO ---
@@ -193,7 +193,7 @@ def register():
     # ===== SI YA ESTÁ LOGUEADO, REDIRIGIR =====
     if current_user.is_authenticated:
         flash('Ya tienes una cuenta activa', 'info')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('inventory.laptops_list'))
 
     # ===== CREAR INSTANCIA DEL FORMULARIO =====
     form = RegisterForm()
