@@ -1,0 +1,307 @@
+/* ============================================
+   ESTILOS PARA FORMULARIO DE LAPTOPS
+   ============================================ */
+
+/* ===== SELECT2 PERSONALIZADO ===== */
+.select2-container--default .select2-selection--single {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    height: 42px;
+    padding: 0.5rem;
+}
+
+.dark .select2-container--default .select2-selection--single {
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 26px;
+    padding-left: 0;
+}
+
+.dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #f3f4f6;
+}
+
+.select2-dropdown {
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+}
+
+.dark .select2-dropdown {
+    background-color: #1f2937;
+    border-color: #4b5563;
+}
+
+.dark .select2-results__option {
+    background-color: #1f2937;
+    color: #f3f4f6;
+}
+
+.dark .select2-results__option--highlighted {
+    background-color: #4f46e5 !important;
+}
+
+.dark .select2-search__field {
+    background-color: #374151;
+    color: #f3f4f6;
+}
+
+/* ===== MARGENES Y PRECIOS ===== */
+.margin-good {
+    color: #10b981 !important;
+}
+
+.margin-warning {
+    color: #f59e0b !important;
+}
+
+.margin-danger {
+    color: #ef4444 !important;
+}
+
+/* ===== GALERÍA DE IMÁGENES ===== */
+.image-upload-container {
+    position: relative;
+    border: 2px dashed #d1d5db;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f9fafb;
+    height: 160px;
+}
+
+.dark .image-upload-container {
+    border-color: #4b5563;
+    background-color: #1f2937;
+}
+
+.image-upload-container:hover {
+    border-color: #6366f1;
+    background-color: #eef2ff;
+}
+
+.dark .image-upload-container:hover {
+    border-color: #818cf8;
+    background-color: #312e81;
+}
+
+.image-upload-container.has-image {
+    border-style: solid;
+    border-color: #10b981;
+}
+
+.image-upload-container.dragging {
+    border-color: #8b5cf6;
+    background-color: rgba(139, 92, 246, 0.1);
+    transform: scale(1.02);
+}
+
+.image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.image-preview.visible {
+    display: block;
+}
+
+.image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #9ca3af;
+}
+
+.image-placeholder.hidden {
+    display: none;
+}
+
+.image-upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.image-number-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    z-index: 20;
+}
+
+.image-number-badge.is-cover {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+.remove-image-btn:hover {
+    background-color: #dc2626;
+    transform: scale(1.1);
+}
+
+.remove-image-btn.visible {
+    display: flex;
+}
+
+.existing-image-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background-color: rgba(16, 185, 129, 0.9);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    z-index: 15;
+}
+
+/* ===== DRAG & DROP ===== */
+.drop-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: #f9fafb;
+    cursor: pointer;
+}
+
+.dark .drop-zone {
+    border-color: #4b5563;
+    background-color: #1f2937;
+}
+
+.drop-zone:hover, .drop-zone.dragover {
+    border-color: #8b5cf6;
+    background-color: rgba(139, 92, 246, 0.05);
+}
+
+.dark .drop-zone:hover, .dark .drop-zone.dragover {
+    border-color: #a78bfa;
+    background-color: rgba(139, 92, 246, 0.1);
+}
+
+.drag-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.drag-overlay.visible {
+    display: flex;
+}
+
+.drag-message {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    width: 400px;
+}
+
+.dark .drag-message {
+    background-color: #1f2937;
+}
+
+.image-slot {
+    cursor: move;
+}
+
+.image-slot:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ===== UTILIDADES ===== */
+.form-input {
+    @apply w-full px-4 py-3 rounded-lg border-2 border-gray-300
+           focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200
+           transition-all duration-300 outline-none
+           dark:bg-gray-800 dark:border-gray-600 dark:text-white
+           dark:focus:border-indigo-400 dark:focus:ring-indigo-900;
+}
+
+.form-input:focus {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-input.error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-200
+           dark:border-red-400 dark:focus:ring-red-900;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .image-upload-container {
+        height: 120px;
+    }
+
+    .drop-zone {
+        padding: 1.5rem;
+    }
+
+    .drag-message {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+}
