@@ -1,99 +1,259 @@
 // ============================================
-// GALERÍA DE IMÁGENES CON DRAG & DROP
+// GALERÍA DE IMÁGENES PREMIUM CON DRAG & DROP
 // ============================================
 
-const LaptopGallery = {
-    draggedSlot: null,
+const LaptopGalleryPremium = {
+    draggedCard: null,
     totalImages: 0,
     imageConfig: {
         maxSize: 5 * 1024 * 1024, // 5MB
-        validTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+        validTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
+        maxImages: 8
     },
+
+    // Colores para los placeholders de imágenes
+    placeholderColors: [
+        'placeholder-color-1',
+        'placeholder-color-2',
+        'placeholder-color-3',
+        'placeholder-color-4',
+        'placeholder-color-5',
+        'placeholder-color-6',
+        'placeholder-color-7',
+        'placeholder-color-8'
+    ],
 
     // Inicializar galería
     init: function() {
         this.initDragDrop();
         this.initEventListeners();
-        this.updateImageCounter();
+        this.initTipsTooltip();
         this.initExistingImages();
+        this.updateImageCounter();
     },
 
-    // Inicializar drag & drop
+    // Inicializar drag & drop premium
     initDragDrop: function() {
-        const dropZone = document.getElementById('drop-zone');
-        const dragOverlay = document.getElementById('drag-overlay');
+        const uploadArea = document.getElementById('upload-area-premium');
+        const dragOverlay = document.getElementById('drag-overlay-premium');
 
-        if (!dropZone || !dragOverlay) return;
+        if (!uploadArea || !dragOverlay) return;
 
         // Eventos para el área de drop
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, this.preventDefaults, false);
+            uploadArea.addEventListener(eventName, this.preventDefaults, false);
             document.body.addEventListener(eventName, this.preventDefaults, false);
         });
 
         // Resaltar área de drop
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, this.highlightDropZone.bind(this), false);
+            uploadArea.addEventListener(eventName, this.highlightDropZone.bind(this), false);
             document.body.addEventListener(eventName, this.highlightBody.bind(this), false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, this.unhighlightDropZone.bind(this), false);
+            uploadArea.addEventListener(eventName, this.unhighlightDropZone.bind(this), false);
             document.body.addEventListener(eventName, this.unhighlightBody.bind(this), false);
         });
 
         // Manejar drop
-        dropZone.addEventListener('drop', this.handleDrop.bind(this), false);
+        uploadArea.addEventListener('drop', this.handleDrop.bind(this), false);
         document.body.addEventListener('drop', this.handleBodyDrop.bind(this), false);
 
         // Configurar click en área de drop
-        dropZone.addEventListener('click', (e) => {
-            if (e.target === dropZone || !e.target.closest('button')) {
-                document.getElementById('bulk-upload').click();
+        const browseBtn = document.getElementById('browse-btn-premium');
+        if (browseBtn) {
+            browseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('bulk-upload-premium').click();
+            });
+        }
+
+        // También permitir click en el área de carga
+        uploadArea.addEventListener('click', (e) => {
+            if (e.target === uploadArea || e.target.classList.contains('upload-icon-premium') ||
+                e.target.classList.contains('upload-subtitle') || e.target.classList.contains('upload-title')) {
+                document.getElementById('bulk-upload-premium').click();
             }
         });
     },
 
     // Inicializar event listeners
     initEventListeners: function() {
-        const bulkUpload = document.getElementById('bulk-upload');
+        const bulkUpload = document.getElementById('bulk-upload-premium');
         if (bulkUpload) {
             bulkUpload.addEventListener('change', this.handleBulkUpload.bind(this));
         }
 
-        // Inicializar eventos de drag & drop para cada slot
-        for (let i = 1; i <= 8; i++) {
-            const container = document.getElementById(`image-container-${i}`);
-            if (container) {
-                container.addEventListener('dragstart', (e) => this.dragStart(e, i));
-                container.addEventListener('dragover', this.allowDrop);
-                container.addEventListener('drop', (e) => this.drop(e, i));
-                container.addEventListener('dragend', this.dragEnd.bind(this));
+        // Evento para el botón de eliminar todas las imágenes
+        const clearAllBtn = document.getElementById('clear-all-images');
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', this.clearAllImages.bind(this));
+        }
 
-                // Botón eliminar
-                const removeBtn = document.getElementById(`remove-btn-${i}`);
-                if (removeBtn) {
-                    removeBtn.addEventListener('click', () => this.removeImage(i));
-                }
-
-                // Input file individual
-                const input = document.getElementById(`image_${i}`);
-                if (input) {
-                    input.addEventListener('change', (e) => this.handleSingleUpload(e, i));
-                }
-            }
+        // Evento para el botón de guardar galería
+        const saveBtn = document.getElementById('save-gallery-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', this.saveGallery.bind(this));
         }
     },
 
-    // Inicializar imágenes existentes
+    // Inicializar tooltip de consejos
+    initTipsTooltip: function() {
+        const infoIcon = document.getElementById('info-icon-premium');
+        const tipsTooltip = document.getElementById('tips-tooltip-premium');
+
+        if (!infoIcon || !tipsTooltip) return;
+
+        infoIcon.addEventListener('mouseenter', () => {
+            tipsTooltip.classList.add('show');
+        });
+
+        infoIcon.addEventListener('mouseleave', () => {
+            tipsTooltip.classList.remove('show');
+        });
+
+        // Cerrar tooltip al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!infoIcon.contains(e.target) && !tipsTooltip.contains(e.target)) {
+                tipsTooltip.classList.remove('show');
+            }
+        });
+    },
+
+    // Inicializar imágenes existentes (modo edición)
     initExistingImages: function() {
+        // Contar imágenes existentes
+        let existingCount = 0;
+
         for (let i = 1; i <= 8; i++) {
+            const input = document.getElementById(`image_${i}`);
             const preview = document.getElementById(`preview-${i}`);
-            const removeBtn = document.getElementById(`remove-btn-${i}`);
-            if (preview && preview.classList.contains('visible') && removeBtn) {
-                removeBtn.classList.add('visible');
+
+            if (preview && preview.classList.contains('visible') && preview.src) {
+                existingCount++;
+
+                // Crear tarjeta para imagen existente
+                this.createImageCardForExisting(i, preview.src);
             }
         }
+
+        this.totalImages = existingCount;
+        this.updateImageCounter();
+
+        // Si hay imágenes, agregar clase has-images al área de carga
+        const uploadArea = document.getElementById('upload-area-premium');
+        if (existingCount > 0 && uploadArea) {
+            uploadArea.classList.add('has-images');
+        }
+    },
+
+    // Crear tarjeta para imagen existente
+    createImageCardForExisting: function(slot, imageSrc) {
+        const imagesContainer = document.getElementById('images-container-premium');
+        if (!imagesContainer) return;
+
+        const altInput = document.getElementById(`image_${slot}_alt`);
+        const altText = altInput ? altInput.value : '';
+        const fileName = `imagen-${slot}`;
+        const isCover = slot === 1;
+
+        const imageCard = this.createImageCardElement({
+            id: slot,
+            name: fileName,
+            alt: altText,
+            isCover: isCover,
+            isExisting: true,
+            src: imageSrc
+        }, slot - 1);
+
+        imagesContainer.appendChild(imageCard);
+    },
+
+    // Crear elemento de tarjeta de imagen
+    createImageCardElement: function(imageData, index) {
+        const card = document.createElement('div');
+        card.className = `image-card-premium ${imageData.isCover ? 'cover' : ''}`;
+        card.draggable = true;
+        card.dataset.id = imageData.id;
+        card.dataset.slot = imageData.id;
+
+        // Obtener extensión del archivo
+        const extension = imageData.name.split('.').pop().toUpperCase();
+
+        card.innerHTML = `
+            <div class="image-preview-premium">
+                ${imageData.isCover ? `
+                    <div class="cover-badge-premium">
+                        <i class="fas fa-crown"></i> Portada
+                    </div>
+                ` : ''}
+                
+                <div class="image-actions-premium">
+                    <button class="image-btn-premium set-cover" title="Establecer como portada">
+                        <i class="fas fa-crown"></i>
+                    </button>
+                    <button class="image-btn-premium delete" title="Eliminar imagen">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                
+                ${imageData.isExisting ? `
+                    <img src="${imageData.src}" alt="${imageData.alt}" class="w-full h-full object-cover">
+                ` : `
+                    <div class="image-placeholder-premium ${this.placeholderColors[index % 8]}">
+                        <div style="text-align: center; color: white;">
+                            <i class="fas fa-image" style="font-size: 36px; margin-bottom: 8px;"></i>
+                            <div style="font-size: 12px; opacity: 0.9;">${extension}</div>
+                        </div>
+                    </div>
+                `}
+            </div>
+            <div class="image-info-premium">
+                <div class="image-name-premium" title="${imageData.name}">${imageData.name}</div>
+                <input type="text" 
+                       class="alt-text-input-premium" 
+                       value="${imageData.alt}" 
+                       placeholder="Texto alternativo (SEO)"
+                       data-id="${imageData.id}">
+            </div>
+        `;
+
+        // Agregar event listeners
+        this.addCardEventListeners(card, imageData.id);
+
+        return card;
+    },
+
+    // Agregar event listeners a la tarjeta
+    addCardEventListeners: function(card, slotId) {
+        const setCoverBtn = card.querySelector('.set-cover');
+        const deleteBtn = card.querySelector('.delete');
+        const altInput = card.querySelector('.alt-text-input-premium');
+
+        setCoverBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.setAsCover(slotId);
+        });
+
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteImage(slotId);
+        });
+
+        altInput.addEventListener('change', (e) => {
+            this.updateAltText(slotId, e.target.value);
+        });
+
+        altInput.addEventListener('blur', (e) => {
+            this.updateAltText(slotId, e.target.value);
+        });
+
+        // Eventos de drag & drop
+        card.addEventListener('dragstart', (e) => this.dragStart(e, slotId));
+        card.addEventListener('dragover', this.allowDrop);
+        card.addEventListener('drop', (e) => this.drop(e, slotId));
+        card.addEventListener('dragend', this.dragEnd);
     },
 
     // Manejar drop de imágenes
@@ -104,7 +264,7 @@ const LaptopGallery = {
     },
 
     handleBodyDrop: function(e) {
-        if (!e.target.closest('#drop-zone')) {
+        if (!e.target.closest('#upload-area-premium')) {
             const dt = e.dataTransfer;
             const files = dt.files;
             this.handleFiles(files);
@@ -118,87 +278,283 @@ const LaptopGallery = {
         e.target.value = ''; // Resetear input
     },
 
-    // Manejar carga individual
-    handleSingleUpload: function(e, slot) {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            if (this.validateImageFile(file)) {
-                this.uploadToSlot(file, slot);
-            } else {
-                e.target.value = '';
-            }
-        }
-    },
-
     // Procesar archivos
     handleFiles: function(files) {
-        const fileArray = Array.from(files).slice(0, 8 - this.totalImages);
-        let currentSlot = 1;
+        const fileArray = Array.from(files).slice(0, this.imageConfig.maxImages - this.totalImages);
 
+        if (fileArray.length === 0) {
+            if (files.length > (this.imageConfig.maxImages - this.totalImages)) {
+                this.showNotification(`Solo puedes subir hasta ${this.imageConfig.maxImages} imágenes. Se seleccionarán las primeras ${this.imageConfig.maxImages - this.totalImages}.`, true);
+            }
+            return;
+        }
+
+        let processedCount = 0;
         fileArray.forEach((file) => {
-            if (currentSlot <= 8 && this.validateImageFile(file)) {
-                // Encontrar el siguiente slot vacío
-                while (currentSlot <= 8) {
-                    const preview = document.getElementById(`preview-${currentSlot}`);
-                    if (!preview.classList.contains('visible')) {
-                        this.uploadToSlot(file, currentSlot);
-                        currentSlot++;
-                        break;
-                    }
-                    currentSlot++;
-                }
+            if (this.validateImageFile(file)) {
+                this.uploadImage(file);
+                processedCount++;
             }
         });
 
-        this.updateImageCounter();
+        if (processedCount > 0) {
+            this.showNotification(`Se ${processedCount > 1 ? 'han añadido' : 'ha añadido'} ${processedCount} imagen${processedCount > 1 ? 'es' : ''} a la galería.`);
+        }
     },
 
-    // Subir imagen a slot específico
-    uploadToSlot: function(file, slot) {
-        const input = document.getElementById(`image_${slot}`);
-        const preview = document.getElementById(`preview-${slot}`);
-        const placeholder = document.getElementById(`placeholder-${slot}`);
-        const container = document.getElementById(`image-container-${slot}`);
-        const removeBtn = document.getElementById(`remove-btn-${slot}`);
+    // Subir imagen individual
+    uploadImage: function(file) {
+        // Encontrar el siguiente slot disponible
+        let targetSlot = null;
+        for (let i = 1; i <= this.imageConfig.maxImages; i++) {
+            const input = document.getElementById(`image_${i}`);
+            const preview = document.getElementById(`preview-${i}`);
 
-        if (!input || !preview || !placeholder || !container) return;
+            // Verificar si el slot está vacío (sin archivo ni imagen existente)
+            if (input && (!input.files || !input.files[0])) {
+                if (preview && !preview.classList.contains('visible')) {
+                    targetSlot = i;
+                    break;
+                } else if (!preview) {
+                    targetSlot = i;
+                    break;
+                }
+            }
+        }
+
+        if (!targetSlot) {
+            this.showNotification(`Ya has alcanzado el límite de ${this.imageConfig.maxImages} imágenes. Elimina algunas antes de añadir más.`, true);
+            return;
+        }
 
         // Asignar archivo al input
+        const input = document.getElementById(`image_${targetSlot}`);
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         input.files = dataTransfer.files;
 
-        // Mostrar preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            preview.src = e.target.result;
-            preview.classList.add('visible');
-            placeholder.classList.add('hidden');
-            container.classList.add('has-image');
-            if (removeBtn) {
-                removeBtn.classList.add('visible');
+        // Actualizar texto alternativo si está vacío
+        const altInput = document.getElementById(`image_${targetSlot}_alt`);
+        if (altInput && !altInput.value) {
+            const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+            altInput.value = `Imagen de ${nameWithoutExt}`;
+        }
+
+        // Crear tarjeta de imagen
+        const imagesContainer = document.getElementById('images-container-premium');
+        if (imagesContainer) {
+            // Remover empty state si existe
+            const emptyState = imagesContainer.querySelector('.empty-state-premium');
+            if (emptyState) {
+                emptyState.remove();
             }
-        };
-        reader.readAsDataURL(file);
+
+            const imageCard = this.createImageCardElement({
+                id: targetSlot,
+                name: file.name,
+                alt: altInput ? altInput.value : '',
+                isCover: this.totalImages === 0, // Primera imagen es portada
+                isExisting: false,
+                src: null
+            }, targetSlot - 1);
+
+            imagesContainer.appendChild(imageCard);
+        }
+
+        this.totalImages++;
+        this.updateImageCounter();
+
+        // Actualizar área de carga
+        const uploadArea = document.getElementById('upload-area-premium');
+        if (uploadArea && !uploadArea.classList.contains('has-images')) {
+            uploadArea.classList.add('has-images');
+        }
     },
 
-    // Funciones para drag & drop entre slots
-    dragStart: function(e, slot) {
-        const container = document.getElementById(`image-container-${slot}`);
-        const preview = document.getElementById(`preview-${slot}`);
+    // Establecer imagen como portada
+    setAsCover: function(slotId) {
+        // Remover clase cover de todas las imágenes
+        document.querySelectorAll('.image-card-premium').forEach(card => {
+            card.classList.remove('cover');
+        });
 
-        if (!preview.classList.contains('visible')) {
-            e.preventDefault();
+        // Agregar clase cover a la imagen seleccionada
+        const card = document.querySelector(`.image-card-premium[data-id="${slotId}"]`);
+        if (card) {
+            card.classList.add('cover');
+        }
+
+        // Mostrar notificación
+        this.showNotification('Portada actualizada correctamente');
+    },
+
+    // Eliminar imagen
+    deleteImage: function(slotId) {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
             return;
         }
 
-        this.draggedSlot = slot;
-        e.dataTransfer.setData('text/plain', slot);
+        // Limpiar input file
+        const input = document.getElementById(`image_${slotId}`);
+        if (input) {
+            input.value = '';
+        }
+
+        // Limpiar preview existente
+        const preview = document.getElementById(`preview-${slotId}`);
+        if (preview) {
+            preview.src = '';
+            preview.classList.remove('visible');
+        }
+
+        // Limpiar alt text
+        const altInput = document.getElementById(`image_${slotId}_alt`);
+        if (altInput) {
+            altInput.value = '';
+        }
+
+        // Remover tarjeta de imagen
+        const card = document.querySelector(`.image-card-premium[data-id="${slotId}"]`);
+        if (card) {
+            card.remove();
+        }
+
+        // Si eliminamos la imagen de portada y hay más imágenes, hacer la siguiente imagen la portada
+        const wasCover = card && card.classList.contains('cover');
+        if (wasCover && this.totalImages > 1) {
+            // Buscar la primera imagen disponible
+            const firstCard = document.querySelector('.image-card-premium');
+            if (firstCard) {
+                const firstSlotId = firstCard.dataset.id;
+                this.setAsCover(firstSlotId);
+            }
+        }
+
+        this.totalImages--;
+        this.updateImageCounter();
+
+        // Si no hay imágenes, mostrar empty state
+        if (this.totalImages === 0) {
+            this.showEmptyState();
+            const uploadArea = document.getElementById('upload-area-premium');
+            if (uploadArea) {
+                uploadArea.classList.remove('has-images');
+            }
+        }
+
+        this.showNotification('Imagen eliminada correctamente');
+    },
+
+    // Actualizar texto alternativo
+    updateAltText: function(slotId, newAlt) {
+        const altInput = document.getElementById(`image_${slotId}_alt`);
+        if (altInput) {
+            altInput.value = newAlt;
+        }
+    },
+
+    // Mostrar estado vacío
+    showEmptyState: function() {
+        const imagesContainer = document.getElementById('images-container-premium');
+        if (!imagesContainer) return;
+
+        imagesContainer.innerHTML = `
+            <div class="empty-state-premium">
+                <div class="empty-icon-premium">
+                    <i class="fas fa-images"></i>
+                </div>
+                <div class="empty-text-premium">
+                    No hay imágenes cargadas. Arrastra y suelta imágenes aquí o haz clic en el botón de arriba.
+                </div>
+            </div>
+        `;
+    },
+
+    // Actualizar contador de imágenes
+    updateImageCounter: function() {
+        const counter = document.getElementById('image-counter-premium');
+        if (counter) {
+            counter.textContent = this.totalImages;
+        }
+    },
+
+    // Limpiar todas las imágenes
+    clearAllImages: function() {
+        if (this.totalImages === 0) {
+            this.showNotification('No hay imágenes para eliminar', true);
+            return;
+        }
+
+        if (!confirm('¿Estás seguro de que quieres eliminar todas las imágenes?')) {
+            return;
+        }
+
+        // Limpiar todos los inputs
+        for (let i = 1; i <= this.imageConfig.maxImages; i++) {
+            const input = document.getElementById(`image_${i}`);
+            if (input) {
+                input.value = '';
+            }
+
+            const altInput = document.getElementById(`image_${i}_alt`);
+            if (altInput) {
+                altInput.value = '';
+            }
+
+            const preview = document.getElementById(`preview-${i}`);
+            if (preview) {
+                preview.src = '';
+                preview.classList.remove('visible');
+            }
+        }
+
+        // Remover todas las tarjetas
+        const imagesContainer = document.getElementById('images-container-premium');
+        if (imagesContainer) {
+            imagesContainer.innerHTML = '';
+            this.showEmptyState();
+        }
+
+        this.totalImages = 0;
+        this.updateImageCounter();
+
+        // Actualizar área de carga
+        const uploadArea = document.getElementById('upload-area-premium');
+        if (uploadArea) {
+            uploadArea.classList.remove('has-images');
+        }
+
+        this.showNotification('Todas las imágenes han sido eliminadas');
+    },
+
+    // Guardar galería (simulación)
+    saveGallery: function() {
+        const saveBtn = document.getElementById('save-gallery-btn');
+        if (!saveBtn) return;
+
+        // Simular guardado
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        saveBtn.disabled = true;
+
+        setTimeout(() => {
+            this.showNotification('¡Galería guardada exitosamente!');
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar galería';
+            saveBtn.disabled = false;
+        }, 1500);
+    },
+
+    // Funciones para drag & drop entre tarjetas (reordenar)
+    dragStart: function(e, slotId) {
+        this.draggedCard = e.currentTarget;
+        e.dataTransfer.setData('text/plain', slotId);
         e.dataTransfer.effectAllowed = 'move';
 
-        if (container) {
-            container.classList.add('dragging');
-        }
+        // Agregar clase dragging
+        setTimeout(() => {
+            if (this.draggedCard) {
+                this.draggedCard.classList.add('dragging');
+            }
+        }, 0);
     },
 
     allowDrop: function(e) {
@@ -206,131 +562,32 @@ const LaptopGallery = {
         e.dataTransfer.dropEffect = 'move';
     },
 
-    drop: function(e, targetSlot) {
+    drop: function(e, targetSlotId) {
         e.preventDefault();
 
-        if (this.draggedSlot && this.draggedSlot !== targetSlot) {
-            this.swapImages(this.draggedSlot, targetSlot);
-            this.updateImageCounter();
+        if (this.draggedCard && this.draggedCard !== e.currentTarget) {
+            const draggedSlotId = this.draggedCard.dataset.id;
+
+            // Intercambiar posiciones en el DOM
+            const imagesContainer = document.getElementById('images-container-premium');
+            const targetCard = e.currentTarget;
+
+            if (imagesContainer && draggedSlotId !== targetSlotId) {
+                // Reinsertar el elemento arrastrado antes del objetivo
+                imagesContainer.insertBefore(this.draggedCard, targetCard);
+
+                // Notificar al usuario
+                this.showNotification('Imágenes reordenadas. Nota: Para guardar el nuevo orden, debes guardar el formulario.');
+            }
         }
 
         this.dragEnd();
     },
 
     dragEnd: function() {
-        if (this.draggedSlot) {
-            const container = document.getElementById(`image-container-${this.draggedSlot}`);
-            if (container) {
-                container.classList.remove('dragging');
-            }
-            this.draggedSlot = null;
-        }
-    },
-
-    // Intercambiar imágenes entre dos slots
-    swapImages: function(slot1, slot2) {
-        const input1 = document.getElementById(`image_${slot1}`);
-        const input2 = document.getElementById(`image_${slot2}`);
-        const preview1 = document.getElementById(`preview-${slot1}`);
-        const preview2 = document.getElementById(`preview-${slot2}`);
-        const placeholder1 = document.getElementById(`placeholder-${slot1}`);
-        const placeholder2 = document.getElementById(`placeholder-${slot2}`);
-        const container1 = document.getElementById(`image-container-${slot1}`);
-        const container2 = document.getElementById(`image-container-${slot2}`);
-        const removeBtn1 = document.getElementById(`remove-btn-${slot1}`);
-        const removeBtn2 = document.getElementById(`remove-btn-${slot2}`);
-        const alt1 = document.getElementById(`image_${slot1}_alt`);
-        const alt2 = document.getElementById(`image_${slot2}_alt`);
-
-        if (!input1 || !input2 || !preview1 || !preview2) return;
-
-        // Guardar valores temporales
-        const tempFiles = input1.files;
-        const tempSrc = preview1.src;
-        const tempAlt = alt1 ? alt1.value : '';
-        const tempHasImage = preview1.classList.contains('visible');
-        const tempHasImage2 = preview2.classList.contains('visible');
-
-        // Mover slot1 a slot2
-        input1.files = input2.files;
-        preview1.src = preview2.src;
-        if (alt1 && alt2) alt1.value = alt2.value;
-
-        if (tempHasImage2) {
-            preview1.classList.add('visible');
-            placeholder1.classList.add('hidden');
-            container1.classList.add('has-image');
-            if (removeBtn1) removeBtn1.classList.add('visible');
-        } else {
-            preview1.classList.remove('visible');
-            placeholder1.classList.remove('hidden');
-            container1.classList.remove('has-image');
-            if (removeBtn1) removeBtn1.classList.remove('visible');
-        }
-
-        // Mover temporales a slot2
-        input2.files = tempFiles;
-        preview2.src = tempSrc;
-        if (alt2) alt2.value = tempAlt;
-
-        if (tempHasImage) {
-            preview2.classList.add('visible');
-            placeholder2.classList.add('hidden');
-            container2.classList.add('has-image');
-            if (removeBtn2) removeBtn2.classList.add('visible');
-        } else {
-            preview2.classList.remove('visible');
-            placeholder2.classList.remove('hidden');
-            container2.classList.remove('has-image');
-            if (removeBtn2) removeBtn2.classList.remove('visible');
-        }
-    },
-
-    // Actualizar contador de imágenes
-    updateImageCounter: function() {
-        let count = 0;
-        for (let i = 1; i <= 8; i++) {
-            const preview = document.getElementById(`preview-${i}`);
-            if (preview && preview.classList.contains('visible')) {
-                count++;
-            }
-        }
-        const counter = document.getElementById('image-counter');
-        if (counter) {
-            counter.textContent = count;
-        }
-        this.totalImages = count;
-    },
-
-    // Eliminar imagen específica
-    removeImage: function(slot) {
-        const input = document.getElementById(`image_${slot}`);
-        const preview = document.getElementById(`preview-${slot}`);
-        const placeholder = document.getElementById(`placeholder-${slot}`);
-        const container = document.getElementById(`image-container-${slot}`);
-        const removeBtn = document.getElementById(`remove-btn-${slot}`);
-        const altInput = document.getElementById(`image_${slot}_alt`);
-
-        // Resetear valores
-        if (input) input.value = '';
-        if (preview) {
-            preview.src = '';
-            preview.classList.remove('visible');
-        }
-        if (placeholder) placeholder.classList.remove('hidden');
-        if (container) container.classList.remove('has-image');
-        if (removeBtn) removeBtn.classList.remove('visible');
-        if (altInput) altInput.value = '';
-
-        this.updateImageCounter();
-    },
-
-    // Limpiar todas las imágenes
-    clearAllImages: function() {
-        if (confirm('¿Estás seguro de que quieres eliminar todas las imágenes?')) {
-            for (let i = 1; i <= 8; i++) {
-                this.removeImage(i);
-            }
+        if (this.draggedCard) {
+            this.draggedCard.classList.remove('dragging');
+            this.draggedCard = null;
         }
     },
 
@@ -351,9 +608,62 @@ const LaptopGallery = {
         return true;
     },
 
-    // Mostrar error
+    // Mostrar error de imagen
     showImageError: function(message) {
-        alert(message);
+        this.showNotification(message, true);
+    },
+
+    // Mostrar notificación
+    showNotification: function(message, isError = false) {
+        // Crear elemento de notificación
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${isError ? '#fef2f2' : '#f0fdf4'};
+            color: ${isError ? '#7f1d1d' : '#14532d'};
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid ${isError ? '#ef4444' : '#10b981'};
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        `;
+
+        notification.innerHTML = `
+            <i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}" style="margin-right: 12px;"></i>
+            ${message}
+        `;
+
+        document.body.appendChild(notification);
+
+        // Agregar estilos de animación si no existen
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Eliminar notificación después de 3 segundos
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
     },
 
     // Funciones auxiliares para eventos
@@ -363,28 +673,28 @@ const LaptopGallery = {
     },
 
     highlightDropZone: function() {
-        const dropZone = document.getElementById('drop-zone');
-        if (dropZone) {
-            dropZone.classList.add('dragover');
+        const uploadArea = document.getElementById('upload-area-premium');
+        if (uploadArea) {
+            uploadArea.classList.add('dragover');
         }
     },
 
     unhighlightDropZone: function() {
-        const dropZone = document.getElementById('drop-zone');
-        if (dropZone) {
-            dropZone.classList.remove('dragover');
+        const uploadArea = document.getElementById('upload-area-premium');
+        if (uploadArea) {
+            uploadArea.classList.remove('dragover');
         }
     },
 
     highlightBody: function() {
-        const dragOverlay = document.getElementById('drag-overlay');
+        const dragOverlay = document.getElementById('drag-overlay-premium');
         if (dragOverlay) {
             dragOverlay.classList.add('visible');
         }
     },
 
     unhighlightBody: function() {
-        const dragOverlay = document.getElementById('drag-overlay');
+        const dragOverlay = document.getElementById('drag-overlay-premium');
         if (dragOverlay) {
             dragOverlay.classList.remove('visible');
         }
@@ -393,8 +703,8 @@ const LaptopGallery = {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    LaptopGallery.init();
+    LaptopGalleryPremium.init();
 });
 
 // Exponer para uso global
-window.laptopGallery = LaptopGallery;
+window.laptopGalleryPremium = LaptopGalleryPremium;

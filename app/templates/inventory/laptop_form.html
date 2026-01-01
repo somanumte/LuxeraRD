@@ -213,117 +213,106 @@
                 </div>
             </div>
 
-            <!-- Card: Galería de Imágenes -->
+            <!-- Card: Galería de Imágenes PREMIUM -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Galería de Imágenes
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    Sube hasta 8 imágenes. La primera imagen será la portada principal. Formatos: JPG, PNG, WebP, GIF.
-                </p>
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Galería de Imágenes
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Sube hasta 8 imágenes. La primera imagen será la portada principal. Formatos: JPG, PNG, WebP, GIF.
+                        </p>
+                    </div>
 
-                <!-- Área de Drag & Drop -->
-                <div class="mb-6">
-                    <div class="drop-zone" id="drop-zone">
-                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Arrastra y suelta tus imágenes aquí
-                        </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            o haz clic para buscar archivos
-                        </p>
-                        <input type="file"
-                               id="bulk-upload"
-                               accept="image/jpeg,image/png,image/webp,image/gif"
-                               multiple
-                               class="hidden">
-                        <button type="button"
-                                onclick="document.getElementById('bulk-upload').click()"
-                                class="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors duration-300">
-                            Buscar imágenes
+                    <div class="info-icon-container-premium">
+                        <button class="info-icon-premium" id="info-icon-premium">
+                            <i class="fas fa-info-circle"></i>
                         </button>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                            Máximo 8 imágenes • Se seleccionarán automáticamente hasta completar el límite
-                        </p>
+
+                        <div class="tips-tooltip-premium" id="tips-tooltip-premium">
+                            <div class="tips-title-premium">
+                                <i class="fas fa-lightbulb"></i> Consejos para tu galería
+                            </div>
+                            <ul class="tips-list-premium">
+                                <li class="tip-item-premium">
+                                    <i class="fas fa-star"></i>
+                                    <span>La primera imagen será la portada principal de tu galería.</span>
+                                </li>
+                                <li class="tip-item-premium">
+                                    <i class="fas fa-expand-alt"></i>
+                                    <span>Utiliza imágenes de alta calidad (mínimo 800×600px).</span>
+                                </li>
+                                <li class="tip-item-premium">
+                                    <i class="fas fa-search"></i>
+                                    <span>El texto alternativo mejora el SEO y la accesibilidad.</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Contador de imágenes -->
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Imágenes seleccionadas: <span id="image-counter">0</span>/8
-                    </span>
-                    <button type="button"
-                            onclick="window.laptopGallery.clearAllImages()"
-                            class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">
-                        Eliminar todas
+                <!-- Área de Drag & Drop PREMIUM -->
+                <div class="upload-area-premium" id="upload-area-premium">
+                    <div class="upload-icon-premium">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3 class="upload-title">Arrastra y suelta tus imágenes aquí</h3>
+                    <p class="upload-subtitle">o haz clic en el botón para buscar archivos en tu dispositivo</p>
+                    <button class="browse-btn-premium" id="browse-btn-premium">
+                        <i class="fas fa-folder-open"></i> Buscar imágenes
                     </button>
+
+                    <!-- Contenedor de imágenes (se llena dinámicamente) -->
+                    <div class="images-grid-premium" id="images-container-premium">
+                        <!-- Las imágenes se generan dinámicamente aquí -->
+                        {% if mode == 'edit' and laptop.images.count() > 0 %}
+                            {# Las imágenes existentes se cargarán mediante JavaScript #}
+                        {% else %}
+                            <div class="empty-state-premium">
+                                <div class="empty-icon-premium">
+                                    <i class="fas fa-images"></i>
+                                </div>
+                                <div class="empty-text-premium"> </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Input para carga múltiple (oculto) -->
+                    <input type="file"
+                           id="bulk-upload-premium"
+                           accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                           multiple
+                           class="hidden">
                 </div>
 
-                <!-- Grid de imágenes -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="image-grid">
+                <!-- Información de carga -->
+                <div class="upload-info-premium">
+                    <div>
+                        <span class="upload-count">Imágenes seleccionadas: <span id="image-counter-premium">0</span>/8</span>
+                    </div>
+                    <div class="upload-max">Máximo 8 imágenes</div>
+                </div>
+
+                <!-- Mantener los campos originales del formulario (ocultos pero funcionales) -->
+                <div class="hidden" id="original-form-fields">
                     {% for i in range(1, 9) %}
-                    <div class="space-y-2 image-slot"
-                         data-slot="{{ i }}">
-                        <!-- Contenedor de imagen -->
-                        <div class="image-upload-container relative {% if mode == 'edit' and laptop and laptop.images.filter_by(ordering=i).first() %}has-image{% endif %}"
-                             id="image-container-{{ i }}"
-                             draggable="true">
+                    <div class="image-slot-original" data-slot="{{ i }}">
+                        <!-- Input file original (oculto) -->
+                        {{ form['image_' ~ i](
+                            class="hidden original-image-input",
+                            id="image_" ~ i,
+                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        ) }}
 
-                            <!-- Badge de número -->
-                            <span class="image-number-badge {% if i == 1 %}is-cover{% endif %}">
-                                {% if i == 1 %}★{% else %}{{ i }}{% endif %}
-                            </span>
-
-                            <!-- Botón eliminar -->
-                            <button type="button"
-                                    class="remove-image-btn"
-                                    id="remove-btn-{{ i }}"
-                                    title="Eliminar imagen">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-
-                            <!-- Preview de imagen -->
-                            <img id="preview-{{ i }}"
-                                 class="image-preview {% if mode == 'edit' and laptop %}{% set existing_img = laptop.images.filter_by(ordering=i).first() %}{% if existing_img %}visible{% endif %}{% endif %}"
-                                 src="{% if mode == 'edit' and laptop %}{% set existing_img = laptop.images.filter_by(ordering=i).first() %}{% if existing_img %}{{ url_for('static', filename=existing_img.image_path) }}{% endif %}{% endif %}"
-                                 alt="Preview {{ i }}"
-                                 draggable="false">
-
-                            <!-- Placeholder -->
-                            <div class="image-placeholder {% if mode == 'edit' and laptop %}{% set existing_img = laptop.images.filter_by(ordering=i).first() %}{% if existing_img %}hidden{% endif %}{% endif %}"
-                                 id="placeholder-{{ i }}">
-                                <svg class="w-8 h-8 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span class="text-xs text-gray-500">
-                                    {% if i == 1 %}Portada{% else %}Slot {{ i }}{% endif %}
-                                </span>
-                            </div>
-
-                            <!-- Input file (oculto) -->
-                            {{ form['image_' ~ i](class="hidden", id="image_" ~ i) }}
-
-                            <!-- Indicador de imagen existente -->
-                            {% if mode == 'edit' and laptop %}
-                                {% set existing_img = laptop.images.filter_by(ordering=i).first() %}
-                                {% if existing_img %}
-                                <span class="existing-image-indicator">Guardada</span>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-
-                        <!-- Campo de texto alternativo -->
-                        <div>
-                            {{ form['image_' ~ i ~ '_alt'](class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20", placeholder="Texto alternativo (SEO)", id="image_" ~ i ~ "_alt") }}
-                        </div>
+                        <!-- Input alt original (oculto pero necesario para formulario) -->
+                        {{ form['image_' ~ i ~ '_alt'](
+                            class="hidden original-alt-input",
+                            id="image_" ~ i ~ "_alt"
+                        ) }}
                     </div>
                     {% endfor %}
                 </div>
@@ -335,20 +324,18 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <div class="text-xs text-amber-700 dark:text-amber-300">
-                            <strong>Consejos:</strong> La imagen ★ será la portada. Usa imágenes de alta calidad (mín. 800x600px).
-                            El texto alternativo mejora el SEO y la accesibilidad.
+                            <strong>Consejos:</strong> La imagen con ★ será la portada. Usa imágenes de alta calidad (mín. 800×600px).
+                            El texto alternativo mejora el SEO y la accesibilidad. Puedes reordenar imágenes arrastrándolas.
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Overlay de arrastre -->
-            <div id="drag-overlay" class="drag-overlay">
-                <div class="drag-message">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
-                    </svg>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Suelta las imágenes</h3>
+            <!-- Overlay de arrastre PREMIUM -->
+            <div id="drag-overlay-premium" class="drag-overlay-premium">
+                <div class="drag-message-premium">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-pink-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Suelta las imágenes aquí</h3>
                     <p class="text-gray-600 dark:text-gray-400">Seleccionaremos hasta 8 imágenes automáticamente</p>
                 </div>
             </div>
