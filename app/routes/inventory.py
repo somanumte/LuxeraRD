@@ -563,6 +563,84 @@ def laptop_by_slug(slug):
     )
 
 
+# ===== ELIMINAR LAPTOP =====
+
+@inventory_bp.route('/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def laptop_delete(id):
+    """
+    Elimina una laptop del inventario
+    """
+    laptop = Laptop.query.get_or_404(id)
+
+    try:
+        # Obtener y eliminar imágenes asociadas
+        images = laptop.images.all()
+
+        # Eliminar archivos de imágenes del sistema de archivos
+        for image in images:
+            try:
+                filepath = os.path.join('app', 'static', image.image_path)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    logger.info(f'Laptop {laptop.sku}: Imagen eliminada {image.image_path}')
+            except Exception as e:
+                logger.error(f'Error al eliminar imagen {image.image_path}: {str(e)}')
+
+        # Eliminar directorio de imágenes si existe
+        image_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
+        if os.path.exists(image_folder):
+            try:
+                os.rmdir(image_folder)
+                logger.info(f'Laptop {laptop.sku}: Directorio de imágenes eliminado')
+            except Exception as e:
+                logger.error(f'Error al eliminar directorio de imágenes: {str(e)}')
+
+        # Eliminar la laptop de la base de datos
+        db.session.delete(laptop)
+        db.session.commit()
+
+        flash(f'✅ Laptop {laptop.sku} eliminada exitosamente', 'success')
+        return redirect(url_for('inventory.laptops_list'))
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al eliminar laptop {laptop.sku}: {str(e)}', exc_info=True)
+        flash(f'❌ Error al eliminar laptop: {str(e)}', 'error')
+        return redirect(url_for('inventory.laptop_detail', id=id))
+
+
+# ===== Duplicar LAPTOP =====
+
+@inventory_bp.route('/inventory/<int:id>/duplicate', methods=['POST'])
+@login_required
+def laptop_duplicate(id):
+    original = Laptop.query.get_or_404(id)
+
+    duplicate = Laptop(
+        sku=f"{original.sku}-COPY",
+        display_name=f"{original.display_name} (Copia)",
+        short_description=original.short_description,
+        long_description_html=original.long_description_html,
+        category=original.category,
+        brand_id=original.brand_id,
+        model_id=original.model_id,
+        processor_id=original.processor_id,
+        ram_id=original.ram_id,
+        storage_id=original.storage_id,
+        sale_price=original.sale_price,
+        is_published=False,
+        created_by_id=current_user.id
+    )
+
+    db.session.add(duplicate)
+    db.session.commit()
+
+    flash('Laptop duplicada correctamente', 'success')
+    return redirect(url_for('inventory.laptop_edit', id=duplicate.id))
+
+
 # ===== EDITAR LAPTOP =====
 
 @inventory_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
