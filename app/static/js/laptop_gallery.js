@@ -178,6 +178,11 @@ const LaptopGalleryPremium = {
         card.dataset.id = imageData.id;
         card.dataset.slot = imageData.id;
 
+        // Guardar la URL del objeto para liberarla después si es necesario
+        if (imageData.isExisting === false && imageData.src && imageData.src.startsWith('blob:')) {
+            card.dataset.objectUrl = imageData.src;
+        }
+
         // Obtener extensión del archivo
         const extension = imageData.name.split('.').pop().toUpperCase();
 
@@ -198,16 +203,7 @@ const LaptopGalleryPremium = {
                     </button>
                 </div>
                 
-                ${imageData.isExisting ? `
-                    <img src="${imageData.src}" alt="${imageData.alt}" class="w-full h-full object-cover">
-                ` : `
-                    <div class="image-placeholder-premium ${this.placeholderColors[index % 8]}">
-                        <div style="text-align: center; color: white;">
-                            <i class="fas fa-image" style="font-size: 36px; margin-bottom: 8px;"></i>
-                            <div style="font-size: 12px; opacity: 0.9;">${extension}</div>
-                        </div>
-                    </div>
-                `}
+                <img src="${imageData.src}" alt="${imageData.alt}" class="w-full h-full object-cover">
             </div>
             <div class="image-info-premium">
                 <div class="image-name-premium" title="${imageData.name}">${imageData.name}</div>
@@ -355,7 +351,7 @@ const LaptopGalleryPremium = {
                 alt: altInput ? altInput.value : '',
                 isCover: this.totalImages === 0, // Primera imagen es portada
                 isExisting: false,
-                src: null
+                src: URL.createObjectURL(file)
             }, targetSlot - 1);
 
             imagesContainer.appendChild(imageCard);
@@ -413,9 +409,13 @@ const LaptopGalleryPremium = {
             altInput.value = '';
         }
 
-        // Remover tarjeta de imagen
+        // Remover tarjeta de imagen y liberar URL del objeto si existe
         const card = document.querySelector(`.image-card-premium[data-id="${slotId}"]`);
         if (card) {
+            // Liberar URL del objeto si fue creada para vista previa
+            if (card.dataset.objectUrl) {
+                URL.revokeObjectURL(card.dataset.objectUrl);
+            }
             card.remove();
         }
 
@@ -488,6 +488,13 @@ const LaptopGalleryPremium = {
         if (!confirm('¿Estás seguro de que quieres eliminar todas las imágenes?')) {
             return;
         }
+
+        // Liberar todas las URLs de objeto creadas
+        document.querySelectorAll('.image-card-premium[data-object-url]').forEach(card => {
+            if (card.dataset.objectUrl) {
+                URL.revokeObjectURL(card.dataset.objectUrl);
+            }
+        });
 
         // Limpiar todos los inputs
         for (let i = 1; i <= this.imageConfig.maxImages; i++) {
