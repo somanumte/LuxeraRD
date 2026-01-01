@@ -144,7 +144,7 @@
         border-radius: 50%;
         display: flex;
         align-items: center;
-        justify-content: center;
+                        justify-content: center;
         font-size: 0.75rem;
         font-weight: bold;
         z-index: 20;
@@ -237,7 +237,7 @@
 
                 <div class="grid grid-cols-1 gap-6">
                     <!-- Nombre Comercial (display_name) - AUTO-GENERADO -->
-                    <div>
+                    <div class="hidden">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.display_name.label.text }} <span class="text-red-500">*</span>
                             <span class="text-xs font-normal text-indigo-600 dark:text-indigo-400 ml-2">(Generado automáticamente)</span>
@@ -250,10 +250,10 @@
                         {% if form.display_name.errors %}
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.display_name.errors[0] }}</p>
                         {% endif %}
-                    </div>
+						<div class="hidden">
 
                     <!-- Descripcion Corta (opcional) -->
-                    <div>
+                    <div class="hidden">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                             {{ form.short_description.label.text }}
                         </label>
@@ -658,16 +658,18 @@
             </div>
 
             <!-- Card: Notas -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-                    </svg>
-                    Notas Internas
-                </h2>
+            <div class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                        </svg>
+                        Notas Internas
+                    </h2>
 
-                {{ form.internal_notes(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estas notas son internas y no se muestran al publico</p>
+                    {{ form.internal_notes(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estas notas son internas y no se muestran al publico</p>
+                </div>
             </div>
 
             <!-- Botones -->
