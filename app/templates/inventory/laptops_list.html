@@ -273,10 +273,15 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ laptop.brand.name if laptop.brand else 'N/A' }} {{ laptop.model.name if laptop.model else 'N/A' }}
+                                            {{ laptop.brand.name if laptop.brand else 'N/A' }} {{ laptop.model.name if laptop.model else 'N/A' }}
                                             </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ laptop.processor.name[:30] if laptop.processor else 'N/A' }}...
+                                            <div>CPU: {{ laptop.processor.name[:30] if laptop.processor else 'N/A' }}</div>
+                                            <div>O.S: {{ laptop.operating_system.name[:30] if laptop.operating_system else 'N/A' }}</div>
+                                            <div>GPU: {{ laptop.graphics_card.name[:30] if laptop.graphics_card else 'N/A' }}</div>
+                                            <div>SSD: {{ laptop.storage.name[:30] if laptop.storage else 'N/A' }}</div>
+                                            <div>RAM: {{ laptop.ram.name[:30] if laptop.ram else 'N/A' }}</div>
+                                            <div>Screen: {{ laptop.screen.name[:30] if laptop.screen else 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </div>
