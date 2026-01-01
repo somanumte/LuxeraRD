@@ -215,4 +215,143 @@ $(document).ready(function() {
 
     $('#purchase_cost, #sale_price').on('input', calculateMargin);
     calculateMargin();
+
+    // ===== GALERÍA DE IMÁGENES =====
+
+    // Configuración de validación
+    var imageConfig = {
+        maxSize: 5 * 1024 * 1024, // 5MB
+        validTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+        validExtensions: ['jpg', 'jpeg', 'png', 'webp', 'gif']
+    };
+
+    // Inicializar uploaders de imágenes
+    function initImageUploaders() {
+        for (var i = 1; i <= 8; i++) {
+            initSingleUploader(i);
+        }
+    }
+
+    // Inicializar un uploader individual con drag & drop
+    function initSingleUploader(index) {
+        var container = document.getElementById('image-container-' + index);
+        if (!container) return;
+
+        // Eventos de drag & drop
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('border-indigo-500', 'bg-indigo-50');
+        });
+
+        container.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('border-indigo-500', 'bg-indigo-50');
+        });
+
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('border-indigo-500', 'bg-indigo-50');
+
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                var input = document.getElementById('image_' + index);
+                // Crear un nuevo FileList no es posible directamente,
+                // así que simulamos el cambio
+                handleImageFile(files[0], index);
+            }
+        });
+
+        // Mostrar botón eliminar si ya hay imagen
+        var preview = document.getElementById('preview-' + index);
+        var removeBtn = document.getElementById('remove-btn-' + index);
+        if (preview && preview.classList.contains('visible')) {
+            removeBtn.classList.add('visible');
+        }
+    }
+
+    // Manejar archivo de imagen (desde input o drag & drop)
+    function handleImageFile(file, index) {
+        // Validar tipo
+        if (!imageConfig.validTypes.includes(file.type)) {
+            showImageError('Formato no válido. Usa: JPG, PNG, WebP o GIF');
+            return false;
+        }
+
+        // Validar tamaño
+        if (file.size > imageConfig.maxSize) {
+            showImageError('Imagen muy grande. Máximo 5MB.');
+            return false;
+        }
+
+        // Mostrar preview
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            updateImagePreview(index, e.target.result);
+        };
+        reader.readAsDataURL(file);
+        return true;
+    }
+
+    // Actualizar preview de imagen
+    function updateImagePreview(index, src) {
+        var preview = document.getElementById('preview-' + index);
+        var placeholder = document.getElementById('placeholder-' + index);
+        var container = document.getElementById('image-container-' + index);
+        var removeBtn = document.getElementById('remove-btn-' + index);
+
+        if (preview && placeholder && container && removeBtn) {
+            preview.src = src;
+            preview.classList.add('visible');
+            placeholder.classList.add('hidden');
+            container.classList.add('has-image');
+            removeBtn.classList.add('visible');
+        }
+    }
+
+    // Mostrar error de imagen
+    function showImageError(message) {
+        // Usar notificación simple por ahora
+        alert(message);
+    }
+
+    // Exponer funciones globalmente para uso en HTML
+    window.previewImage = function(input, index) {
+        if (input.files && input.files[0]) {
+            if (handleImageFile(input.files[0], index)) {
+                // Archivo válido, el preview se actualiza en handleImageFile
+            } else {
+                // Archivo inválido, limpiar input
+                input.value = '';
+            }
+        }
+    };
+
+    window.removeImage = function(index) {
+        var input = document.getElementById('image_' + index);
+        var preview = document.getElementById('preview-' + index);
+        var placeholder = document.getElementById('placeholder-' + index);
+        var container = document.getElementById('image-container-' + index);
+        var removeBtn = document.getElementById('remove-btn-' + index);
+
+        if (input) input.value = '';
+        if (preview) {
+            preview.src = '';
+            preview.classList.remove('visible');
+        }
+        if (placeholder) placeholder.classList.remove('hidden');
+        if (container) container.classList.remove('has-image');
+        if (removeBtn) removeBtn.classList.remove('visible');
+
+        // Remover indicador de imagen existente si lo hay
+        var existingIndicator = container.querySelector('.existing-image-indicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+    };
+
+    // Inicializar uploaders
+    initImageUploaders();
 });

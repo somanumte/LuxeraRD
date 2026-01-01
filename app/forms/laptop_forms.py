@@ -4,7 +4,7 @@
 # Actualizado al nuevo modelo de datos
 
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from wtforms import (
     StringField, SelectField, DecimalField, IntegerField,
     TextAreaField, BooleanField, SubmitField, HiddenField,
@@ -19,7 +19,6 @@ from app.models.laptop import (
     Brand, LaptopModel, Processor, OperatingSystem,
     Screen, GraphicsCard, Storage, Ram, Store, Location, Supplier
 )
-
 
 # ===== OPCIONES DE PUERTOS DE CONECTIVIDAD =====
 CONNECTIVITY_PORTS_CHOICES = [
@@ -57,6 +56,125 @@ KEYBOARD_LAYOUT_CHOICES = [
 ]
 
 
+# ===== FORMULARIO DE BÚSQUEDA RÁPIDA =====
+class QuickSearchForm(FlaskForm):
+    """
+    Formulario simple para búsqueda rápida en el inventario
+    """
+    q = StringField(
+        'Buscar',
+        validators=[Optional(), Length(max=100)],
+        render_kw={
+            'placeholder': 'Buscar por SKU, nombre, modelo...',
+            'class': 'form-input'
+        }
+    )
+    submit = SubmitField('Buscar')
+
+
+# ===== FORMULARIO DE FILTROS =====
+class FilterForm(FlaskForm):
+    """
+    Formulario para filtrar el listado de laptops
+    Usado en laptops_list.html
+    """
+    # Filtro por tienda
+    store_id = SelectField(
+        'Tienda',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    # Filtro por marca
+    brand_id = SelectField(
+        'Marca',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    # Filtro por procesador
+    processor_id = SelectField(
+        'Procesador',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    # Filtro por tarjeta gráfica
+    graphics_card_id = SelectField(
+        'Tarjeta Gráfica',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    # Filtro por pantalla
+    screen_id = SelectField(
+        'Pantalla',
+        coerce=int,
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    # Filtro por categoría
+    category = SelectField(
+        'Categoría',
+        choices=[
+            ('', 'Todas'),
+            ('laptop', 'Laptop'),
+            ('workstation', 'Workstation'),
+            ('gaming', 'Gaming')
+        ],
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    # Filtro por condición
+    condition = SelectField(
+        'Condición',
+        choices=[
+            ('', 'Todas'),
+            ('new', 'Nuevo'),
+            ('used', 'Usado'),
+            ('refurbished', 'Refurbished')
+        ],
+        validators=[Optional()],
+        render_kw={'class': 'form-input'}
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario y carga las opciones de los selectores"""
+        super(FilterForm, self).__init__(*args, **kwargs)
+
+        # Stores
+        self.store_id.choices = [(0, 'Todas las tiendas')] + [
+            (s.id, s.name) for s in Store.query.filter_by(is_active=True).order_by(Store.name).all()
+        ]
+
+        # Brands
+        self.brand_id.choices = [(0, 'Todas las marcas')] + [
+            (b.id, b.name) for b in Brand.query.filter_by(is_active=True).order_by(Brand.name).all()
+        ]
+
+        # Processors
+        self.processor_id.choices = [(0, 'Todos los procesadores')] + [
+            (p.id, p.name) for p in Processor.query.filter_by(is_active=True).order_by(Processor.name).all()
+        ]
+
+        # Graphics Cards
+        self.graphics_card_id.choices = [(0, 'Todas las GPUs')] + [
+            (g.id, g.name) for g in GraphicsCard.query.filter_by(is_active=True).order_by(GraphicsCard.name).all()
+        ]
+
+        # Screens
+        self.screen_id.choices = [(0, 'Todas las pantallas')] + [
+            (s.id, s.name) for s in Screen.query.filter_by(is_active=True).order_by(Screen.name).all()
+        ]
+
+
+# ===== FORMULARIO PRINCIPAL DE LAPTOP =====
 class LaptopForm(FlaskForm):
     """
     Formulario principal para agregar/editar laptops
@@ -153,7 +271,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 3. ESPECIFICACIONES TA‰CNICAS =====
+    # ===== 3. ESPECIFICACIONES TÉCNICAS =====
     brand_id = SelectField(
         'Marca',
         coerce=int,
@@ -266,7 +384,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 4. DETALLES TA‰CNICOS ESPECAFICOS =====
+    # ===== 4. DETALLES TÉCNICOS ESPECÍFICOS =====
     npu = BooleanField(
         'Tiene NPU (Procesador de IA)',
         default=False,
@@ -296,7 +414,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 5. ESTADO Y CATEGORAA =====
+    # ===== 5. ESTADO Y CATEGORÍA =====
     category = SelectField(
         'Categoria',
         choices=[
@@ -327,7 +445,153 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 6. FINANCIEROS =====
+    # ===== 6. IMÁGENES =====
+    # Campos para hasta 8 imágenes
+    image_1 = FileField(
+        'Imagen 1 (Principal)',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_1_alt = StringField(
+        'Texto alternativo Imagen 1',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_2 = FileField(
+        'Imagen 2',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_2_alt = StringField(
+        'Texto alternativo Imagen 2',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_3 = FileField(
+        'Imagen 3',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_3_alt = StringField(
+        'Texto alternativo Imagen 3',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_4 = FileField(
+        'Imagen 4',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_4_alt = StringField(
+        'Texto alternativo Imagen 4',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_5 = FileField(
+        'Imagen 5',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_5_alt = StringField(
+        'Texto alternativo Imagen 5',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_6 = FileField(
+        'Imagen 6',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_6_alt = StringField(
+        'Texto alternativo Imagen 6',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_7 = FileField(
+        'Imagen 7',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_7_alt = StringField(
+        'Texto alternativo Imagen 7',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    image_8 = FileField(
+        'Imagen 8',
+        validators=[Optional()],
+        render_kw={
+            'class': 'form-input',
+            'accept': 'image/*'
+        }
+    )
+
+    image_8_alt = StringField(
+        'Texto alternativo Imagen 8',
+        validators=[Optional(), Length(max=255)],
+        render_kw={
+            'placeholder': 'Descripción de la imagen para SEO',
+            'class': 'form-input'
+        }
+    )
+
+    # ===== 7. FINANCIEROS =====
     purchase_cost = DecimalField(
         'Costo de Compra ($)',
         places=2,
@@ -396,7 +660,7 @@ class LaptopForm(FlaskForm):
     # Campo oculto para mostrar el margen (calculado por JavaScript)
     margin_percentage = HiddenField('Margen %')
 
-    # ===== 7. INVENTARIO =====
+    # ===== 8. INVENTARIO =====
     quantity = IntegerField(
         'Cantidad Total',
         validators=[
@@ -440,7 +704,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== UBICACIA“N Y LOGASTICA =====
+    # ===== UBICACIÓN Y LOGÍSTICA =====
     store_id = SelectField(
         'Tienda',
         coerce=int,
@@ -477,7 +741,7 @@ class LaptopForm(FlaskForm):
         }
     )
 
-    # ===== 8. TIMESTAMPS =====
+    # ===== 9. TIMESTAMPS =====
     # entry_date se establece automaticamente en el backend (date.today())
     # sale_date se establece cuando se realiza una venta
 
@@ -575,284 +839,37 @@ class LaptopForm(FlaskForm):
             if field.data >= self.sale_price.data:
                 raise ValidationError('El precio de descuento debe ser menor al precio de venta')
 
+    # Validar que las imágenes sean del tipo correcto
+    def validate_image_1(self, field):
+        self._validate_image_field(field, 'image_1')
 
-class LaptopImageForm(FlaskForm):
-    """Formulario para agregar imagenes a una laptop"""
+    def validate_image_2(self, field):
+        self._validate_image_field(field, 'image_2')
 
-    image = FileField(
-        'Imagen',
-        validators=[
-            DataRequired(message='La imagen es requerida'),
-            FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif'], 'Solo imagenes (jpg, png, webp, gif)')
-        ]
-    )
+    def validate_image_3(self, field):
+        self._validate_image_field(field, 'image_3')
 
-    alt_text = StringField(
-        'Texto Alternativo (SEO)',
-        validators=[Optional(), Length(max=255)],
-        render_kw={
-            'placeholder': 'Descripcion de la imagen para SEO',
-            'class': 'form-input'
-        }
-    )
+    def validate_image_4(self, field):
+        self._validate_image_field(field, 'image_4')
 
-    is_cover = BooleanField(
-        'Es imagen de portada',
-        default=False,
-        render_kw={
-            'class': 'h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded'
-        }
-    )
+    def validate_image_5(self, field):
+        self._validate_image_field(field, 'image_5')
 
-    submit = SubmitField('Subir Imagen')
+    def validate_image_6(self, field):
+        self._validate_image_field(field, 'image_6')
 
+    def validate_image_7(self, field):
+        self._validate_image_field(field, 'image_7')
 
-class QuickSearchForm(FlaskForm):
-    """Formulario de busqueda rapida"""
+    def validate_image_8(self, field):
+        self._validate_image_field(field, 'image_8')
 
-    search = StringField(
-        'Buscar',
-        validators=[Optional()],
-        render_kw={
-            'placeholder': 'Buscar por SKU, nombre, marca, modelo...',
-            'class': 'form-input',
-            'autocomplete': 'off'
-        }
-    )
-
-    submit = SubmitField('Buscar')
-
-
-class FilterForm(FlaskForm):
-    """Formulario de filtros avanzados"""
-
-    store_id = SelectField(
-        'Tienda',
-        coerce=int,
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    brand_id = SelectField(
-        'Marca',
-        coerce=int,
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    category = SelectField(
-        'Categoria',
-        choices=[
-            ('', 'Todas'),
-            ('laptop', ' Laptop'),
-            ('workstation', ' Workstation'),
-            ('gaming', ' Gaming')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    processor_id = SelectField(
-        'Procesador',
-        coerce=int,
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    graphics_card_id = SelectField(
-        'Tarjeta Grafica',
-        coerce=int,
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    screen_id = SelectField(
-        'Pantalla',
-        coerce=int,
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    condition = SelectField(
-        'Condicion',
-        choices=[
-            ('', 'Todas'),
-            ('new', ' Nuevo'),
-            ('used', ' Usado'),
-            ('refurbished', ' Reacondicionado')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    is_published = SelectField(
-        'Estado de Publicacion',
-        choices=[
-            ('', 'Todos'),
-            ('1', 'Publicados'),
-            ('0', 'No publicados')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    is_featured = SelectField(
-        'Destacados',
-        choices=[
-            ('', 'Todos'),
-            ('1', 'Solo destacados'),
-            ('0', 'No destacados')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    supplier_id = SelectField(
-        'Proveedor',
-        coerce=int,
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    min_price = DecimalField(
-        'Precio Minimo',
-        places=2,
-        validators=[Optional(), PositiveOrZero()],
-        render_kw={
-            'placeholder': '0.00',
-            'class': 'form-input',
-            'step': '0.01'
-        }
-    )
-
-    max_price = DecimalField(
-        'Precio Maximo',
-        places=2,
-        validators=[Optional(), PositiveOrZero()],
-        render_kw={
-            'placeholder': '9999.99',
-            'class': 'form-input',
-            'step': '0.01'
-        }
-    )
-
-    has_npu = SelectField(
-        'Tiene NPU',
-        choices=[
-            ('', 'Todos'),
-            ('1', 'Con NPU'),
-            ('0', 'Sin NPU')
-        ],
-        validators=[Optional()],
-        render_kw={'class': 'form-input'}
-    )
-
-    submit = SubmitField('Filtrar', render_kw={'class': 'btn-primary'})
-
-    def __init__(self, *args, **kwargs):
-        super(FilterForm, self).__init__(*args, **kwargs)
-
-        # Cargar tiendas
-        self.store_id.choices = [(0, 'Todas las tiendas')] + [
-            (s.id, s.name) for s in Store.query.filter_by(is_active=True).order_by(Store.name).all()
-        ]
-
-        # Cargar marcas
-        self.brand_id.choices = [(0, 'Todas las marcas')] + [
-            (b.id, b.name) for b in Brand.query.filter_by(is_active=True).order_by(Brand.name).all()
-        ]
-
-        # Cargar procesadores
-        self.processor_id.choices = [(0, 'Todos los procesadores')] + [
-            (p.id, p.name) for p in Processor.query.filter_by(is_active=True).order_by(Processor.name).all()
-        ]
-
-        # Cargar tarjetas graficas
-        self.graphics_card_id.choices = [(0, 'Todas las GPUs')] + [
-            (g.id, g.name) for g in GraphicsCard.query.filter_by(is_active=True).order_by(GraphicsCard.name).all()
-        ]
-
-        # Cargar pantallas
-        self.screen_id.choices = [(0, 'Todas las pantallas')] + [
-            (s.id, s.name) for s in Screen.query.filter_by(is_active=True).order_by(Screen.name).all()
-        ]
-
-        # Cargar proveedores
-        self.supplier_id.choices = [(0, 'Todos los proveedores')] + [
-            (s.id, s.name) for s in Supplier.query.filter_by(is_active=True).order_by(Supplier.name).all()
-        ]
-
-
-class SupplierForm(FlaskForm):
-    """Formulario para gestionar proveedores"""
-
-    name = StringField(
-        'Nombre del Proveedor',
-        validators=[
-            DataRequired(message='El nombre es requerido'),
-            Length(max=100)
-        ],
-        render_kw={
-            'placeholder': 'Nombre de la empresa proveedora',
-            'class': 'form-input'
-        }
-    )
-
-    contact_name = StringField(
-        'Nombre de Contacto',
-        validators=[Optional(), Length(max=100)],
-        render_kw={
-            'placeholder': 'Persona de contacto',
-            'class': 'form-input'
-        }
-    )
-
-    email = StringField(
-        'Email',
-        validators=[Optional(), Length(max=120)],
-        render_kw={
-            'placeholder': 'email@proveedor.com',
-            'class': 'form-input',
-            'type': 'email'
-        }
-    )
-
-    phone = StringField(
-        'Telefono',
-        validators=[Optional(), Length(max=20)],
-        render_kw={
-            'placeholder': '+1 234 567 8900',
-            'class': 'form-input'
-        }
-    )
-
-    address = TextAreaField(
-        'Direccion',
-        validators=[Optional(), Length(max=300)],
-        render_kw={
-            'placeholder': 'Direccion completa',
-            'class': 'form-input',
-            'rows': '2'
-        }
-    )
-
-    website = StringField(
-        'Sitio Web',
-        validators=[Optional(), Length(max=200), URL(message='URL invalida')],
-        render_kw={
-            'placeholder': 'https://www.proveedor.com',
-            'class': 'form-input'
-        }
-    )
-
-    notes = TextAreaField(
-        'Notas',
-        validators=[Optional()],
-        render_kw={
-            'placeholder': 'Notas adicionales sobre el proveedor',
-            'class': 'form-input',
-            'rows': '3'
-        }
-    )
-
-    submit = SubmitField('Guardar Proveedor')
+    def _validate_image_field(self, field, field_name):
+        """Valida un campo de imagen individual"""
+        if field.data:
+            # Verificar extensión del archivo
+            filename = field.data.filename
+            if filename:
+                allowed_extensions = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
+                if not ('.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions):
+                    raise ValidationError('Solo se permiten imágenes (jpg, png, webp, gif)')

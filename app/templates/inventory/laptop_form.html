@@ -66,6 +66,132 @@
     .margin-danger {
         color: #ef4444 !important;
     }
+
+    /* Estilos para galería de imágenes */
+    .image-upload-container {
+        position: relative;
+        border: 2px dashed #d1d5db;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f9fafb;
+    }
+
+    .dark .image-upload-container {
+        border-color: #4b5563;
+        background-color: #1f2937;
+    }
+
+    .image-upload-container:hover {
+        border-color: #6366f1;
+        background-color: #eef2ff;
+    }
+
+    .dark .image-upload-container:hover {
+        border-color: #818cf8;
+        background-color: #312e81;
+    }
+
+    .image-upload-container.has-image {
+        border-style: solid;
+        border-color: #10b981;
+    }
+
+    .image-preview {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        display: none;
+    }
+
+    .image-preview.visible {
+        display: block;
+    }
+
+    .image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 150px;
+        color: #9ca3af;
+    }
+
+    .image-placeholder.hidden {
+        display: none;
+    }
+
+    .image-upload-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .image-number-badge {
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        z-index: 20;
+    }
+
+    .image-number-badge.is-cover {
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    }
+
+    .remove-image-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        background-color: #ef4444;
+        color: white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        transition: all 0.2s ease;
+    }
+
+    .remove-image-btn:hover {
+        background-color: #dc2626;
+        transform: scale(1.1);
+    }
+
+    .remove-image-btn.visible {
+        display: flex;
+    }
+
+    .existing-image-indicator {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background-color: rgba(16, 185, 129, 0.9);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        z-index: 15;
+    }
 </style>
 {% endblock %}
 
@@ -270,6 +396,85 @@
                             {{ form.keyboard_layout.label.text }}
                         </label>
                         {{ form.keyboard_layout(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Galería de Imágenes -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Galería de Imágenes
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    Sube hasta 8 imágenes. La primera imagen será la portada principal. Formatos: JPG, PNG, WebP, GIF.
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {% for i in range(1, 9) %}
+                    <div class="space-y-2">
+                        <!-- Contenedor de imagen -->
+                        <div class="image-upload-container relative {% if mode == 'edit' and laptop and laptop.images.filter_by(ordering=i).first() %}has-image{% endif %}" id="image-container-{{ i }}">
+                            <!-- Badge de número -->
+                            <span class="image-number-badge {% if i == 1 %}is-cover{% endif %}">
+                                {% if i == 1 %}★{% else %}{{ i }}{% endif %}
+                            </span>
+
+                            <!-- Botón eliminar -->
+                            <button type="button" class="remove-image-btn" id="remove-btn-{{ i }}" onclick="removeImage({{ i }})" title="Eliminar imagen">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Preview de imagen -->
+                            <img
+                                id="preview-{{ i }}"
+                                class="image-preview {% if mode == 'edit' and laptop %}{% set existing_img = laptop.images.filter_by(ordering=i).first() %}{% if existing_img %}visible{% endif %}{% endif %}"
+                                src="{% if mode == 'edit' and laptop %}{% set existing_img = laptop.images.filter_by(ordering=i).first() %}{% if existing_img %}{{ url_for('static', filename=existing_img.image_path) }}{% endif %}{% endif %}"
+                                alt="Preview {{ i }}"
+                            >
+
+                            <!-- Placeholder -->
+                            <div class="image-placeholder {% if mode == 'edit' and laptop %}{% set existing_img = laptop.images.filter_by(ordering=i).first() %}{% if existing_img %}hidden{% endif %}{% endif %}" id="placeholder-{{ i }}">
+                                <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                <span class="text-xs">{% if i == 1 %}Portada{% else %}Imagen {{ i }}{% endif %}</span>
+                            </div>
+
+                            <!-- Input file (invisible, cubre todo el contenedor) -->
+                            {{ form['image_' ~ i](class="image-upload-input", id="image_" ~ i, onchange="previewImage(this, " ~ i ~ ")") }}
+
+                            <!-- Indicador de imagen existente -->
+                            {% if mode == 'edit' and laptop %}
+                                {% set existing_img = laptop.images.filter_by(ordering=i).first() %}
+                                {% if existing_img %}
+                                <span class="existing-image-indicator">Guardada</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo de texto alternativo -->
+                        <div>
+                            {{ form['image_' ~ i ~ '_alt'](class="w-full px-2 py-1 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20", placeholder="Texto alt (SEO)", id="image_" ~ i ~ "_alt") }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Nota informativa -->
+                <div class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="text-xs text-amber-700 dark:text-amber-300">
+                            <strong>Consejos:</strong> La imagen ★ será la portada. Usa imágenes de alta calidad (mín. 800x600px).
+                            El texto alternativo mejora el SEO y la accesibilidad.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -489,6 +694,77 @@
 <!-- Scripts separados para mejor organización -->
 <script src="{{ url_for('static', filename='js/laptop_form.js') }}"></script>
 <script src="{{ url_for('static', filename='js/laptop_form_submit.js') }}"></script>
+
+<!-- Funciones para manejo de imágenes -->
+<script>
+// Preview de imagen al seleccionar archivo
+function previewImage(input, index) {
+    var preview = document.getElementById('preview-' + index);
+    var placeholder = document.getElementById('placeholder-' + index);
+    var container = document.getElementById('image-container-' + index);
+    var removeBtn = document.getElementById('remove-btn-' + index);
+
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+
+        // Validar tipo de archivo
+        var validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            alert('Por favor selecciona una imagen válida (JPG, PNG, WebP o GIF)');
+            input.value = '';
+            return;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('La imagen es demasiado grande. Máximo 5MB.');
+            input.value = '';
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.add('visible');
+            placeholder.classList.add('hidden');
+            container.classList.add('has-image');
+            removeBtn.classList.add('visible');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Eliminar imagen seleccionada
+function removeImage(index) {
+    var input = document.getElementById('image_' + index);
+    var preview = document.getElementById('preview-' + index);
+    var placeholder = document.getElementById('placeholder-' + index);
+    var container = document.getElementById('image-container-' + index);
+    var removeBtn = document.getElementById('remove-btn-' + index);
+
+    // Limpiar input
+    input.value = '';
+
+    // Restaurar UI
+    preview.src = '';
+    preview.classList.remove('visible');
+    placeholder.classList.remove('hidden');
+    container.classList.remove('has-image');
+    removeBtn.classList.remove('visible');
+}
+
+// Inicializar estado de botones de eliminar para imágenes existentes
+$(document).ready(function() {
+    // Mostrar botón eliminar para imágenes que ya tienen preview visible
+    for (var i = 1; i <= 8; i++) {
+        var preview = document.getElementById('preview-' + i);
+        var removeBtn = document.getElementById('remove-btn-' + i);
+        if (preview && preview.classList.contains('visible')) {
+            removeBtn.classList.add('visible');
+        }
+    }
+});
+</script>
 
 <!-- Mensajes de error del formulario -->
 <script>
