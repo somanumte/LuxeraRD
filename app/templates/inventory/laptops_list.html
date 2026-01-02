@@ -6,11 +6,11 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Header: Título y Botón Agregar -->
+        <!-- Header: TÃ­tulo y BotÃ³n Agregar -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                    📦 Inventario de Laptops
+                    Inventario de Laptops
                 </h1>
                 <p class="mt-1 text-gray-600 dark:text-gray-400">
                     Gestiona tu inventario de manera eficiente
@@ -27,7 +27,7 @@
             {% endif %}
         </div>
 
-        <!-- Estadísticas Cards -->
+        <!-- EstadÃ­sticas Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Laptops -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
@@ -79,7 +79,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Publicadas</p>
-                        <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{{ stats.published if stats.published is defined else '—' }}</p>
+                        <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{{ stats.published if stats.published is defined else 'â€”' }}</p>
                     </div>
                     <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
                         <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,17 +97,17 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                Filtros de Búsqueda
+                Filtros de BÃºsqueda
             </h3>
 
             <form method="GET" action="{{ url_for('inventory.laptops_list') }}" class="space-y-4">
 
-                <!-- Fila 1: Tienda, Marca, Categoría -->
+                <!-- Fila 1: Tienda, Marca, CategorÃ­a -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Tienda -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            🏪 Tienda
+                            Tienda
                         </label>
                         <select name="store" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="0">Todas las tiendas</option>
@@ -120,7 +120,7 @@
                     <!-- Marca -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            🏷️ Marca
+                            Marca
                         </label>
                         <select name="brand" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="0">Todas las marcas</option>
@@ -130,16 +130,16 @@
                         </select>
                     </div>
 
-                    <!-- Categoría -->
+                    <!-- CategorÃ­a -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            📂 Categoría
+                            ðŸ“‚ CategorÃ­a
                         </label>
                         <select name="category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="">Todas</option>
-                            <option value="laptop" {% if request.args.get('category') == 'laptop' %}selected{% endif %}>💻 Laptop</option>
-                            <option value="workstation" {% if request.args.get('category') == 'workstation' %}selected{% endif %}>💼 Workstation</option>
-                            <option value="gaming" {% if request.args.get('category') == 'gaming' %}selected{% endif %}>🎮 Gaming</option>
+                            <option value="laptop" {% if request.args.get('category') == 'laptop' %}selected{% endif %}>ðŸ’» Laptop</option>
+                            <option value="workstation" {% if request.args.get('category') == 'workstation' %}selected{% endif %}>Workstation</option>
+                            <option value="gaming" {% if request.args.get('category') == 'gaming' %}selected{% endif %}>Gaming</option>
                         </select>
                     </div>
                 </div>
@@ -149,7 +149,7 @@
                     <!-- Procesador -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            ⚡ Procesador
+                            Procesador
                         </label>
                         <select name="processor" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="0">Todos los procesadores</option>
@@ -159,10 +159,10 @@
                         </select>
                     </div>
 
-                    <!-- Tarjeta Gráfica -->
+                    <!-- Tarjeta GrÃ¡fica -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            🎮 Tarjeta Gráfica
+                            ðŸŽ® Tarjeta GrÃ¡fica
                         </label>
                         <select name="gpu" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="0">Todas las GPUs</option>
@@ -175,7 +175,7 @@
                     <!-- Pantalla -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            🖥️ Pantalla
+                            Pantalla
                         </label>
                         <select name="screen" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="0">Todas las pantallas</option>
@@ -186,25 +186,25 @@
                     </div>
                 </div>
 
-                <!-- Fila 3: Condición y Rango de Precio -->
+                <!-- Fila 3: CondiciÃ³n y Rango de Precio -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Condición -->
+                    <!-- CondiciÃ³n -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            📋 Condición
+                            ðŸ“‹ CondiciÃ³n
                         </label>
                         <select name="condition" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                             <option value="">Todas</option>
-                            <option value="new" {% if request.args.get('condition') == 'new' %}selected{% endif %}>✨ Nuevo</option>
-                            <option value="used" {% if request.args.get('condition') == 'used' %}selected{% endif %}>📦 Usado</option>
-                            <option value="refurbished" {% if request.args.get('condition') == 'refurbished' %}selected{% endif %}>♻️ Refurbished</option>
+                            <option value="new" {% if request.args.get('condition') == 'new' %}selected{% endif %}>Nuevo</option>
+                            <option value="used" {% if request.args.get('condition') == 'used' %}selected{% endif %}>Usado</option>
+                            <option value="refurbished" {% if request.args.get('condition') == 'refurbished' %}selected{% endif %}>Refurbished</option>
                         </select>
                     </div>
 
                     <!-- Rango de Precio con Slider -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            💰 Rango de Precio
+                            Rango de Precio
                         </label>
                         <div class="px-2">
                             <!-- Slider Container -->
@@ -213,10 +213,10 @@
                             <!-- Display Values -->
                             <div class="flex justify-between items-center text-sm">
                                 <div class="text-gray-600 dark:text-gray-400">
-                                    Mín: <span id="price-min-display" class="font-semibold text-indigo-600 dark:text-indigo-400">$0</span>
+                                    MÃ­n: <span id="price-min-display" class="font-semibold text-indigo-600 dark:text-indigo-400">$0</span>
                                 </div>
                                 <div class="text-gray-600 dark:text-gray-400">
-                                    Máx: <span id="price-max-display" class="font-semibold text-indigo-600 dark:text-indigo-400">$0</span>
+                                    MÃ¡x: <span id="price-max-display" class="font-semibold text-indigo-600 dark:text-indigo-400">$0</span>
                                 </div>
                             </div>
 
@@ -245,9 +245,8 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SKU</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Laptop</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categoría</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" colspan="2">Laptop</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">CategorÃ­a</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precio</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
@@ -258,48 +257,71 @@
                         {% if laptops %}
                             {% for laptop in laptops %}
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                <!-- SKU -->
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm font-mono text-gray-900 dark:text-gray-100">{{ laptop.sku }}</span>
-                                </td>
+                                <!-- Laptop Info con Imagen -->
+                                <td class="px-6 py-4" colspan="2">
+                                    <div class="flex items-center gap-4">
+                                        <!-- Imagen de portada o placeholder -->
+                                        <div class="flex-shrink-0 h-20 w-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-sm">
+                                            {% set cover_image = laptop.images.filter_by(is_cover=True).first() %}
+                                            {% if not cover_image %}
+                                                {% set cover_image = laptop.images.first() %}
+                                            {% endif %}
 
-                                <!-- Laptop Info -->
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                            </svg>
+                                            {% if cover_image %}
+                                                <img
+                                                    src="{{ url_for('static', filename=cover_image.image_path) }}"
+                                                    alt="{{ cover_image.alt_text or laptop.display_name or (laptop.brand.name ~ ' ' ~ laptop.model.name) }}"
+                                                    class="h-full w-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                    onclick="window.location.href='{{ url_for('inventory.laptop_detail', id=laptop.id) }}'"
+                                                    onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'h-full w-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center\'><svg class=\'w-10 h-10 text-white\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\'></path></svg></div>';"
+                                                >
+                                            {% else %}
+                                                <!-- Placeholder cuando no hay imagen -->
+                                                <div class="h-full w-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ laptop.brand.name if laptop.brand else 'N/A' }} {{ laptop.model.name if laptop.model else 'N/A' }}
+
+                                        <!-- Informacion de la laptop -->
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                                    {{ laptop.brand.name if laptop.brand else 'N/A' }} {{ laptop.model.name if laptop.model else 'N/A' }}
+                                                </h3>
                                             </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            <div>CPU: {{ laptop.processor.name[:30] if laptop.processor else 'N/A' }}</div>
-                                            <div>O.S: {{ laptop.operating_system.name[:30] if laptop.operating_system else 'N/A' }}</div>
-                                            <div>GPU: {{ laptop.graphics_card.name[:30] if laptop.graphics_card else 'N/A' }}</div>
-                                            <div>SSD: {{ laptop.storage.name[:30] if laptop.storage else 'N/A' }}</div>
-                                            <div>RAM: {{ laptop.ram.name[:30] if laptop.ram else 'N/A' }}</div>
-                                            <div>Screen: {{ laptop.screen.name[:30] if laptop.screen else 'N/A' }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                                                <div class="font-mono text-xs">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                        SKU: {{ laptop.sku }}
+                                                    </span>
+                                                </div>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-1">
+                                                    <div class="truncate">CPU: {{ laptop.processor.name[:25] if laptop.processor else 'N/A' }}</div>
+                                                    <div class="truncate">GPU: {{ laptop.graphics_card.name[:25] if laptop.graphics_card else 'N/A' }}</div>
+                                                    <div class="truncate">RAM: {{ laptop.ram.name[:20] if laptop.ram else 'N/A' }}</div>
+                                                    <div class="truncate">SSD: {{ laptop.storage.name[:20] if laptop.storage else 'N/A' }}</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
 
-                                <!-- Categoría -->
+                                <!-- CategorÃ­a -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {% if laptop.category == 'gaming' %}
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                                            🎮 Gaming
+                                            Gaming
                                         </span>
                                     {% elif laptop.category == 'workstation' %}
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                            💼 Workstation
+                                            Workstation
                                         </span>
                                     {% else %}
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                            💻 Laptop
+                                            ðŸ’» Laptop
                                         </span>
                                     {% endif %}
                                 </td>
@@ -334,16 +356,16 @@
                                     <div class="flex flex-col space-y-1">
                                         {% if laptop.is_published %}
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                                                📢 Publicado
+                                                Publicado
                                             </span>
                                         {% else %}
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                📝 Borrador
+                                                Borrador
                                             </span>
                                         {% endif %}
                                         {% if laptop.is_featured %}
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                                                ⭐ Destacado
+                                                Destacado
                                             </span>
                                         {% endif %}
                                     </div>
@@ -384,7 +406,7 @@
                 </table>
             </div>
 
-            <!-- Paginación -->
+            <!-- PaginaciÃ³n -->
             {% if pagination.pages > 1 %}
             <div class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
                 <div class="flex items-center justify-between">
@@ -420,7 +442,7 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/inventory/price-slider.js') }}"></script>
 <script>
-// Inicializar el slider de precios cuando el DOM esté listo
+// Inicializar el slider de precios cuando el DOM estÃ© listo
 document.addEventListener('DOMContentLoaded', function() {
     new PriceSlider({
         dbMinPrice: {{ min_db_price }},
