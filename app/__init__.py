@@ -51,7 +51,10 @@ def create_app(config_name='development'):
     from app.routes.main import main_bp
     from app.routes.inventory import inventory_bp
     from app.routes.api.catalog_api import catalog_api_bp
+    from app.routes.api.customers import customers_bp
 
+
+    app.register_blueprint(customers_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(inventory_bp)
