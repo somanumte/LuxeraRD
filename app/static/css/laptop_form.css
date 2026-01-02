@@ -361,6 +361,53 @@
     background-color: #1f2937;
 }
 
+/* ===== BADGES DE TIPO DE IMAGEN (HÍBRIDO) ===== */
+
+.type-badge {
+    position: absolute;
+    top: 0.625rem;
+    right: 0.625rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.image-card-premium:hover .type-badge {
+    opacity: 1;
+}
+
+.type-badge.existing {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.type-badge.new {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.type-badge i {
+    font-size: 0.625rem;
+}
+
+/* ===== ESTADO DE DRAG ===== */
+
+.image-card-premium.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    cursor: grabbing;
+}
+
 /* Tip tooltip premium */
 .info-icon-container-premium {
     position: relative;
@@ -553,6 +600,33 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.image-card-premium {
+    animation: cardFadeIn 0.3s ease;
+}
+
+/* ===== MEJORAS DE ACCESIBILIDAD ===== */
+
+.image-btn-premium:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+}
+
+.alt-text-input-premium:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+}
+
 /* ===== UTILIDADES ===== */
 .form-input {
     @apply w-full px-4 py-3 rounded-lg border-2 border-gray-300
@@ -594,6 +668,15 @@
     .drag-message-premium {
         padding: 1.5rem;
         margin: 0 1rem;
+    }
+
+    .type-badge {
+        font-size: 0.5rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .type-badge i {
+        font-size: 0.5rem;
     }
 }
 

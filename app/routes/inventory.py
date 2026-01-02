@@ -1,7 +1,7 @@
 # ============================================
 # RUTAS DE INVENTARIO - LAPTOPS
 # ============================================
-# Actualizado al nuevo modelo de datos
+# Actualizado con sistema híbrido de imágenes
 
 import logging
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
@@ -19,6 +19,7 @@ from datetime import datetime, date
 from sqlalchemy import or_
 import re
 import os
+import json
 from werkzeug.utils import secure_filename
 
 # Configurar logging
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 inventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 
 # Configuración de imágenes
+UPLOAD_FOLDER = 'static/uploads/laptops'
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
 
@@ -117,115 +119,191 @@ def allowed_image_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 
-def process_laptop_images(laptop, form, is_edit=False):
+def process_laptop_images(laptop, form):
     """
-    Procesa las imágenes subidas en el formulario
+    Procesa las imágenes del formulario (híbrido: nuevas + existentes)
+
+    Esta función maneja:
+    1. Eliminación de imágenes marcadas (images_to_delete)
+    2. Actualización de imágenes existentes (alt text, orden)
+    3. Guardado de imágenes nuevas
+    4. Asignación de portada
 
     Args:
-        laptop: Objeto Laptop
-        form: Formulario LaptopForm
-        is_edit: Si es edición (True) o creación (False)
+        laptop: Objeto Laptop (debe tener un ID asignado)
+        form: Formulario LaptopForm validado
 
     Returns:
         tuple: (success_count, error_messages)
     """
-    # Lista de campos de imagen
-    image_fields = [
-        ('image_1', 'image_1_alt'),
-        ('image_2', 'image_2_alt'),
-        ('image_3', 'image_3_alt'),
-        ('image_4', 'image_4_alt'),
-        ('image_5', 'image_5_alt'),
-        ('image_6', 'image_6_alt'),
-        ('image_7', 'image_7_alt'),
-        ('image_8', 'image_8_alt'),
-    ]
 
-    # Si es edición, obtener orden máximo actual
-    if is_edit:
-        max_order = db.session.query(db.func.max(LaptopImage.ordering)).filter_by(
-            laptop_id=laptop.id
-        ).scalar() or 0
-    else:
-        max_order = 0
+    logger.info(f"\n{'=' * 60}")
+    logger.info(f"📸 PROCESANDO IMÁGENES PARA LAPTOP ID: {laptop.id}")
+    logger.info(f"{'=' * 60}\n")
 
     success_count = 0
     error_messages = []
 
-    # Procesar cada campo de imagen
-    for idx, (img_field, alt_field) in enumerate(image_fields, start=1):
+    # ===== PASO 1: ELIMINAR IMÁGENES MARCADAS =====
+    images_to_delete_json = request.form.get('images_to_delete', '[]')
+
+    try:
+        images_to_delete = json.loads(images_to_delete_json)
+        logger.info(f"🗑️  Imágenes marcadas para eliminar: {len(images_to_delete)}")
+
+        for image_id in images_to_delete:
+            # Convertir a int si viene como string
+            try:
+                image_id = int(image_id)
+            except (ValueError, TypeError):
+                logger.warning(f"⚠️  ID inválido: {image_id}")
+                continue
+
+            image = LaptopImage.query.get(image_id)
+
+            if image and image.laptop_id == laptop.id:
+                # Eliminar archivo físico
+                image_full_path = os.path.join('app', 'static', image.image_path)
+                if os.path.exists(image_full_path):
+                    try:
+                        os.remove(image_full_path)
+                        logger.info(f"✅ Archivo eliminado: {image.image_path}")
+                    except Exception as e:
+                        logger.error(f"⚠️  Error al eliminar archivo {image.image_path}: {str(e)}")
+
+                # Eliminar registro de BD
+                db.session.delete(image)
+                logger.info(f"✅ Registro eliminado: imagen ID {image_id}")
+            else:
+                logger.warning(f"⚠️  Imagen ID {image_id} no encontrada o no pertenece al laptop")
+
+    except json.JSONDecodeError as e:
+        logger.error(f"⚠️  Error al decodificar images_to_delete: {str(e)}")
+        images_to_delete = []
+
+    # Flush para aplicar eliminaciones antes de continuar
+    db.session.flush()
+
+    # ===== PASO 2: OBTENER IMÁGENES EXISTENTES (que NO fueron eliminadas) =====
+    existing_images = LaptopImage.query.filter_by(laptop_id=laptop.id).all()
+
+    logger.info(f"\n📊 Imágenes existentes en BD después de eliminaciones: {len(existing_images)}")
+
+    # ===== PASO 3: PROCESAR SLOTS DEL FORMULARIO (1-8) =====
+    processed_images = []
+
+    for i in range(1, 9):  # Slots 1-8
         try:
-            image_file = getattr(form, img_field).data
-            alt_text = getattr(form, alt_field).data
+            file = request.files.get(f'image_{i}')
+            alt_text = request.form.get(f'image_{i}_alt', '')
+            image_path = request.form.get(f'image_{i}', '')
 
-            if not image_file or not image_file.filename:
-                continue
+            # CASO A: Archivo nuevo subido
+            if file and file.filename and allowed_image_file(file.filename):
+                logger.info(f"\n➕ SLOT {i}: Nuevo archivo detectado")
+                logger.info(f"   Nombre: {file.filename}")
 
-            # Validar extensión del archivo
-            if not allowed_image_file(image_file.filename):
-                error_msg = f'Imagen {idx}: Formato no permitido. Use JPG, PNG, WebP o GIF.'
-                error_messages.append(error_msg)
-                logger.warning(f'Laptop {laptop.sku}: {error_msg}')
-                continue
+                # Validar extensión del archivo
+                if not allowed_image_file(file.filename):
+                    error_msg = f'Imagen {i}: Formato no permitido. Use JPG, PNG, WebP o GIF.'
+                    error_messages.append(error_msg)
+                    logger.warning(f'Laptop {laptop.sku}: {error_msg}')
+                    continue
 
-            # Validar tamaño del archivo
-            image_file.seek(0, os.SEEK_END)
-            file_size = image_file.tell()
-            image_file.seek(0)  # Volver al inicio para guardar
+                # Validar tamaño del archivo
+                file.seek(0, os.SEEK_END)
+                file_size = file.tell()
+                file.seek(0)  # Volver al inicio para guardar
 
-            if file_size > MAX_IMAGE_SIZE:
-                error_msg = f'Imagen {idx}: Archivo muy grande ({file_size / 1024 / 1024:.1f}MB). Máximo 5MB.'
-                error_messages.append(error_msg)
-                logger.warning(f'Laptop {laptop.sku}: {error_msg}')
-                continue
+                if file_size > MAX_IMAGE_SIZE:
+                    error_msg = f'Imagen {i}: Archivo muy grande ({file_size / 1024 / 1024:.1f}MB). Máximo 5MB.'
+                    error_messages.append(error_msg)
+                    logger.warning(f'Laptop {laptop.sku}: {error_msg}')
+                    continue
 
-            # Generar nombre seguro para el archivo
-            filename = secure_filename(image_file.filename)
-            # Agregar timestamp para evitar colisiones
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"{laptop.sku}_{idx}_{timestamp}_{filename}"
+                # Generar nombre seguro para el archivo
+                filename = secure_filename(file.filename)
+                # Agregar timestamp para evitar colisiones
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                extension = filename.rsplit('.', 1)[1].lower()
+                filename = f"{laptop.sku}_{i}_{timestamp}.{extension}"
 
-            # Crear directorio si no existe
-            upload_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
-            os.makedirs(upload_folder, exist_ok=True)
+                # Crear directorio si no existe
+                upload_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
+                os.makedirs(upload_folder, exist_ok=True)
 
-            # Guardar archivo
-            filepath = os.path.join(upload_folder, filename)
-            image_file.save(filepath)
+                # Guardar archivo
+                filepath = os.path.join(upload_folder, filename)
+                file.save(filepath)
 
-            # Ruta relativa para la base de datos
-            relative_path = f"uploads/laptops/{laptop.id}/{filename}"
+                # Ruta relativa para la base de datos
+                relative_path = f"uploads/laptops/{laptop.id}/{filename}"
 
-            # Determinar si es portada (la primera imagen con archivo)
-            is_cover = False
-            if idx == 1:
-                # Si es la primera imagen, verificar si ya hay una portada
-                existing_cover = LaptopImage.query.filter_by(
+                # Crear registro de imagen
+                image = LaptopImage(
                     laptop_id=laptop.id,
-                    is_cover=True
-                ).first()
-                if not existing_cover:
-                    is_cover = True
+                    image_path=relative_path,
+                    alt_text=alt_text or f"{laptop.display_name} - imagen {i}",
+                    is_cover=False,  # Se asigna después
+                    ordering=i,
+                    position=i
+                )
 
-            # Crear registro de imagen
-            # Nota: position se incluye por compatibilidad con la BD existente
-            image = LaptopImage(
-                laptop_id=laptop.id,
-                image_path=relative_path,
-                alt_text=alt_text or f"{laptop.display_name} - imagen {idx}",
-                is_cover=is_cover,
-                ordering=max_order + idx,
-                position=max_order + idx  # Columna requerida por la BD
-            )
+                db.session.add(image)
+                db.session.flush()  # Para obtener el ID
+                processed_images.append(image)
+                success_count += 1
 
-            db.session.add(image)
-            success_count += 1
-            logger.info(f'Laptop {laptop.sku}: Imagen {idx} guardada correctamente ({filename})')
+                logger.info(f'   ✅ Guardado como: {filename}')
+                logger.info(f'   ✅ Registro creado: ID {image.id}')
+
+            # CASO B: Imagen existente (mantener y actualizar)
+            elif image_path:
+                logger.info(f"\n🔄 SLOT {i}: Verificando imagen existente")
+                logger.info(f"   Path: {image_path[:50]}...")
+
+                # Buscar imagen existente por path
+                existing_img = None
+                for img in existing_images:
+                    if img.image_path == image_path or image_path.endswith(img.image_path):
+                        existing_img = img
+                        break
+
+                if existing_img:
+                    logger.info(f"   ✅ Encontrada: ID {existing_img.id}")
+
+                    # Actualizar metadata
+                    existing_img.alt_text = alt_text or existing_img.alt_text
+                    existing_img.position = i
+                    existing_img.ordering = i
+                    processed_images.append(existing_img)
+
+                    logger.info(
+                        f"   ✅ Actualizada: posición {i}, alt: {alt_text[:30] if alt_text else 'sin cambios'}...")
+                else:
+                    logger.warning(f"   ⚠️  No encontrada en BD")
 
         except Exception as e:
-            error_msg = f'Imagen {idx}: Error al procesar - {str(e)}'
+            error_msg = f'Imagen {i}: Error al procesar - {str(e)}'
             error_messages.append(error_msg)
             logger.error(f'Laptop {laptop.sku}: {error_msg}', exc_info=True)
+
+    # ===== PASO 4: ASIGNAR PORTADA Y POSICIONES FINALES =====
+    logger.info(f"\n👑 Asignando portada y posiciones finales")
+    logger.info(f"   Total imágenes procesadas: {len(processed_images)}")
+
+    # La primera imagen procesada es la portada
+    for idx, img in enumerate(processed_images):
+        img.is_cover = (idx == 0)
+        img.position = idx + 1
+        img.ordering = idx + 1
+
+        if img.is_cover:
+            logger.info(f"   👑 PORTADA: {img.image_path}")
+
+    logger.info(f"\n{'=' * 60}")
+    logger.info(f"✅ PROCESO COMPLETADO")
+    logger.info(f"{'=' * 60}\n")
 
     return success_count, error_messages
 
@@ -458,8 +536,8 @@ def laptop_add():
                 min_alert=form.min_alert.data,
 
                 # Timestamps
-                entry_date=date.today(),  # Fecha automatica de ingreso
-                sale_date=None,  # Se establece cuando se vende
+                entry_date=date.today(),
+                sale_date=None,
                 internal_notes=form.internal_notes.data,
 
                 # Auditoria
@@ -468,10 +546,10 @@ def laptop_add():
 
             # Guardar en base de datos
             db.session.add(laptop)
-            db.session.commit()
+            db.session.flush()  # Para obtener el ID
 
-            # Procesar imágenes si se subieron
-            img_success, img_errors = process_laptop_images(laptop, form, is_edit=False)
+            # Procesar imágenes
+            img_success, img_errors = process_laptop_images(laptop, form)
             db.session.commit()
 
             # Mensaje de éxito
@@ -561,84 +639,6 @@ def laptop_by_slug(slug):
         images=images,
         cover_image=cover_image
     )
-
-
-# ===== ELIMINAR LAPTOP =====
-
-@inventory_bp.route('/<int:id>/delete', methods=['POST'])
-@login_required
-@admin_required
-def laptop_delete(id):
-    """
-    Elimina una laptop del inventario
-    """
-    laptop = Laptop.query.get_or_404(id)
-
-    try:
-        # Obtener y eliminar imágenes asociadas
-        images = laptop.images.all()
-
-        # Eliminar archivos de imágenes del sistema de archivos
-        for image in images:
-            try:
-                filepath = os.path.join('app', 'static', image.image_path)
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-                    logger.info(f'Laptop {laptop.sku}: Imagen eliminada {image.image_path}')
-            except Exception as e:
-                logger.error(f'Error al eliminar imagen {image.image_path}: {str(e)}')
-
-        # Eliminar directorio de imágenes si existe
-        image_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
-        if os.path.exists(image_folder):
-            try:
-                os.rmdir(image_folder)
-                logger.info(f'Laptop {laptop.sku}: Directorio de imágenes eliminado')
-            except Exception as e:
-                logger.error(f'Error al eliminar directorio de imágenes: {str(e)}')
-
-        # Eliminar la laptop de la base de datos
-        db.session.delete(laptop)
-        db.session.commit()
-
-        flash(f'✅ Laptop {laptop.sku} eliminada exitosamente', 'success')
-        return redirect(url_for('inventory.laptops_list'))
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f'Error al eliminar laptop {laptop.sku}: {str(e)}', exc_info=True)
-        flash(f'❌ Error al eliminar laptop: {str(e)}', 'error')
-        return redirect(url_for('inventory.laptop_detail', id=id))
-
-
-# ===== Duplicar LAPTOP =====
-
-@inventory_bp.route('/inventory/<int:id>/duplicate', methods=['POST'])
-@login_required
-def laptop_duplicate(id):
-    original = Laptop.query.get_or_404(id)
-
-    duplicate = Laptop(
-        sku=f"{original.sku}-COPY",
-        display_name=f"{original.display_name} (Copia)",
-        short_description=original.short_description,
-        long_description_html=original.long_description_html,
-        category=original.category,
-        brand_id=original.brand_id,
-        model_id=original.model_id,
-        processor_id=original.processor_id,
-        ram_id=original.ram_id,
-        storage_id=original.storage_id,
-        sale_price=original.sale_price,
-        is_published=False,
-        created_by_id=current_user.id
-    )
-
-    db.session.add(duplicate)
-    db.session.commit()
-
-    flash('Laptop duplicada correctamente', 'success')
-    return redirect(url_for('inventory.laptop_edit', id=duplicate.id))
 
 
 # ===== EDITAR LAPTOP =====
@@ -731,15 +731,11 @@ def laptop_edit(id):
 
             # Notas
             laptop.internal_notes = form.internal_notes.data
-            # entry_date no se modifica (se establecio al crear)
-            # sale_date se establece desde otro proceso cuando se vende
 
             laptop.updated_at = datetime.utcnow()
 
-            db.session.commit()
-
-            # Procesar imágenes si se subieron
-            img_success, img_errors = process_laptop_images(laptop, form, is_edit=True)
+            # Procesar imágenes
+            img_success, img_errors = process_laptop_images(laptop, form)
             db.session.commit()
 
             # Mensaje de éxito
@@ -765,4 +761,87 @@ def laptop_edit(id):
             for error in errors:
                 flash(f'Error en {field}: {error}', 'error')
 
-    return render_template('inventory/laptop_form.html', form=form, mode='edit', laptop=laptop)
+    # IMPORTANTE: Crear diccionario de imágenes por posición para el template
+    images_list = laptop.images.order_by(LaptopImage.ordering).all()
+    images_by_position = {img.position: img for img in images_list}
+
+    return render_template('inventory/laptop_form.html', form=form, mode='edit', laptop=laptop,
+                           images_by_position=images_by_position)
+
+
+# ===== ELIMINAR LAPTOP =====
+
+@inventory_bp.route('/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def laptop_delete(id):
+    """
+    Elimina una laptop del inventario
+    """
+    laptop = Laptop.query.get_or_404(id)
+
+    try:
+        # Obtener y eliminar imágenes asociadas
+        images = laptop.images.all()
+
+        # Eliminar archivos de imágenes del sistema de archivos
+        for image in images:
+            try:
+                filepath = os.path.join('app', 'static', image.image_path)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    logger.info(f'Laptop {laptop.sku}: Imagen eliminada {image.image_path}')
+            except Exception as e:
+                logger.error(f'Error al eliminar imagen {image.image_path}: {str(e)}')
+
+        # Eliminar directorio de imágenes si existe
+        image_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
+        if os.path.exists(image_folder):
+            try:
+                os.rmdir(image_folder)
+                logger.info(f'Laptop {laptop.sku}: Directorio de imágenes eliminado')
+            except Exception as e:
+                logger.error(f'Error al eliminar directorio de imágenes: {str(e)}')
+
+        # Eliminar la laptop de la base de datos
+        db.session.delete(laptop)
+        db.session.commit()
+
+        flash(f'✅ Laptop {laptop.sku} eliminada exitosamente', 'success')
+        return redirect(url_for('inventory.laptops_list'))
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error al eliminar laptop {laptop.sku}: {str(e)}', exc_info=True)
+        flash(f'❌ Error al eliminar laptop: {str(e)}', 'error')
+        return redirect(url_for('inventory.laptop_detail', id=id))
+
+
+# ===== DUPLICAR LAPTOP =====
+
+@inventory_bp.route('/<int:id>/duplicate', methods=['POST'])
+@login_required
+def laptop_duplicate(id):
+    original = Laptop.query.get_or_404(id)
+
+    duplicate = Laptop(
+        sku=f"{original.sku}-COPY",
+        display_name=f"{original.display_name} (Copia)",
+        short_description=original.short_description,
+        long_description_html=original.long_description_html,
+        category=original.category,
+        brand_id=original.brand_id,
+        model_id=original.model_id,
+        processor_id=original.processor_id,
+        ram_id=original.ram_id,
+        storage_id=original.storage_id,
+        sale_price=original.sale_price,
+        is_published=False,
+        created_by_id=current_user.id
+    )
+
+    db.session.add(duplicate)
+    db.session.commit()
+
+    flash('Laptop duplicada correctamente', 'success')
+    return redirect(url_for('inventory.laptop_edit', id=duplicate.id))

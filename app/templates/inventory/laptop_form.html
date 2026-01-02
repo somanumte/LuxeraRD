@@ -40,12 +40,12 @@
             {{ form.hidden_tag() }}
 
             <!-- Card: Informacion del Producto -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700 hidden">
-                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                     <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700 hidden">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
-                 Informacion del Producto
+                    Informacion del Producto
                 </h2>
 
                 <div class="grid grid-cols-1 gap-6">
@@ -213,7 +213,7 @@
                 </div>
             </div>
 
-            <!-- Card: Galería de Imágenes PREMIUM -->
+            <!-- Card: Galería de Imágenes HÍBRIDA -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex justify-between items-start mb-6">
                     <div>
@@ -224,12 +224,16 @@
                             Galería de Imágenes
                         </h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Sube hasta 8 imágenes. La primera imagen será la portada principal. Formatos: JPG, PNG, WebP, GIF.
+                            {% if mode == 'edit' %}
+                            Gestiona las imágenes existentes o agrega nuevas. Máximo 8 imágenes.
+                            {% else %}
+                            Sube hasta 8 imágenes. La primera será la portada. Formatos: JPG, PNG, WebP, GIF.
+                            {% endif %}
                         </p>
                     </div>
 
                     <div class="info-icon-container-premium">
-                        <button class="info-icon-premium" id="info-icon-premium">
+                        <button type="button" class="info-icon-premium" id="info-icon-premium">
                             <i class="fas fa-info-circle"></i>
                         </button>
 
@@ -240,45 +244,41 @@
                             <ul class="tips-list-premium">
                                 <li class="tip-item-premium">
                                     <i class="fas fa-star"></i>
-                                    <span>La primera imagen será la portada principal de tu galería.</span>
+                                    <span>La primera imagen será la portada principal.</span>
                                 </li>
                                 <li class="tip-item-premium">
                                     <i class="fas fa-expand-alt"></i>
-                                    <span>Utiliza imágenes de alta calidad (mínimo 800×600px).</span>
+                                    <span>Usa imágenes de alta calidad (mínimo 800×600px).</span>
                                 </li>
                                 <li class="tip-item-premium">
                                     <i class="fas fa-search"></i>
-                                    <span>El texto alternativo mejora el SEO y la accesibilidad.</span>
+                                    <span>El texto alternativo mejora el SEO y accesibilidad.</span>
                                 </li>
+                                {% if mode == 'edit' %}
+                                <li class="tip-item-premium">
+                                    <i class="fas fa-cloud"></i>
+                                    <span>Badge verde = Ya guardada | Badge azul = Nueva</span>
+                                </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- Área de Drag & Drop PREMIUM -->
+                <!-- Área de Drag & Drop -->
                 <div class="upload-area-premium" id="upload-area-premium">
                     <div class="upload-icon-premium">
                         <i class="fas fa-cloud-upload-alt"></i>
                     </div>
                     <h3 class="upload-title">Arrastra y suelta tus imágenes aquí</h3>
-                    <p class="upload-subtitle">o haz clic en el botón para buscar archivos en tu dispositivo</p>
+                    <p class="upload-subtitle">o haz clic en el botón para buscar archivos</p>
                     <button type="button" class="browse-btn-premium" id="browse-btn-premium">
                         <i class="fas fa-folder-open"></i> Buscar imágenes
                     </button>
 
-                    <!-- Contenedor de imágenes (se llena dinámicamente) -->
+                    <!-- Contenedor del grid (se llena dinámicamente) -->
                     <div class="images-grid-premium" id="images-container-premium">
-                        <!-- Las imágenes se generan dinámicamente aquí -->
-                        {% if mode == 'edit' and laptop.images.count() > 0 %}
-                            {# Las imágenes existentes se cargarán mediante JavaScript #}
-                        {% else %}
-                            <div class="empty-state-premium">
-                                <div class="empty-icon-premium">
-                                    <i class="fas fa-images"></i>
-                                </div>
-                                <div class="empty-text-premium"> </div>
-                            </div>
-                        {% endif %}
+                        <!-- El JavaScript renderizará aquí las tarjetas -->
                     </div>
 
                     <!-- Input para carga múltiple (oculto) -->
@@ -292,38 +292,60 @@
                 <!-- Información de carga -->
                 <div class="upload-info-premium">
                     <div>
-                        <span class="upload-count">Imágenes seleccionadas: <span id="image-counter-premium">0</span>/8</span>
+                        <span class="upload-count">Imágenes: <span id="image-counter-premium">0</span>/8</span>
                     </div>
                     <div class="upload-max">Máximo 8 imágenes</div>
                 </div>
 
-                <!-- Mantener los campos originales del formulario (ocultos pero funcionales) -->
+                <!-- ===== INPUTS ORIGINALES DEL FORMULARIO ===== -->
+                <!-- Estos inputs son manipulados por el componente JavaScript -->
                 <div class="hidden" id="original-form-fields">
                     {% for i in range(1, 9) %}
                     <div class="image-slot-original" data-slot="{{ i }}">
-                        <!-- Input file original (oculto) -->
-                        {{ form['image_' ~ i](
-                            class="hidden original-image-input",
-                            id="image_" ~ i,
-                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                        ) }}
+                        {% if mode == 'edit' %}
+                            {% set img = images_by_position.get(i) %}
+                        {% else %}
+                            {% set img = None %}
+                        {% endif %}
 
-                        <!-- Input alt original (oculto pero necesario para formulario) -->
-                        {{ form['image_' ~ i ~ '_alt'](
-                            class="hidden original-alt-input",
-                            id="image_" ~ i ~ "_alt"
-                        ) }}
+                        <!-- Input file -->
+                        <input type="file"
+                               id="image_{{ i }}"
+                               name="image_{{ i }}"
+                               class="hidden original-image-input"
+                               accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                               {% if img %}
+                               data-image-id="{{ img.id }}"
+                               data-image-url="{{ url_for('static', filename=img.image_path) }}"
+                               data-is-cover="{{ 'true' if img.is_cover else 'false' }}"
+                               value="{{ img.image_path }}"
+                               {% endif %}>
+
+                        <!-- Input alt text -->
+                        <input type="text"
+                               id="image_{{ i }}_alt"
+                               name="image_{{ i }}_alt"
+                               class="hidden original-alt-input"
+                               {% if img %}
+                               value="{{ img.alt_text or '' }}"
+                               {% endif %}>
                     </div>
                     {% endfor %}
+
+                    <!-- Input oculto para IDs de imágenes a eliminar -->
+                    <input type="hidden"
+                           id="images_to_delete"
+                           name="images_to_delete"
+                           value="[]">
                 </div>
             </div>
 
-            <!-- Overlay de arrastre PREMIUM -->
+            <!-- Overlay de arrastre -->
             <div id="drag-overlay-premium" class="drag-overlay-premium">
                 <div class="drag-message-premium">
                     <i class="fas fa-cloud-upload-alt text-4xl text-pink-500 mb-4"></i>
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Suelta las imágenes aquí</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Seleccionaremos hasta 8 imágenes automáticamente</p>
+                    <p class="text-gray-600 dark:text-gray-400">Seleccionaremos hasta 8 automáticamente</p>
                 </div>
             </div>
 
@@ -540,6 +562,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
 <!-- Scripts separados para mejor organización -->
 <script src="{{ url_for('static', filename='js/laptop_form.js') }}"></script>
