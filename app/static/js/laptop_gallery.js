@@ -76,9 +76,8 @@ const LaptopGalleryHybrid = {
                 this.objectUrls.add(imageData.url);
             }
             // CASO 2: Imagen existente en la BD (el input tiene un value o data-image-url)
-            else if (input.value && input.value.trim() !== '') {
-                // El backend debe poner la URL en el atributo data-image-url o en el value
-                const imageUrl = input.getAttribute('data-image-url') || input.value;
+            else if (input.hasAttribute('data-image-url') && input.getAttribute('data-image-url').trim() !== '') {
+                const imageUrl = input.getAttribute('data-image-url');
                 const imageId = input.getAttribute('data-image-id') || i;
 
                 imageData = {
@@ -429,7 +428,7 @@ const LaptopGalleryHybrid = {
             }
             // Para imágenes existentes, mantener el value/data attributes
             else if (imageData.type === 'existing') {
-                input.value = imageData.url;
+                // NO establecer input.value porque es tipo file
                 input.setAttribute('data-image-id', imageData.id);
                 input.setAttribute('data-image-url', imageData.url);
                 input.setAttribute('data-is-cover', imageData.isCover);
