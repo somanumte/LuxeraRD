@@ -17,7 +17,7 @@ from app.models.customer import Customer
 DOMINICAN_PROVINCES = [
     ('', 'Selecciona una provincia'),
     ('Azua', 'Azua'),
-    ('Baoruco', 'Booaoruco'),
+    ('Baoruco', 'Baoruco'),
     ('Barahona', 'Barahona'),
     ('Dajabón', 'Dajabón'),
     ('Distrito Nacional', 'Distrito Nacional'),

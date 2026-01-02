@@ -3,9 +3,11 @@
 # ============================================
 # Maneja las rutas principales de la aplicación
 
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
 from app.models.user import User  # ← LÍNEA AGREGADA
+import os
+
 # ============================================
 # CREAR BLUEPRINT PRINCIPAL
 # ============================================
@@ -38,6 +40,52 @@ def index():
     # Pero lo dejamos así para que pueda ver la landing page
 
     return render_template('index.html')
+
+
+# ============================================
+# RUTA: FAVICON
+# ============================================
+
+@main_bp.route('/favicon.ico')
+def favicon():
+    """
+    Servir el favicon de la aplicación
+
+    URL: /favicon.ico
+
+    Returns:
+        Archivo favicon.ico desde static/
+    """
+    # Nota: main_bp.root_path apunta a la carpeta de routes/main.py
+    # Necesitamos subir un nivel para llegar a app/static/
+    import os
+    static_dir = os.path.join(main_bp.root_path, '..', 'static')
+    return send_from_directory(
+        os.path.abspath(static_dir),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+
+
+# ============================================
+# RUTA: DASHBOARD
+# ============================================
+
+@main_bp.route('/dashboard')
+@login_required
+def dashboard():
+    """
+    Dashboard principal de usuarios autenticados
+
+    URL: /dashboard
+
+    Returns:
+        Template dashboard.html
+    """
+    # Si el usuario es admin, puede redirigir al panel de admin
+    # o mostrar un dashboard diferente
+    return render_template('dashboard.html')
+
 
 # ============================================
 # RUTA: PÁGINA "ACERCA DE"

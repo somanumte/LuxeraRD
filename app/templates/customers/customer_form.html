@@ -12,6 +12,14 @@
         font-size: 0.875rem;
         margin-top: 0.25rem;
     }
+    /* Estilo para campos no editables manualmente */
+    .readonly-field {
+        background-color: #f3f4f6 !important;
+        cursor: not-allowed;
+    }
+    .dark .readonly-field {
+        background-color: #1f2937 !important;
+    }
 </style>
 {% endblock %}
 
@@ -19,7 +27,6 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Header -->
         <div class="mb-8">
             <div class="flex items-center space-x-3 mb-4">
                 <a href="{{ url_for('customers.customers_list') }}" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
@@ -37,33 +44,48 @@
             </div>
         </div>
 
-        <!-- Formulario -->
         <form method="POST" id="customer-form" class="space-y-6">
             {{ form.hidden_tag() }}
 
-            <!-- Card: Tipo de Cliente -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
                     </svg>
-                    Tipo de Cliente
+                    Identificación del Cliente
                 </h2>
 
-                <div class="grid grid-cols-1 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {{ form.id_number.label.text }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.id_number(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20", placeholder="Ingrese solo números", maxlength="13") }}
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="id-helper-text">
+                            Formato automático: 11 dígitos (Cédula) o 9 dígitos (RNC)
+                        </p>
+                        <div id="id-error-message" class="error-message hidden"></div>
+                        {% if form.id_number.errors %}
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.id_number.errors[0] }}</p>
+                        {% endif %}
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.customer_type.label.text }} <span class="text-red-500">*</span>
+                            {{ form.id_type.label.text }}
                         </label>
-                        {{ form.customer_type(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        {% if form.customer_type.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.customer_type.errors[0] }}</p>
-                        {% endif %}
+                        {{ form.id_type(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 readonly-field", readonly=True, tabindex="-1") }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {{ form.customer_type.label.text }}
+                        </label>
+                        {{ form.customer_type(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 readonly-field", readonly=True, tabindex="-1") }}
                     </div>
                 </div>
             </div>
 
-            <!-- Card: Información Personal/Empresa -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +95,6 @@
                 </h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Campos de Persona -->
                     <div id="person-fields">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
@@ -98,7 +119,6 @@
                         </div>
                     </div>
 
-                    <!-- Campo de Empresa -->
                     <div id="company-fields" class="hidden-field md:col-span-2">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
@@ -113,43 +133,6 @@
                 </div>
             </div>
 
-            <!-- Card: Identificación Fiscal -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
-                    </svg>
-                    Identificación Fiscal
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.id_type.label.text }} <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.id_type(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        {% if form.id_type.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.id_type.errors[0] }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.id_number.label.text }} <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.id_number(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20", placeholder="Ingrese solo números") }}
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="id-helper-text">
-                            Formato automático: 11 dígitos (Cédula) o 9 dígitos (RNC)
-                        </p>
-                        <div id="id-error-message" class="error-message hidden"></div>
-                        {% if form.id_number.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.id_number.errors[0] }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card: Contacto -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,8 +180,6 @@
                 </div>
             </div>
 
-            <!-- Resto del formulario se mantiene igual -->
-            <!-- Card: Dirección -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +229,6 @@
                 </div>
             </div>
 
-            <!-- Card: Información Adicional -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- Botones -->
             <div class="flex items-center justify-between">
                 <a href="{{ url_for('customers.customers_list') }}" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold">
                     Cancelar
@@ -318,80 +297,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const phoneErrorMessage = document.getElementById('phone-error-message');
     const customerForm = document.getElementById('customer-form');
 
-    // Función para formatear número de identificación
     function formatIdNumber(value) {
-        // Remover todos los caracteres no numéricos
         const digits = value.replace(/\D/g, '');
-
-        // Formatear según la cantidad de dígitos
         if (digits.length === 11) {
-            // Formato cédula: XXX-XXXXXXX-X
             return digits.replace(/(\d{3})(\d{7})(\d{1})/, '$1-$2-$3');
         } else if (digits.length === 9) {
-            // Formato RNC: XXX-XXXXX-X
             return digits.replace(/(\d{3})(\d{5})(\d{1})/, '$1-$2-$3');
         }
-        // Si no tiene 9 o 11 dígitos, devolver solo dígitos
         return digits;
     }
 
-    // Función para validar y auto-detectar tipo de identificación
     function autoDetectIdType(value) {
         const digits = value.replace(/\D/g, '');
-
         if (digits.length === 11) {
-            // 11 dígitos = Cédula = Cliente Personal
             customerTypeSelect.value = 'person';
             idTypeSelect.value = 'cedula';
             return 'cedula';
         } else if (digits.length === 9) {
-            // 9 dígitos = RNC = Cliente Empresarial
             customerTypeSelect.value = 'company';
             idTypeSelect.value = 'rnc';
             return 'rnc';
         } else if (digits.length > 0 && digits.length !== 11 && digits.length !== 9) {
-            // Longitud incorrecta
-            idErrorMessage.textContent = 'Por favor validar el número de documento. Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
-            idErrorMessage.classList.remove('hidden');
+           idErrorMessage.classList.remove('hidden');
             return null;
         } else {
-            // Campo vacío o longitud válida
             idErrorMessage.classList.add('hidden');
             return null;
         }
     }
 
-    // Función para actualizar campos del formulario
     function updateFormFields() {
         const customerType = customerTypeSelect.value;
         const idType = idTypeSelect.value;
 
-        // Mostrar/ocultar campos según tipo de cliente
         if (customerType === 'person') {
             personFields.classList.remove('hidden-field');
             personFields2.classList.remove('hidden-field');
             companyFields.classList.add('hidden-field');
             infoHeader.textContent = 'Información Personal';
-        } else {
+        } else if (customerType === 'company') {
             personFields.classList.add('hidden-field');
             personFields2.classList.add('hidden-field');
             companyFields.classList.remove('hidden-field');
             infoHeader.textContent = 'Información de la Empresa';
         }
-
-        // Actualizar texto de ayuda según tipo de ID
-        if (idType === 'cedula') {
-            idHelperText.textContent = 'Formato automático: XXX-XXXXXXX-X (11 dígitos)';
-        } else {
-            idHelperText.textContent = 'Formato automático: XXX-XXXXX-X (9 dígitos)';
-        }
     }
 
-    // Función para validar email
     function validateEmail() {
         const email = emailInput.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
         if (!email) {
             emailErrorMessage.textContent = 'El correo electrónico es requerido.';
             emailErrorMessage.classList.remove('hidden');
@@ -406,13 +360,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Función para validar teléfono
     function validatePhone() {
         const phonePrimary = phonePrimaryInput.value.trim();
-        const phoneSecondary = phoneSecondaryInput.value.trim();
-
-        if (!phonePrimary && !phoneSecondary) {
-            phoneErrorMessage.textContent = 'Al menos un número de teléfono es requerido.';
+        if (!phonePrimary) {
+            phoneErrorMessage.textContent = 'El teléfono principal es requerido.';
             phoneErrorMessage.classList.remove('hidden');
             return false;
         } else {
@@ -421,12 +372,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Función para validar formulario completo
     function validateForm() {
         const isEmailValid = validateEmail();
         const isPhoneValid = validatePhone();
-
-        // Validar número de identificación
         const idValue = idNumberInput.value.trim();
         const digits = idValue.replace(/\D/g, '');
         let isIdValid = true;
@@ -436,33 +384,24 @@ document.addEventListener('DOMContentLoaded', function() {
             idErrorMessage.classList.remove('hidden');
             isIdValid = false;
         } else if (digits.length !== 11 && digits.length !== 9) {
-            idErrorMessage.textContent = 'Por favor validar el número de documento. Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
+            idErrorMessage.textContent = 'Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
             idErrorMessage.classList.remove('hidden');
             isIdValid = false;
-        } else {
-            idErrorMessage.classList.add('hidden');
         }
 
         return isEmailValid && isPhoneValid && isIdValid;
     }
 
-    // Event listeners
     idNumberInput.addEventListener('input', function(e) {
         const cursorPosition = e.target.selectionStart;
         const formattedValue = formatIdNumber(e.target.value);
-
-        // Actualizar valor formateado
         e.target.value = formattedValue;
 
-        // Restaurar posición del cursor
         const change = formattedValue.length - e.target.value.length;
         e.target.setSelectionRange(cursorPosition + change, cursorPosition + change);
 
-        // Auto-detectar tipo de identificación
         const detectedType = autoDetectIdType(formattedValue);
-        if (detectedType) {
-            updateFormFields();
-        }
+        updateFormFields();
     });
 
     idNumberInput.addEventListener('blur', function() {
@@ -474,20 +413,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    customerTypeSelect.addEventListener('change', updateFormFields);
-    idTypeSelect.addEventListener('change', updateFormFields);
-
-    // Validación en tiempo real
     emailInput.addEventListener('blur', validateEmail);
     phonePrimaryInput.addEventListener('blur', validatePhone);
-    phoneSecondaryInput.addEventListener('blur', validatePhone);
 
-    // Validación antes de enviar el formulario
     customerForm.addEventListener('submit', function(e) {
         if (!validateForm()) {
             e.preventDefault();
-
-            // Scroll al primer error
             const firstError = document.querySelector('.error-message:not(.hidden)');
             if (firstError) {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -495,15 +426,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Inicializar campos
-    updateFormFields();
-
-    // Si ya hay un valor en el campo de identificación, formatearlo al cargar
+    // Inicialización
     if (idNumberInput.value) {
         idNumberInput.value = formatIdNumber(idNumberInput.value);
         autoDetectIdType(idNumberInput.value);
-        updateFormFields();
     }
+    updateFormFields();
 });
 </script>
 {% endblock %}
