@@ -40,12 +40,12 @@
             {{ form.hidden_tag() }}
 
             <!-- Card: Informacion del Producto -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700 hidden">
+                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                     <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
-                    Informacion del Producto
+                 Informacion del Producto
                 </h2>
 
                 <div class="grid grid-cols-1 gap-6">
@@ -315,19 +315,6 @@
                         ) }}
                     </div>
                     {% endfor %}
-                </div>
-
-                <!-- Nota informativa -->
-                <div class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <div class="flex items-start">
-                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <div class="text-xs text-amber-700 dark:text-amber-300">
-                            <strong>Consejos:</strong> La imagen con ★ será la portada. Usa imágenes de alta calidad (mín. 800×600px).
-                            El texto alternativo mejora el SEO y la accesibilidad. Puedes reordenar imágenes arrastrándolas.
-                        </div>
-                    </div>
                 </div>
             </div>
 
