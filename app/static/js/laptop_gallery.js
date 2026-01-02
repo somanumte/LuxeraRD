@@ -577,24 +577,6 @@ const LaptopGalleryHybrid = {
         });
     },
 
-    // ===== UI HELPERS =====
-
-    showEmptyState: function() {
-        const { imagesContainer } = this.elements;
-        if (!imagesContainer) return;
-
-        imagesContainer.innerHTML = `
-            <div class="empty-state-premium">
-                <div class="empty-icon-premium">
-                    <i class="fas fa-images"></i>
-                </div>
-                <div class="empty-text-premium">
-                    No hay imágenes cargadas. Arrastra y suelta imágenes aquí o haz clic en el botón de arriba.
-                </div>
-            </div>
-        `;
-    },
-
     updateCounter: function() {
         if (this.elements.imageCounter) {
             this.elements.imageCounter.textContent = this.images.length;
