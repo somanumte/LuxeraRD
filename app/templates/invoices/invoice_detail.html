@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Factura {{ invoice.invoice_number }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white; }
+        .print-area { box-shadow: none; border: none; }
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-draft { background-color: #e5e7eb; color: #374151; }
+    .status-issued { background-color: #dbeafe; color: #1e40af; }
+    .status-paid { background-color: #d1fae5; color: #065f46; }
+    .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+    .status-overdue { background-color: #fef3c7; color: #92400e; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="p-6 space-y-6 no-print">
+    <!-- Header con acciones -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                Factura {{ invoice.invoice_number }}
+            </h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                NCF: {{ invoice.ncf }}
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                Imprimir
+            </button>
+            {% if invoice.status == 'draft' %}
+            <a href="{{ url_for('invoices.invoice_edit', invoice_id=invoice.id) }}" 
+               class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Editar
+            </a>
+            {% endif %}
+            <a href="{{ url_for('invoices.invoices_list') }}" 
+               class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
+                Volver
+            </a>
+        </div>
+    </div>
+    
+    <!-- Estado y acciones rápidas -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Estado actual:</span>
+                {% if invoice.is_overdue %}
+                <span class="status-badge status-overdue">Vencida</span>
+                {% elif invoice.status == 'draft' %}
+                <span class="status-badge status-draft">Borrador</span>
+                {% elif invoice.status == 'issued' %}
+                <span class="status-badge status-issued">Emitida</span>
+                {% elif invoice.status == 'paid' %}
+                <span class="status-badge status-paid">Pagada</span>
+                {% elif invoice.status == 'cancelled' %}
+                <span class="status-badge status-cancelled">Cancelada</span>
+                {% endif %}
+            </div>
+            
+            {% if invoice.status != 'cancelled' %}
+            <form method="POST" action="{{ url_for('invoices.invoice_change_status', invoice_id=invoice.id) }}" class="flex gap-2">
+                <select name="status" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                    <option value="draft" {% if invoice.status == 'draft' %}selected{% endif %}>Borrador</option>
+                    <option value="issued" {% if invoice.status == 'issued' %}selected{% endif %}>Emitida</option>
+                    <option value="paid" {% if invoice.status == 'paid' %}selected{% endif %}>Pagada</option>
+                    <option value="cancelled" {% if invoice.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                </select>
+                <button type="submit" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    Cambiar Estado
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Factura Imprimible -->
+<div class="print-area max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <!-- Encabezado de la Empresa -->
+    <div class="border-b-2 border-indigo-600 pb-6 mb-6">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-indigo-600">{{ settings.company_name }}</h1>
+                <p class="text-sm text-gray-600 mt-2">RNC: {{ settings.company_rnc }}</p>
+                <p class="text-sm text-gray-600">{{ settings.company_address }}</p>
+                <p class="text-sm text-gray-600">Tel: {{ settings.company_phone }}</p>
+                {% if settings.company_email %}
+                <p class="text-sm text-gray-600">Email: {{ settings.company_email }}</p>
+                {% endif %}
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold text-gray-900">FACTURA</div>
+                <div class="mt-2 text-sm">
+                    <p><span class="font-semibold">No:</span> {{ invoice.invoice_number }}</p>
+                    <p><span class="font-semibold">NCF:</span> {{ invoice.ncf }}</p>
+                    <p><span class="font-semibold">Fecha:</span> {{ invoice.invoice_date.strftime('%d/%m/%Y') }}</p>
+                    {% if invoice.due_date %}
+                    <p><span class="font-semibold">Vence:</span> {{ invoice.due_date.strftime('%d/%m/%Y') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Información del Cliente -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">FACTURAR A:</h2>
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="font-semibold text-gray-900">{{ invoice.customer.full_name }}</p>
+            <p class="text-sm text-gray-600">{{ invoice.customer.id_type|upper }}: {{ invoice.customer.id_number }}</p>
+            {% if invoice.customer.email %}
+            <p class="text-sm text-gray-600">Email: {{ invoice.customer.email }}</p>
+            {% endif %}
+            {% if invoice.customer.phone_primary %}
+            <p class="text-sm text-gray-600">Tel: {{ invoice.customer.phone_primary }}</p>
+            {% endif %}
+            {% if invoice.customer.full_address != 'Sin dirección' %}
+            <p class="text-sm text-gray-600">{{ invoice.customer.full_address }}</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Items de la Factura -->
+    <div class="mb-8">
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-100 border-b-2 border-gray-300">
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Cant.</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Descripción</th>
+                    <th class="text-right py-3 px-4 font-semibold text-gray-700">Precio Unit.</th>
+                    <th class="text-right py-3 px-4 font-semibold text-gray-700">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in invoice.items.order_by('line_order').all() %}
+                <tr class="border-b border-gray-200">
+                    <td class="py-3 px-4 text-gray-900">{{ item.quantity }}</td>
+                    <td class="py-3 px-4 text-gray-900">
+                        {{ item.description }}
+                        {% if item.laptop %}
+                        <br><span class="text-xs text-gray-500">SKU: {{ item.laptop.sku }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4 text-right text-gray-900">RD$ {{ "{:,.2f}".format(item.unit_price|float) }}</td>
+                    <td class="py-3 px-4 text-right font-semibold text-gray-900">RD$ {{ "{:,.2f}".format(item.line_total|float) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Totales -->
+    <div class="flex justify-end mb-8">
+        <div class="w-64">
+            <div class="flex justify-between py-2 text-gray-700">
+                <span>Subtotal:</span>
+                <span class="font-semibold">RD$ {{ "{:,.2f}".format(invoice.subtotal|float) }}</span>
+            </div>
+            <div class="flex justify-between py-2 text-gray-700">
+                <span>ITBIS (18%):</span>
+                <span class="font-semibold">RD$ {{ "{:,.2f}".format(invoice.tax_amount|float) }}</span>
+            </div>
+            <div class="flex justify-between py-3 border-t-2 border-gray-300 text-lg font-bold text-gray-900">
+                <span>TOTAL:</span>
+                <span>RD$ {{ "{:,.2f}".format(invoice.total|float) }}</span>
+            </div>
+            <div class="flex justify-between py-2 text-sm text-gray-600">
+                <span>Método de Pago:</span>
+                <span class="font-semibold">{{ invoice.payment_method|title }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Términos y Condiciones -->
+    {% if invoice.terms %}
+    <div class="border-t border-gray-300 pt-6 mb-6">
+        <h3 class="font-semibold text-gray-900 mb-2">Términos y Condiciones:</h3>
+        <p class="text-xs text-gray-600 whitespace-pre-line">{{ invoice.terms }}</p>
+    </div>
+    {% endif %}
+    
+    <!-- Notas -->
+    {% if invoice.notes %}
+    <div class="no-print border-t border-gray-300 pt-6">
+        <h3 class="font-semibold text-gray-900 mb-2">Notas Internas:</h3>
+        <p class="text-sm text-gray-600 whitespace-pre-line">{{ invoice.notes }}</p>
+    </div>
+    {% endif %}
+    
+    <!-- Footer -->
+    <div class="border-t border-gray-300 pt-6 text-center text-xs text-gray-500">
+        <p>Válido hasta: {{ settings.ncf_valid_until.strftime('%d/%m/%Y') if settings.ncf_valid_until else 'N/A' }}</p>
+        <p class="mt-2">Gracias por su preferencia</p>
+    </div>
+</div>
+
+<!-- Acciones adicionales (no imprimibles) -->
+<div class="no-print max-w-4xl mx-auto mt-6 flex justify-end gap-2">
+    {% if invoice.status == 'draft' %}
+    <form method="POST" action="{{ url_for('invoices.invoice_delete', invoice_id=invoice.id) }}" 
+          onsubmit="return confirm('¿Estás seguro de eliminar esta factura?')">
+        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+            Eliminar Factura
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

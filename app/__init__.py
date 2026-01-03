@@ -52,6 +52,7 @@ def create_app(config_name='development'):
     from app.routes.inventory import inventory_bp
     from app.routes.api.catalog_api import catalog_api_bp
     from app.routes.api.customers import customers_bp
+    from app.routes.invoices import invoices_bp  # ← NUEVA LÍNEA
 
 
     app.register_blueprint(customers_bp)
@@ -59,6 +60,7 @@ def create_app(config_name='development'):
     app.register_blueprint(main_bp)
     app.register_blueprint(inventory_bp)
     app.register_blueprint(catalog_api_bp)
+    app.register_blueprint(invoices_bp)  # ← NUEVA LÍNEA
 
     # Registrar manejadores de errores
     from app.routes.main import register_error_handlers
@@ -103,6 +105,7 @@ def register_cli_commands(app):
     """
     Registra todos los comandos CLI personalizados
     """
+    from app.models.invoice import Invoice, InvoiceItem, InvoiceSettings
     from app.models.user import User
     from app.models.laptop import (
         Laptop, LaptopImage, Brand, LaptopModel, Processor,

@@ -16,3 +16,90 @@
 2025-12-27 00:34:31,064 INFO: Luxera startup [in C:\Users\felix\PycharmProjects\Luxera\app\__init__.py:83]
 2025-12-27 00:35:17,161 INFO: Luxera startup [in C:\Users\felix\PycharmProjects\Luxera\app\__init__.py:83]
 2025-12-27 00:35:46,715 INFO: Luxera startup [in C:\Users\felix\PycharmProjects\Luxera\app\__init__.py:83]
+2026-01-02 19:16:29,484 INFO: Luxera startup [in C:\Users\felix\PycharmProjects\Luxera\app\__init__.py:102]
+2026-01-02 19:16:31,936 ERROR: Exception on /customers/add [GET] [in C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py:825]
+Traceback (most recent call last):
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask_login\utils.py", line 284, in decorated_view
+    elif not current_user.is_authenticated:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\werkzeug\local.py", line 311, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\werkzeug\local.py", line 515, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask_login\utils.py", line 370, in _get_user
+    current_app.login_manager._load_user()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Flask' object has no attribute 'login_manager'
+2026-01-02 19:18:18,074 ERROR: Exception on /about [GET] [in C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py:825]
+Traceback (most recent call last):
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\felix\PycharmProjects\Luxera\app\routes\main.py", line 107, in about
+    return render_template('about.html')
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\felix\PycharmProjects\Luxera\app\templates\about.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "C:\Users\felix\PycharmProjects\Luxera\app\templates\base.html", line 289, in top-level template code
+    {% if current_user.is_authenticated %}
+    ^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\jinja2\environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'current_user' is undefined
+2026-01-02 19:18:31,012 ERROR: Exception on / [GET] [in C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py:825]
+Traceback (most recent call last):
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\felix\PycharmProjects\Luxera\app\routes\main.py", line 42, in index
+    return render_template('index.html')
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\felix\PycharmProjects\Luxera\app\templates\index.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "C:\Users\felix\PycharmProjects\Luxera\app\templates\base.html", line 289, in top-level template code
+    {% if current_user.is_authenticated %}
+    ^
+  File "C:\Users\felix\PycharmProjects\Luxera\.venv\Lib\site-packages\jinja2\environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'current_user' is undefined

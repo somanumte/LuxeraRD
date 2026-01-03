@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Editar Factura{% else %}Nueva Factura{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .item-row {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .dark .item-row {
+        background: #374151;
+        border-color: #4b5563;
+    }
+    .autocomplete-dropdown {
+        position: absolute;
+        z-index: 50;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+    }
+    .dark .autocomplete-dropdown {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    .autocomplete-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .dark .autocomplete-item {
+        border-color: #374151;
+    }
+    .autocomplete-item:hover {
+        background: #f3f4f6;
+    }
+    .dark .autocomplete-item:hover {
+        background: #374151;
+    }
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                    {% if is_edit %}Editar Factura{% else %}Nueva Factura{% endif %}
+                </h1>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    {% if is_edit %}
+                    Modifica los detalles de la factura
+                    {% else %}
+                    Crea una nueva factura para tus clientes
+                    {% endif %}
+                </p>
+            </div>
+            <a href="{{ url_for('invoices.invoices_list') }}" 
+               class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                Cancelar
+            </a>
+        </div>
+    </div>
+
+    <form id="invoiceForm" method="POST" action="{% if is_edit %}{{ url_for('invoices.invoice_update', invoice_id=invoice.id) }}{% else %}{{ url_for('invoices.invoice_create') }}{% endif %}">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Formulario Principal (2/3) -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Información del Cliente -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información del Cliente</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Cliente -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Cliente <span class="text-red-500">*</span>
+                            </label>
+                            <select name="customer_id" 
+                                    id="customer_id" 
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    {% if is_edit %}disabled{% endif %}>
+                                <option value="">Seleccione un cliente...</option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.id }}" 
+                                        {% if invoice and invoice.customer_id == customer.id %}selected{% endif %}
+                                        data-rnc="{{ customer.id_number }}"
+                                        data-email="{{ customer.email or '' }}"
+                                        data-phone="{{ customer.phone_primary or '' }}">
+                                    {{ customer.full_name }} - {{ customer.id_number }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                ¿No encuentras el cliente? 
+                                <a href="{{ url_for('customers.customers_list') }}" target="_blank" class="text-indigo-600 hover:text-indigo-700">
+                                    Ir a Clientes
+                                </a>
+                            </p>
+                        </div>
+
+                        <!-- Info Cliente Seleccionado -->
+                        <div id="customer_info" class="md:col-span-2 hidden">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+                                <div class="flex items-center text-sm">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300 w-24">RNC/Cédula:</span>
+                                    <span id="customer_rnc" class="text-gray-900 dark:text-white"></span>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300 w-24">Email:</span>
+                                    <span id="customer_email" class="text-gray-900 dark:text-white"></span>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300 w-24">Teléfono:</span>
+                                    <span id="customer_phone" class="text-gray-900 dark:text-white"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items de la Factura -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Items de la Factura</h2>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="addLaptopItem()" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                + Agregar Laptop
+                            </button>
+                            <button type="button" onclick="addCustomItem()" class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                                + Item Personalizado
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="items_container" class="space-y-3">
+                        <!-- Items se agregan dinámicamente aquí -->
+                    </div>
+
+                    <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                        Los items de tipo "Laptop" se vincularán automáticamente al inventario
+                    </p>
+                </div>
+            </div>
+
+            <!-- Panel Derecho (1/3) -->
+            <div class="space-y-6">
+                <!-- Detalles de la Factura -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Detalles</h2>
+
+                    <div class="space-y-4">
+                        <!-- Fecha Emisión -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Fecha de Emisión
+                            </label>
+                            <input type="date"
+                                   name="invoice_date"
+                                   value="{% if invoice %}{{ invoice.invoice_date }}{% else %}{{ today }}{% endif %}"
+                                   required
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        </div>
+
+                        <!-- Fecha Vencimiento -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Fecha de Vencimiento
+                            </label>
+                            <input type="date"
+                                   name="due_date"
+                                   value="{% if invoice and invoice.due_date %}{{ invoice.due_date }}{% endif %}"
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        </div>
+
+                        <!-- Método de Pago -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Método de Pago
+                            </label>
+                            <select name="payment_method"
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <option value="cash" {% if invoice and invoice.payment_method == 'cash' %}selected{% endif %}>Efectivo</option>
+                                <option value="card" {% if invoice and invoice.payment_method == 'card' %}selected{% endif %}>Tarjeta</option>
+                                <option value="transfer" {% if invoice and invoice.payment_method == 'transfer' %}selected{% endif %}>Transferencia</option>
+                                <option value="credit" {% if invoice and invoice.payment_method == 'credit' %}selected{% endif %}>Crédito</option>
+                            </select>
+                        </div>
+
+                        <!-- Estado -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Estado
+                            </label>
+                            <select name="status"
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <option value="draft" {% if not invoice or invoice.status == 'draft' %}selected{% endif %}>Borrador</option>
+                                <option value="issued" {% if invoice and invoice.status == 'issued' %}selected{% endif %}>Emitida</option>
+                                <option value="paid" {% if invoice and invoice.status == 'paid' %}selected{% endif %}>Pagada</option>
+                                <option value="cancelled" {% if invoice and invoice.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Totales -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Totales</h2>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Subtotal:</span>
+                            <span id="subtotal_display" class="font-medium text-gray-900 dark:text-white">RD$ 0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">ITBIS (18%):</span>
+                            <span id="tax_display" class="font-medium text-gray-900 dark:text-white">RD$ 0.00</span>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between">
+                            <span class="text-base font-semibold text-gray-900 dark:text-white">Total:</span>
+                            <span id="total_display" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">RD$ 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas y Términos -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información Adicional</h2>
+
+                    <div class="space-y-4">
+                        <!-- Notas -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Notas Internas
+                            </label>
+                            <textarea name="notes"
+                                      rows="3"
+                                      placeholder="Notas o comentarios internos..."
+                                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">{% if invoice %}{{ invoice.notes }}{% endif %}</textarea>
+                        </div>
+
+                        <!-- Términos -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Términos y Condiciones
+                            </label>
+                            <textarea name="terms"
+                                      rows="4"
+                                      placeholder="Términos y condiciones de la factura..."
+                                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">{% if invoice and invoice.terms %}{{ invoice.terms }}{% else %}{{ settings.default_terms }}{% endif %}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="space-y-3">
+                    <button type="submit" class="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition-colors">
+                        {% if is_edit %}Actualizar Factura{% else %}Crear Factura{% endif %}
+                    </button>
+                    <a href="{{ url_for('invoices.invoices_list') }}"
+                       class="block w-full px-4 py-3 text-center bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-colors">
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+let itemCounter = 0;
+const laptops = {{ laptops|tojson }};
+
+// Inicializar fecha de hoy
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const invoiceDateInput = document.querySelector('input[name="invoice_date"]');
+    if (!invoiceDateInput.value) {
+        invoiceDateInput.value = today;
+    }
+
+    // Mostrar info del cliente cuando se selecciona
+    document.getElementById('customer_id').addEventListener('change', function() {
+        const select = this;
+        const option = select.options[select.selectedIndex];
+        const infoDiv = document.getElementById('customer_info');
+
+        if (option.value) {
+            document.getElementById('customer_rnc').textContent = option.dataset.rnc || 'N/A';
+            document.getElementById('customer_email').textContent = option.dataset.email || 'N/A';
+            document.getElementById('customer_phone').textContent = option.dataset.phone || 'N/A';
+            infoDiv.classList.remove('hidden');
+        } else {
+            infoDiv.classList.add('hidden');
+        }
+    });
+
+    // Si estamos editando, cargar los items existentes
+    {% if invoice and invoice.items %}
+    {% for item in invoice.items.all() %}
+    {% if item.item_type == 'laptop' %}
+    addLaptopItem({{ item.laptop_id or 'null' }}, '{{ item.description }}', {{ item.quantity }}, {{ item.unit_price }});
+    {% else %}
+    addCustomItem('{{ item.description }}', {{ item.quantity }}, {{ item.unit_price }});
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    // Trigger customer info display if editing
+    {% if invoice %}
+    document.getElementById('customer_id').dispatchEvent(new Event('change'));
+    {% endif %}
+
+    calculateTotals();
+});
+
+function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 0) {
+    const container = document.getElementById('items_container');
+    const itemId = itemCounter++;
+
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'item-row';
+    itemDiv.id = `item_${itemId}`;
+
+    itemDiv.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="flex-1 grid grid-cols-12 gap-3">
+                <div class="col-span-5">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Laptop</label>
+                    <select class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                            onchange="updateLaptopDetails(${itemId}, this.value)">
+                        <option value="">Seleccionar laptop...</option>
+                        ${laptops.map(l => `
+                            <option value="${l.id}"
+                                    data-name="${l.display_name}"
+                                    data-price="${l.sale_price}"
+                                    data-qty="${l.quantity}"
+                                    ${laptopId == l.id ? 'selected' : ''}>
+                                ${l.display_name} - RD$ ${parseFloat(l.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} (Stock: ${l.quantity})
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="col-span-4">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                    <input type="text"
+                           id="desc_${itemId}"
+                           value="${description}"
+                           placeholder="Descripción adicional..."
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                </div>
+                <div class="col-span-1">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cant.</label>
+                    <input type="number"
+                           id="qty_${itemId}"
+                           value="${quantity}"
+                           min="1"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                           onchange="calculateTotals()">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Unit.</label>
+                    <input type="number"
+                           id="price_${itemId}"
+                           value="${price}"
+                           step="0.01"
+                           min="0"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                           onchange="calculateTotals()">
+                </div>
+            </div>
+            <button type="button" onclick="removeItem(${itemId})" class="mt-6 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
+        </div>
+        <input type="hidden" id="laptop_id_${itemId}" value="${laptopId || ''}">
+        <input type="hidden" id="type_${itemId}" value="laptop">
+    `;
+
+    container.appendChild(itemDiv);
+    calculateTotals();
+}
+
+function addCustomItem(description = '', quantity = 1, price = 0) {
+    const container = document.getElementById('items_container');
+    const itemId = itemCounter++;
+
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'item-row';
+    itemDiv.id = `item_${itemId}`;
+
+    itemDiv.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="flex-1 grid grid-cols-12 gap-3">
+                <div class="col-span-7">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                    <input type="text"
+                           id="desc_${itemId}"
+                           value="${description}"
+                           placeholder="Descripción del producto o servicio..."
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad</label>
+                    <input type="number"
+                           id="qty_${itemId}"
+                           value="${quantity}"
+                           min="1"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                           onchange="calculateTotals()">
+                </div>
+                <div class="col-span-3">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Unitario</label>
+                    <input type="number"
+                           id="price_${itemId}"
+                           value="${price}"
+                           step="0.01"
+                           min="0"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                           onchange="calculateTotals()">
+                </div>
+            </div>
+            <button type="button" onclick="removeItem(${itemId})" class="mt-6 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
+        </div>
+        <input type="hidden" id="type_${itemId}" value="custom">
+    `;
+
+    container.appendChild(itemDiv);
+    calculateTotals();
+}
+
+function updateLaptopDetails(itemId, laptopId) {
+    if (!laptopId) return;
+
+    const laptop = laptops.find(l => l.id == laptopId);
+    if (laptop) {
+        document.getElementById(`desc_${itemId}`).value = laptop.display_name;
+        document.getElementById(`price_${itemId}`).value = laptop.sale_price;
+        document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
+        calculateTotals();
+    }
+}
+
+function removeItem(itemId) {
+    const item = document.getElementById(`item_${itemId}`);
+    if (item) {
+        item.remove();
+        calculateTotals();
+    }
+}
+
+function calculateTotals() {
+    let subtotal = 0;
+
+    // Recorrer todos los items
+    document.querySelectorAll('[id^="item_"]').forEach(item => {
+        const itemId = item.id.split('_')[1];
+        const qty = parseFloat(document.getElementById(`qty_${itemId}`).value) || 0;
+        const price = parseFloat(document.getElementById(`price_${itemId}`).value) || 0;
+        subtotal += qty * price;
+    });
+
+    const tax = subtotal * 0.18;
+    const total = subtotal + tax;
+
+    // Actualizar displays
+    document.getElementById('subtotal_display').textContent = `RD$ ${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('tax_display').textContent = `RD$ ${tax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('total_display').textContent = `RD$ ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+}
+
+// Interceptar el submit del formulario para agregar los items como JSON
+document.getElementById('invoiceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const items = [];
+    document.querySelectorAll('[id^="item_"]').forEach(item => {
+        const itemId = item.id.split('_')[1];
+        const type = document.getElementById(`type_${itemId}`).value;
+        const description = document.getElementById(`desc_${itemId}`).value.trim();
+        const quantity = parseInt(document.getElementById(`qty_${itemId}`).value) || 0;
+        const price = parseFloat(document.getElementById(`price_${itemId}`).value) || 0;
+
+        if (description && quantity > 0 && price > 0) {
+            const itemData = {
+                type: type,
+                description: description,
+                quantity: quantity,
+                price: price
+            };
+
+            if (type === 'laptop') {
+                const laptopId = document.getElementById(`laptop_id_${itemId}`).value;
+                if (laptopId) {
+                    itemData.laptop_id = laptopId;
+                }
+            }
+
+            items.push(itemData);
+        }
+    });
+
+    if (items.length === 0) {
+        alert('Debes agregar al menos un item a la factura');
+        return;
+    }
+
+    // Agregar los items como inputs hidden en formato JSON
+    items.forEach(item => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'items';
+        input.value = JSON.stringify(item);
+        this.appendChild(input);
+    });
+
+    // Ahora sí enviar el formulario
+    this.submit();
+});
+</script>
+{% endblock %}

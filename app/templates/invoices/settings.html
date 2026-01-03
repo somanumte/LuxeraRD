@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración de Facturación{% endblock %}
+
+{% block content %}
+<div class="p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Configuración de Facturación</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Configura la información de tu empresa y los parámetros de facturación
+            </p>
+        </div>
+        <a href="{{ url_for('invoices.invoices_list') }}" 
+           class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            Volver
+        </a>
+    </div>
+    
+    <form method="POST" action="{{ url_for('invoices.settings_update') }}">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Información de la Empresa -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información de la Empresa</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nombre de la Empresa <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="company_name" 
+                               value="{{ settings.company_name }}"
+                               required
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            RNC de la Empresa
+                        </label>
+                        <input type="text" 
+                               name="company_rnc" 
+                               value="{{ settings.company_rnc or '' }}"
+                               placeholder="000-0000000-0"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Dirección
+                        </label>
+                        <textarea name="company_address" 
+                                  rows="3"
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">{{ settings.company_address or '' }}</textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Teléfono
+                        </label>
+                        <input type="text" 
+                               name="company_phone" 
+                               value="{{ settings.company_phone or '' }}"
+                               placeholder="(809) 000-0000"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Email
+                        </label>
+                        <input type="email" 
+                               name="company_email" 
+                               value="{{ settings.company_email or '' }}"
+                               placeholder="contacto@empresa.com"
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configuración de NCF y Numeración -->
+            <div class="space-y-6">
+                <!-- NCF -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Configuración de NCF</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Prefijo NCF <span class="text-red-500">*</span>
+                            </label>
+                            <select name="ncf_prefix" 
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <option value="B01" {% if settings.ncf_prefix == 'B01' %}selected{% endif %}>B01 - Crédito Fiscal</option>
+                                <option value="B02" {% if settings.ncf_prefix == 'B02' %}selected{% endif %}>B02 - Consumo</option>
+                                <option value="B14" {% if settings.ncf_prefix == 'B14' %}selected{% endif %}>B14 - Regímenes Especiales</option>
+                                <option value="B15" {% if settings.ncf_prefix == 'B15' %}selected{% endif %}>B15 - Gubernamental</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Tipo de comprobante fiscal según DGII
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Próximo NCF
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" 
+                                       value="{{ settings.ncf_prefix }}"
+                                       disabled
+                                       class="w-20 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
+                                <input type="text" 
+                                       value="{{ '{:08d}'.format(settings.ncf_sequence) }}"
+                                       disabled
+                                       class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Próximo: {{ settings.ncf_prefix }}{{ '{:08d}'.format(settings.ncf_sequence) }}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                NCF Válido Hasta
+                            </label>
+                            <input type="date" 
+                                   name="ncf_valid_until" 
+                                   value="{% if settings.ncf_valid_until %}{{ settings.ncf_valid_until }}{% endif %}"
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Fecha de vencimiento de la secuencia de NCF
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Numeración de Facturas -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Numeración de Facturas</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Prefijo de Factura
+                            </label>
+                            <input type="text" 
+                                   name="invoice_prefix" 
+                                   value="{{ settings.invoice_prefix }}"
+                                   maxlength="10"
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Ejemplo: INV, FACT, etc.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Próximo Número
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" 
+                                       value="{{ settings.invoice_prefix }}-"
+                                       disabled
+                                       class="w-24 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
+                                <input type="text" 
+                                       value="{{ '{:08d}'.format(settings.invoice_sequence) }}"
+                                       disabled
+                                       class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Próxima: {{ settings.invoice_prefix }}-{{ '{:08d}'.format(settings.invoice_sequence) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Términos y Condiciones por Defecto -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Términos y Condiciones por Defecto</h2>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Texto de Términos y Condiciones
+                    </label>
+                    <textarea name="default_terms" 
+                              rows="6"
+                              placeholder="Ej: Esta factura deberá ser pagada en un plazo de 30 días..."
+                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">{{ settings.default_terms or '' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Estos términos aparecerán automáticamente en todas las nuevas facturas
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botones de Acción -->
+        <div class="flex justify-end gap-3 mt-6">
+            <a href="{{ url_for('invoices.invoices_list') }}" 
+               class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold">
+                Cancelar
+            </a>
+            <button type="submit" 
+                    class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold">
+                Guardar Configuración
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

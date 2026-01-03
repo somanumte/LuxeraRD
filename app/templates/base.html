@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="LuxeraRD - Sistema de gestión de inventario de laptops">
+    <meta name="description" content="LuxeraRD - Sistema de gestiÃ³n de inventario de laptops">
     <title>{% block title %}LuxeraRD{% endblock %} - LuxeraRD</title>
 
     <!-- Tailwind CSS -->
@@ -304,6 +304,14 @@
                             <span>Inventario</span>
                         </a>
 
+                        <!-- Facturas - NUEVO -->
+                        <a href="{{ url_for('invoices.invoices_list') }}" class="nav-link {% if request.endpoint and 'invoices' in request.endpoint %}active{% endif %}">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Facturas</span>
+                        </a>
+
                         <!-- Clientes -->
                         <a href="{{ url_for('customers.customers_list') }}" class="nav-link {% if request.endpoint and 'customers' in request.endpoint %}active{% endif %}">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,7 +326,7 @@
                         <!-- Admin Section -->
                         {% if current_user.is_admin %}
                         <div class="px-3 mb-2">
-                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Administración</p>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">AdministraciÃ³n</p>
                         </div>
 
                         <a href="{{ url_for('main.admin_panel') }}" class="nav-link {% if request.endpoint == 'main.admin_panel' %}active{% endif %}">
@@ -326,7 +334,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span>Configuración</span>
+                            <span>ConfiguraciÃ³n</span>
                         </a>
 
                         <a href="{{ url_for('main.admin_users') }}" class="nav-link {% if request.endpoint == 'main.admin_users' %}active{% endif %}">
@@ -401,7 +409,7 @@
 
                                 <!-- Logout -->
                                 <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar SesiÃ³n
                                 </a>
                             </div>
                         </div>
@@ -410,7 +418,7 @@
                     <!-- Auth Links -->
                     <div class="space-y-2">
                         <a href="{{ url_for('auth.login') }}" class="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                            Iniciar Sesión
+                            Iniciar SesiÃ³n
                         </a>
                         <a href="{{ url_for('auth.register') }}" class="block w-full text-center px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                             Registrarse
@@ -486,7 +494,7 @@
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                © {{ now.year if now else '2025' }} LuxeraRD. Todos los derechos reservados.
+                                Â© {{ now.year if now else '2025' }} LuxeraRD. Todos los derechos reservados.
                             </p>
                             <div class="flex space-x-6 mt-4 md:mt-0">
                                 <a href="{{ url_for('main.about') }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Acerca de</a>
