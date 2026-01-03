@@ -325,7 +325,13 @@ const recentCustomers = [...allCustomers]
     .sort((a, b) => b.id - a.id)
     .slice(0, 10);
 
-let searchTimeout = null;
+// Obtener los últimos 10 laptops creados
+const recentLaptops = [...laptops]
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 10);
+
+let customerSearchTimeout = null;
+let laptopSearchTimeouts = {};
 
 // Funciones para el buscador de clientes
 function focusCustomerSearch() {
@@ -346,7 +352,7 @@ function filterCustomers(searchTerm) {
         return fullName.includes(searchLower) ||
                idNumber.includes(searchLower) ||
                email.includes(searchLower);
-    }).slice(0, 10); // Limitar a 10 resultados
+    }).slice(0, 10);
 }
 
 function displayCustomerResults(results, isRecent = false) {
@@ -436,6 +442,152 @@ function selectCustomer(customer) {
     emptyState.classList.add('hidden');
 }
 
+// Funciones para el buscador de laptops
+function filterLaptops(searchTerm, itemId) {
+    const searchLower = searchTerm.toLowerCase().trim();
+    if (searchLower.length < 2) {
+        return [];
+    }
+
+    return laptops.filter(laptop => {
+        const displayName = laptop.display_name.toLowerCase();
+        const brand = laptop.brand ? laptop.brand.toLowerCase() : '';
+        const model = laptop.model ? laptop.model.toLowerCase() : '';
+        const processor = laptop.processor ? laptop.processor.toLowerCase() : '';
+
+        return displayName.includes(searchLower) ||
+               brand.includes(searchLower) ||
+               model.includes(searchLower) ||
+               processor.includes(searchLower);
+    }).slice(0, 10);
+}
+
+function displayLaptopResults(itemId, results, isRecent = false) {
+    const resultsContainer = document.getElementById(`laptop_results_list_${itemId}`);
+    const resultsDropdown = document.getElementById(`laptop_results_${itemId}`);
+
+    if (results.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                No se encontraron laptops
+            </div>
+        `;
+        resultsDropdown.classList.remove('hidden');
+        return;
+    }
+
+    resultsContainer.innerHTML = '';
+
+    // Agregar título si son laptops recientes
+    if (isRecent && results.length > 0) {
+        const titleElement = document.createElement('div');
+        titleElement.className = 'px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600';
+        titleElement.innerHTML = `
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Laptops recientes
+            </div>
+            <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                Los últimos 10 laptops creados
+            </div>
+        `;
+        resultsContainer.appendChild(titleElement);
+    }
+
+    results.forEach(laptop => {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0';
+        resultItem.innerHTML = `
+            <div class="font-medium text-gray-900 dark:text-white">${laptop.display_name}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                ${laptop.brand || 'Sin marca'} • ${laptop.model || 'Sin modelo'} • RD$ ${parseFloat(laptop.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} • Stock: ${laptop.quantity}
+            </div>
+        `;
+
+        resultItem.addEventListener('click', () => {
+            selectLaptop(itemId, laptop);
+        });
+
+        resultsContainer.appendChild(resultItem);
+    });
+
+    resultsDropdown.classList.remove('hidden');
+}
+
+function selectLaptop(itemId, laptop) {
+    // Ocultar resultados
+    document.getElementById(`laptop_results_${itemId}`).classList.add('hidden');
+
+    // Actualizar campo de búsqueda
+    document.getElementById(`laptop_search_${itemId}`).value = laptop.display_name;
+
+    // Actualizar campo oculto
+    document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
+
+    // Actualizar descripción y precio
+    document.getElementById(`desc_${itemId}`).value = laptop.display_name;
+    document.getElementById(`price_${itemId}`).value = laptop.sale_price;
+
+    calculateTotals();
+}
+
+function setupLaptopSearch(itemId) {
+    const laptopSearch = document.getElementById(`laptop_search_${itemId}`);
+
+    // Mostrar laptops recientes al enfocar el campo
+    laptopSearch.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+            displayLaptopResults(itemId, recentLaptops, true);
+        }
+    });
+
+    laptopSearch.addEventListener('input', function(e) {
+        const searchTerm = e.target.value;
+
+        // Limpiar timeout anterior
+        if (laptopSearchTimeouts[itemId]) {
+            clearTimeout(laptopSearchTimeouts[itemId]);
+        }
+
+        // Si el campo está vacío, mostrar laptops recientes
+        if (searchTerm.trim() === '') {
+            displayLaptopResults(itemId, recentLaptops, true);
+            return;
+        }
+
+        // Establecer nuevo timeout para evitar búsquedas en cada tecla
+        laptopSearchTimeouts[itemId] = setTimeout(() => {
+            const results = filterLaptops(searchTerm, itemId);
+            displayLaptopResults(itemId, results, false);
+        }, 300);
+    });
+
+    // Ocultar resultados al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        const results = document.getElementById(`laptop_results_${itemId}`);
+        const search = document.getElementById(`laptop_search_${itemId}`);
+
+        if (results && search && !search.contains(e.target) && !results.contains(e.target)) {
+            results.classList.add('hidden');
+        }
+    });
+
+    // Manejar teclas en el buscador
+    laptopSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById(`laptop_results_${itemId}`).classList.add('hidden');
+        }
+
+        // Si presiona Enter y hay resultados, seleccionar el primero
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstResult = document.querySelector(`#laptop_results_list_${itemId} div.cursor-pointer`);
+            if (firstResult) {
+                firstResult.click();
+            }
+        }
+    });
+}
+
 // Inicializar fecha de hoy
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
@@ -457,12 +609,9 @@ document.addEventListener('DOMContentLoaded', function() {
     customerSearch.addEventListener('input', function(e) {
         const searchTerm = e.target.value;
 
-        // Mostrar/ocultar indicador de carga
-        const loadingIndicator = document.getElementById('search_loading');
-
         // Limpiar timeout anterior
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
+        if (customerSearchTimeout) {
+            clearTimeout(customerSearchTimeout);
         }
 
         // Si el campo está vacío, mostrar clientes recientes
@@ -471,13 +620,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        loadingIndicator.classList.remove('hidden');
-
         // Establecer nuevo timeout para evitar búsquedas en cada tecla
-        searchTimeout = setTimeout(() => {
+        customerSearchTimeout = setTimeout(() => {
             const results = filterCustomers(searchTerm);
             displayCustomerResults(results, false);
-            loadingIndicator.classList.add('hidden');
         }, 300);
     });
 
@@ -551,8 +697,13 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     const container = document.getElementById('items_container');
     const itemId = itemCounter++;
 
+    // Buscar el laptop si hay un laptopId
+    let currentLaptop = null;
+    if (laptopId) {
+        currentLaptop = laptops.find(l => l.id == laptopId);
+    }
+
     const itemDiv = document.createElement('div');
-    // Usar clases de Tailwind directamente en lugar de .item-row
     itemDiv.className = 'bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4 transition-all hover:border-indigo-300 dark:hover:border-indigo-700';
     itemDiv.id = `item_${itemId}`;
 
@@ -561,19 +712,26 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
             <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div class="md:col-span-5">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Laptop</label>
-                    <select class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500"
-                            onchange="updateLaptopDetails(${itemId}, this.value)">
-                        <option value="">Seleccionar laptop...</option>
-                        ${laptops.map(l => `
-                            <option value="${l.id}"
-                                    data-name="${l.display_name}"
-                                    data-price="${l.sale_price}"
-                                    data-qty="${l.quantity}"
-                                    ${laptopId == l.id ? 'selected' : ''}>
-                                ${l.display_name} - RD$ ${parseFloat(l.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} (Stock: ${l.quantity})
-                            </option>
-                        `).join('')}
-                    </select>
+                    <div class="relative">
+                        <input type="text"
+                               id="laptop_search_${itemId}"
+                               value="${currentLaptop ? currentLaptop.display_name : ''}"
+                               placeholder="Buscar laptop por nombre, modelo..."
+                               autocomplete="off"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center hidden" id="laptop_search_loading_${itemId}">
+                            <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                        <div id="laptop_results_${itemId}" class="hidden absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <div id="laptop_results_list_${itemId}" class="py-1">
+                                <!-- Los resultados se cargarán aquí -->
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="laptop_id_${itemId}" value="${laptopId || ''}">
                 </div>
                 <div class="md:col-span-4">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</label>
@@ -609,11 +767,19 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
                 </svg>
             </button>
         </div>
-        <input type="hidden" id="laptop_id_${itemId}" value="${laptopId || ''}">
         <input type="hidden" id="type_${itemId}" value="laptop">
     `;
 
     container.appendChild(itemDiv);
+
+    // Configurar el buscador de laptops para este item
+    setupLaptopSearch(itemId);
+
+    // Si hay un laptop seleccionado, actualizar los campos
+    if (currentLaptop) {
+        selectLaptop(itemId, currentLaptop);
+    }
+
     calculateTotals();
 }
 
@@ -669,18 +835,6 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
 
     container.appendChild(itemDiv);
     calculateTotals();
-}
-
-function updateLaptopDetails(itemId, laptopId) {
-    if (!laptopId) return;
-
-    const laptop = laptops.find(l => l.id == laptopId);
-    if (laptop) {
-        document.getElementById(`desc_${itemId}`).value = laptop.display_name;
-        document.getElementById(`price_${itemId}`).value = laptop.sale_price;
-        document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
-        calculateTotals();
-    }
 }
 
 function removeItem(itemId) {
