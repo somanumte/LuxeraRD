@@ -499,7 +499,7 @@ function displayLaptopResults(itemId, results, isRecent = false) {
         resultItem.innerHTML = `
             <div class="font-medium text-gray-900 dark:text-white">${laptop.display_name}</div>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                ${laptop.brand || 'Sin marca'} • ${laptop.model || 'Sin modelo'} • RD$ ${parseFloat(laptop.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} • Stock: ${laptop.quantity}
+                ${laptop.brand || 'Sin marca'} ${laptop.model ? '• ' + laptop.model : ''} ${laptop.processor ? '• ' + laptop.processor : ''} ${laptop.ram ? '• ' + laptop.ram : ''} • RD$ ${parseFloat(laptop.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} • Stock: ${laptop.quantity}
             </div>
         `;
 
@@ -523,8 +523,24 @@ function selectLaptop(itemId, laptop) {
     // Actualizar campo oculto
     document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
 
+    // Crear descripción completa con especificaciones
+    let description = laptop.display_name;
+    if (laptop.brand || laptop.model || laptop.processor || laptop.ram || laptop.storage || laptop.screen) {
+        description += ' - ';
+        const specs = [];
+        if (laptop.brand) specs.push(laptop.brand);
+        if (laptop.model) specs.push(laptop.model);
+        if (laptop.processor) specs.push(laptop.processor);
+        if (laptop.ram) specs.push(laptop.ram);
+        if (laptop.storage) specs.push(laptop.storage);
+        if (laptop.screen) specs.push(laptop.screen);
+        if (laptop.graphics_card) specs.push(laptop.graphics_card);
+        if (laptop.operating_system) specs.push(laptop.operating_system);
+        description += specs.join(' • ');
+    }
+
     // Actualizar descripción y precio
-    document.getElementById(`desc_${itemId}`).value = laptop.display_name;
+    document.getElementById(`desc_${itemId}`).value = description;
     document.getElementById(`price_${itemId}`).value = laptop.sale_price;
 
     calculateTotals();

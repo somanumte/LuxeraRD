@@ -131,15 +131,8 @@ def invoice_new():
         Laptop.quantity > 0
     ).order_by(Laptop.display_name).all()
 
-    # Serializar laptops a diccionarios
-    laptops = [{
-        'id': laptop.id,
-        'display_name': laptop.display_name,
-        'sku': laptop.sku,
-        'sale_price': float(laptop.sale_price),
-        'quantity': laptop.quantity,
-        'short_description': laptop.short_description or ''
-    } for laptop in laptops_query]
+    # Serializar laptops a diccionarios con todas las relaciones
+    laptops = [laptop.to_dict(include_relationships=True) for laptop in laptops_query]
 
     return render_template(
         'invoices/invoice_form.html',
