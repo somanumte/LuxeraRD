@@ -459,15 +459,19 @@ function filterLaptops(searchTerm, itemId) {
     }
 
     return laptops.filter(laptop => {
-        const displayName = laptop.display_name.toLowerCase();
         const brand = laptop.brand ? laptop.brand.toLowerCase() : '';
         const model = laptop.model ? laptop.model.toLowerCase() : '';
         const processor = laptop.processor ? laptop.processor.toLowerCase() : '';
+        const ram = laptop.ram ? laptop.ram.toLowerCase() : '';
+        const storage = laptop.storage ? laptop.storage.toLowerCase() : '';
+        const screen = laptop.screen ? laptop.screen.toLowerCase() : '';
 
-        return displayName.includes(searchLower) ||
-               brand.includes(searchLower) ||
+        return brand.includes(searchLower) ||
                model.includes(searchLower) ||
-               processor.includes(searchLower);
+               processor.includes(searchLower) ||
+               ram.includes(searchLower) ||
+               storage.includes(searchLower) ||
+               screen.includes(searchLower);
     }).slice(0, 10);
 }
 
@@ -505,10 +509,31 @@ function displayLaptopResults(itemId, results, isRecent = false) {
     results.forEach(laptop => {
         const resultItem = document.createElement('div');
         resultItem.className = 'px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0';
+
+        // Construir nombre para mostrar
+        let laptopName = '';
+        if (laptop.brand && laptop.model) {
+            laptopName = `${laptop.brand} ${laptop.model}`;
+        } else if (laptop.brand) {
+            laptopName = laptop.brand;
+        } else if (laptop.model) {
+            laptopName = laptop.model;
+        } else if (laptop.processor) {
+            laptopName = laptop.processor;
+        } else {
+            laptopName = 'Laptop sin nombre';
+        }
+
+        // Construir detalles
+        const details = [];
+        if (laptop.processor) details.push(laptop.processor);
+        if (laptop.ram) details.push(laptop.ram);
+        if (laptop.storage) details.push(laptop.storage);
+
         resultItem.innerHTML = `
-            <div class="font-medium text-gray-900 dark:text-white">${laptop.display_name}</div>
+            <div class="font-medium text-gray-900 dark:text-white">${laptopName}</div>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                ${laptop.brand || 'Sin marca'} ${laptop.model ? '• ' + laptop.model : ''} ${laptop.processor ? '• ' + laptop.processor : ''} ${laptop.ram ? '• ' + laptop.ram : ''} • RD$ ${parseFloat(laptop.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} • Stock: ${laptop.quantity}
+                ${details.join(' • ')} • RD$ ${parseFloat(laptop.sale_price).toLocaleString('en-US', {minimumFractionDigits: 2})} • Stock: ${laptop.quantity}
             </div>
         `;
 
@@ -526,26 +551,36 @@ function selectLaptop(itemId, laptop) {
     // Ocultar resultados
     document.getElementById(`laptop_results_${itemId}`).classList.add('hidden');
 
+    // Construir nombre para mostrar en el campo de búsqueda
+    let laptopName = '';
+    if (laptop.brand && laptop.model) {
+        laptopName = `${laptop.brand} ${laptop.model}`;
+    } else if (laptop.brand) {
+        laptopName = laptop.brand;
+    } else if (laptop.model) {
+        laptopName = laptop.model;
+    } else if (laptop.processor) {
+        laptopName = laptop.processor;
+    }
+
     // Actualizar campo de búsqueda
-    document.getElementById(`laptop_search_${itemId}`).value = laptop.display_name;
+    document.getElementById(`laptop_search_${itemId}`).value = laptopName;
 
     // Actualizar campo oculto
     document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
 
     // Crear descripción completa con especificaciones
-    let description = laptop.display_name;
-    if (laptop.brand || laptop.model || laptop.processor || laptop.ram || laptop.storage || laptop.screen) {
-        description += ' - ';
-        const specs = [];
-        if (laptop.brand) specs.push(laptop.brand);
-        if (laptop.model) specs.push(laptop.model);
-        if (laptop.processor) specs.push(laptop.processor);
-        if (laptop.ram) specs.push(laptop.ram);
-        if (laptop.storage) specs.push(laptop.storage);
-        if (laptop.screen) specs.push(laptop.screen);
-        if (laptop.graphics_card) specs.push(laptop.graphics_card);
-        if (laptop.operating_system) specs.push(laptop.operating_system);
-        description += specs.join(' • ');
+    let description = laptopName;
+    const specs = [];
+    if (laptop.processor) specs.push(laptop.processor);
+    if (laptop.ram) specs.push(laptop.ram);
+    if (laptop.storage) specs.push(laptop.storage);
+    if (laptop.screen) specs.push(laptop.screen);
+    if (laptop.graphics_card) specs.push(laptop.graphics_card);
+    if (laptop.operating_system) specs.push(laptop.operating_system);
+
+    if (specs.length > 0) {
+        description += ' - ' + specs.join(' • ');
     }
 
     // Actualizar descripción y precio
@@ -732,7 +767,14 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     if (laptopId && laptopId !== 'null' && laptopId !== '') {
         currentLaptop = laptops.find(l => l.id == laptopId);
         if (currentLaptop) {
-            laptopName = currentLaptop.display_name;
+            // Construir nombre para mostrar
+            if (currentLaptop.brand && currentLaptop.model) {
+                laptopName = `${currentLaptop.brand} ${currentLaptop.model}`;
+            } else if (currentLaptop.brand) {
+                laptopName = currentLaptop.brand;
+            } else if (currentLaptop.model) {
+                laptopName = currentLaptop.model;
+            }
             laptopIdValue = laptopId;
         }
     }
@@ -750,7 +792,7 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
                         <input type="text"
                                id="laptop_search_${itemId}"
                                value="${laptopName}"
-                               placeholder="Buscar laptop por nombre, modelo..."
+                               placeholder="Buscar laptop por marca, modelo..."
                                autocomplete="off"
                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center hidden" id="laptop_search_loading_${itemId}">
