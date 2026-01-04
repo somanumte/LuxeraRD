@@ -56,8 +56,7 @@
                                                    id="customer_search"
                                                    placeholder="Escribe nombre, RNC o cédula..."
                                                    autocomplete="off"
-                                                   class="w-full px-4 py-2.5 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
-                                                   {% if is_edit %}disabled{% endif %}>
+                                                   class="w-full px-4 py-2.5 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
                                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -557,11 +556,29 @@ function selectLaptop(itemId, laptop) {
 
 function setupLaptopSearch(itemId) {
     const laptopSearch = document.getElementById(`laptop_search_${itemId}`);
+    const laptopIdInput = document.getElementById(`laptop_id_${itemId}`);
+    const currentValue = laptopSearch.value;
+    const currentLaptopId = laptopIdInput.value;
+
+    // Buscar el laptop actual si existe
+    let currentLaptop = null;
+    if (currentLaptopId && currentLaptopId.trim() !== '') {
+        currentLaptop = laptops.find(l => l.id == currentLaptopId);
+    }
 
     // Mostrar laptops recientes al enfocar el campo
     laptopSearch.addEventListener('focus', function() {
-        if (this.value.trim() === '') {
+        if (currentLaptop) {
+            // Si hay un laptop seleccionado, mostrarlo primero
+            const otherRecent = recentLaptops.filter(l => l.id != currentLaptop.id);
+            const displayResults = [currentLaptop, ...otherRecent].slice(0, 10);
+            displayLaptopResults(itemId, displayResults, false);
+        } else if (this.value.trim() === '') {
             displayLaptopResults(itemId, recentLaptops, true);
+        } else {
+            // Si hay texto pero no hay laptop seleccionado, hacer búsqueda
+            const results = filterLaptops(this.value, itemId);
+            displayLaptopResults(itemId, results, false);
         }
     });
 
@@ -575,6 +592,8 @@ function setupLaptopSearch(itemId) {
 
         // Si el campo está vacío, mostrar laptops recientes
         if (searchTerm.trim() === '') {
+            // Limpiar el ID del laptop si el campo está vacío
+            laptopIdInput.value = '';
             displayLaptopResults(itemId, recentLaptops, true);
             return;
         }
@@ -609,6 +628,11 @@ function setupLaptopSearch(itemId) {
             if (firstResult) {
                 firstResult.click();
             }
+        }
+
+        // Si presiona Delete o Backspace y el campo está vacío, limpiar el laptop_id
+        if ((e.key === 'Delete' || e.key === 'Backspace') && this.value.trim() === '') {
+            laptopIdInput.value = '';
         }
     });
 }
@@ -728,6 +752,7 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     let currentLaptop = null;
     let laptopName = '';
     let laptopIdValue = '';
+    let needsSearchSetup = true;
 
     if (laptopId && laptopId !== 'null' && laptopId !== '') {
         currentLaptop = laptops.find(l => l.id == laptopId);
@@ -806,17 +831,19 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
 
     container.appendChild(itemDiv);
 
-    // Configurar el buscador de laptops para este item
+    // Configurar el buscador de laptops para este item - SIEMPRE
     setupLaptopSearch(itemId);
 
-    // Si es un item nuevo (sin laptopId), enfocar el campo de búsqueda y mostrar opciones recientes
+    // Si es un item nuevo (sin laptopId), enfocar el campo de búsqueda
+    // El evento focus disparará setupLaptopSearch automáticamente que mostrará laptops recientes
     if (!laptopIdValue) {
         setTimeout(() => {
             const searchInput = document.getElementById(`laptop_search_${itemId}`);
             searchInput.focus();
-            displayLaptopResults(itemId, recentLaptops, true);
         }, 100);
     }
+    // ✅ Modo edición: setupLaptopSearch ya maneja todo (línea 835)
+
 
     calculateTotals();
 }
