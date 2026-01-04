@@ -673,15 +673,15 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if invoice and invoice.items %}
     {% for item in invoice.items.all() %}
     {% if item.item_type == 'laptop' %}
-    addLaptopItem({{ item.laptop_id or 'null' }}, '{{ item.description }}', {{ item.quantity }}, {{ item.unit_price }});
+    addLaptopItem({{ item.laptop_id if item.laptop_id else 'null' }}, '{{ item.description|replace("'", "\\'")|safe }}', {{ item.quantity }}, {{ item.unit_price }});
     {% else %}
-    addCustomItem('{{ item.description }}', {{ item.quantity }}, {{ item.unit_price }});
+    addCustomItem('{{ item.description|replace("'", "\\'")|safe }}', {{ item.quantity }}, {{ item.unit_price }});
     {% endif %}
     {% endfor %}
     {% endif %}
 
     // Si estamos editando, cargar información del cliente
-    {% if invoice %}
+    {% if invoice and invoice.customer %}
     const customerId = {{ invoice.customer_id }};
     const customer = allCustomers.find(c => c.id == customerId);
     if (customer) {
@@ -690,6 +690,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostrar estado vacío si no hay cliente
         document.getElementById('customer_empty_state').classList.remove('hidden');
     }
+    {% elif invoice %}
+    // Si hay factura pero no tiene cliente
+    document.getElementById('customer_empty_state').classList.remove('hidden');
     {% endif %}
 
     calculateTotals();
@@ -715,8 +718,12 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
 
     // Buscar el laptop si hay un laptopId
     let currentLaptop = null;
-    if (laptopId) {
+    let laptopName = '';
+    if (laptopId && laptopId !== 'null') {
         currentLaptop = laptops.find(l => l.id == laptopId);
+        if (currentLaptop) {
+            laptopName = currentLaptop.display_name;
+        }
     }
 
     const itemDiv = document.createElement('div');
@@ -731,7 +738,7 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
                     <div class="relative">
                         <input type="text"
                                id="laptop_search_${itemId}"
-                               value="${currentLaptop ? currentLaptop.display_name : ''}"
+                               value="${laptopName}"
                                placeholder="Buscar laptop por nombre, modelo..."
                                autocomplete="off"
                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
@@ -747,13 +754,13 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" id="laptop_id_${itemId}" value="${laptopId || ''}">
+                    <input type="hidden" id="laptop_id_${itemId}" value="${laptopId && laptopId !== 'null' ? laptopId : ''}">
                 </div>
                 <div class="md:col-span-4">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</label>
                     <input type="text"
                            id="desc_${itemId}"
-                           value="${description}"
+                           value="${description.replace(/\\'/g, "'")}"
                            placeholder="Descripción adicional..."
                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
                 </div>
@@ -790,12 +797,6 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
 
     // Configurar el buscador de laptops para este item
     setupLaptopSearch(itemId);
-
-    // Si hay un laptop seleccionado, actualizar los campos
-    if (currentLaptop) {
-        selectLaptop(itemId, currentLaptop);
-    }
-
     calculateTotals();
 }
 
@@ -805,7 +806,6 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
     const itemId = itemCounter++;
 
     const itemDiv = document.createElement('div');
-    // Usar clases de Tailwind directamente
     itemDiv.className = 'bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4 transition-all hover:border-indigo-300 dark:hover:border-indigo-700';
     itemDiv.id = `item_${itemId}`;
 
@@ -816,7 +816,7 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</label>
                     <input type="text"
                            id="desc_${itemId}"
-                           value="${description}"
+                           value="${description.replace(/\\'/g, "'")}"
                            placeholder="Descripción del producto o servicio..."
                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
                 </div>
