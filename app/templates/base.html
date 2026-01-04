@@ -3,11 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="LuxeraRD - Sistema de gestiÃ³n de inventario de laptops">
-    <title>{% block title %}LuxeraRD{% endblock %} - LuxeraRD</title>
+    <meta name="description" content="LuxeraRD - Sistema de gestión de inventario de laptops">
+    <title>{% block title %}LuxeraRD{% endblock %}</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'luxera-primary': '#6366f1',
+                        'luxera-dark': '#0f172a',
+                        'luxera-light': '#f8fafc',
+                        'luxera-accent': '#8b5cf6',
+                        'luxera-secondary': '#06b6d4',
+                    },
+                    transitionProperty: {
+                        'theme': 'background-color, border-color, color, fill, stroke, opacity, box-shadow, transform',
+                    },
+                    transitionDuration: {
+                        'theme': '400ms',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-in-right': 'slideInRight 0.3s ease-out',
+                        'slide-in-left': 'slideInLeft 0.3s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'theme-transition': 'themeTransition 0.4s ease-in-out',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideInRight: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        slideInLeft: {
+                            '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        pulseGentle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        },
+                        themeTransition: {
+                            '0%': {
+                                filter: 'brightness(1) saturate(1)',
+                                transform: 'scale(1)',
+                            },
+                            '50%': {
+                                filter: 'brightness(1.05) saturate(1.1)',
+                                transform: 'scale(1.005)',
+                            },
+                            '100%': {
+                                filter: 'brightness(1) saturate(1)',
+                                transform: 'scale(1)',
+                            },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(99, 102, 241, 0.5)' },
+                            '100%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.8)' },
+                        },
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        }
+    </script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,9 +92,76 @@
     {% block extra_css %}{% endblock %}
 
     <style>
-        /* Variables CSS */
+        /* Variables CSS dinámicas para temas */
         :root {
             --sidebar-width: 16rem;
+            --luxera-primary: #6366f1;
+            --luxera-primary-dark: #818cf8;
+            --luxera-bg-light: #f8fafc;
+            --luxera-bg-dark: #0f172a;
+            --luxera-surface-light: #ffffff;
+            --luxera-surface-dark: #1e293b;
+            --luxera-text-light: #334155;
+            --luxera-text-dark: #e2e8f0;
+            --luxera-border-light: #e2e8f0;
+            --luxera-border-dark: #334155;
+            --luxera-accent: #8b5cf6;
+            --luxera-secondary: #06b6d4;
+
+            /* Efectos de transición */
+            --transition-theme: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .dark {
+            --luxera-primary: var(--luxera-primary-dark);
+            --luxera-bg: var(--luxera-bg-dark);
+            --luxera-surface: var(--luxera-surface-dark);
+            --luxera-text: var(--luxera-text-dark);
+            --luxera-border: var(--luxera-border-dark);
+        }
+
+        .light {
+            --luxera-primary: #6366f1;
+            --luxera-bg: var(--luxera-bg-light);
+            --luxera-surface: var(--luxera-surface-light);
+            --luxera-text: var(--luxera-text-light);
+            --luxera-border: var(--luxera-border-light);
+        }
+
+        /* Aplicar variables CSS */
+        body {
+            background-color: var(--luxera-bg);
+            color: var(--luxera-text);
+            transition: var(--transition-theme);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efecto de partículas sutiles para el fondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 20%);
+            z-index: -1;
+            opacity: 0.7;
+            transition: var(--transition-theme);
+        }
+
+        .dark body::before {
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 20%);
+            opacity: 0.5;
         }
 
         /* Reset body height */
@@ -34,6 +175,7 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+            transition: var(--transition-theme);
         }
 
         /* Sidebar - Fixed height with internal scroll */
@@ -42,14 +184,31 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             flex-shrink: 0; /* Prevent shrinking */
+            background-color: var(--luxera-surface);
+            border-right: 1px solid var(--luxera-border);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Efecto de borde sutil en el sidebar */
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -1px;
+            height: 100%;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--luxera-primary), transparent);
+            opacity: 0.3;
         }
 
         /* Sidebar content - Scrollable */
         .sidebar-content {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .sidebar-hidden {
@@ -64,10 +223,23 @@
                 height: 100vh;
                 z-index: 40;
                 transform: translateX(-100%);
+                backdrop-filter: blur(10px);
+                background-color: rgba(255, 255, 255, 0.9);
+                border-right: 1px solid rgba(226, 232, 240, 0.5);
+            }
+
+            .dark .sidebar {
+                background-color: rgba(15, 23, 42, 0.95);
+                border-right: 1px solid rgba(51, 65, 85, 0.5);
             }
 
             .sidebar.sidebar-visible {
                 transform: translateX(0);
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .dark .sidebar.sidebar-visible {
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
             }
 
             .content-area {
@@ -83,7 +255,8 @@
             flex-direction: column;
             height: 100vh;
             overflow-y: auto; /* Allow scroll only in content */
-            transition: margin-left 0.3s ease-in-out;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--luxera-bg);
         }
 
         @media (min-width: 769px) {
@@ -98,42 +271,52 @@
             display: flex;
             align-items: center;
             padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            color: #6b7280;
-            transition: all 0.2s ease;
+            border-radius: 0.75rem;
+            color: var(--luxera-text);
+            transition: var(--transition-smooth);
             text-decoration: none;
             margin-bottom: 0.25rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .dark .nav-link {
-            color: #9ca3af;
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
         }
 
         .nav-link:hover {
-            background-color: #f3f4f6;
-            color: #4f46e5;
-        }
-
-        .dark .nav-link:hover {
-            background-color: #374151;
-            color: #818cf8;
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--luxera-primary);
+            transform: translateX(5px);
         }
 
         .nav-link.active {
-            background-color: #eef2ff;
-            color: #4f46e5;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            color: var(--luxera-primary);
             font-weight: 600;
-        }
-
-        .dark .nav-link.active {
-            background-color: #312e81;
-            color: #a5b4fc;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
         }
 
         .nav-link svg {
             width: 1.25rem;
             height: 1.25rem;
             margin-right: 0.75rem;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-link:hover svg {
+            transform: scale(1.1);
         }
 
         /* Overlay for mobile */
@@ -143,57 +326,125 @@
             inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 30;
+            backdrop-filter: blur(3px);
+            animation: fadeIn 0.3s ease-out;
         }
 
         .sidebar-overlay.active {
             display: block;
         }
 
-        /* Dark mode toggle */
+        /* Dark mode toggle - Modern Design */
+        .dark-mode-toggle-container {
+            position: relative;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background-color: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: var(--transition-smooth);
+        }
+
+        .dark-mode-toggle-container:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
         .dark-mode-toggle {
             position: relative;
-            width: 3rem;
-            height: 1.5rem;
-            background-color: #d1d5db;
+            width: 3.5rem;
+            height: 2rem;
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
             border-radius: 9999px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: var(--transition-bounce);
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .dark .dark-mode-toggle {
-            background-color: #4f46e5;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .dark-mode-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover::before {
+            opacity: 1;
         }
 
         .dark-mode-toggle::after {
             content: '';
             position: absolute;
-            top: 0.125rem;
-            left: 0.125rem;
-            width: 1.25rem;
-            height: 1.25rem;
-            background-color: white;
+            top: 0.25rem;
+            left: 0.25rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
             border-radius: 9999px;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #f59e0b;
         }
 
         .dark .dark-mode-toggle::after {
             transform: translateX(1.5rem);
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #0f172a;
+            content: '🌙';
+            font-size: 0.8rem;
+        }
+
+        .light .dark-mode-toggle::after {
+            content: '☀️';
         }
 
         /* Flash messages animation */
         .flash-message {
-            animation: slideInRight 0.3s ease-out;
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            overflow: hidden;
+            position: relative;
         }
 
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .flash-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .flash-message.success::before {
+            background: linear-gradient(to bottom, #10b981, #059669);
+        }
+
+        .flash-message.error::before {
+            background: linear-gradient(to bottom, #ef4444, #dc2626);
+        }
+
+        .flash-message.warning::before {
+            background: linear-gradient(to bottom, #f59e0b, #d97706);
+        }
+
+        .flash-message.info::before {
+            background: linear-gradient(to bottom, #3b82f6, #2563eb);
         }
 
         /* Smooth scrolling */
@@ -207,68 +458,221 @@
             right: 0;
             top: 100%;
             margin-top: 0.5rem;
-            width: 12rem;
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            width: 14rem;
+            background-color: var(--luxera-surface);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.2s ease;
+            transform: translateY(-10px) scale(0.95);
+            transition: var(--transition-bounce);
             z-index: 50;
+            border: 1px solid var(--luxera-border);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
         .dark .user-dropdown {
-            background-color: #1f2937;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.1);
         }
 
         .user-dropdown.active {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+        }
+
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--luxera-primary), var(--luxera-accent));
         }
 
         /* Logo animation */
         .logo-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--luxera-primary), var(--luxera-accent), var(--luxera-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            background-size: 200% auto;
+            animation: glow 3s ease-in-out infinite alternate;
         }
 
         /* Main content wrapper */
         .main-wrapper {
             flex: 1;
             overflow-y: auto;
+            animation: fade-in 0.6s ease-out;
         }
 
         /* Mobile top bar */
         .mobile-top-bar {
             height: 64px;
             flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .dark .mobile-top-bar {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
         }
 
         /* Footer should not grow */
         footer {
             flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+            border-top: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .dark footer {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-top: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        /* Dark mode toggle for desktop */
+        .desktop-dark-toggle {
+            display: none;
+        }
+
+        @media (min-width: 769px) {
+            .desktop-dark-toggle {
+                display: flex;
+            }
+            .mobile-top-bar .dark-mode-toggle-container {
+                display: none;
+            }
+        }
+
+        /* Theme transition effect on page */
+        .theme-transition {
+            animation: themeTransition 0.4s ease-in-out;
+        }
+
+        /* Loading bar for theme transition */
+        .theme-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--luxera-primary), var(--luxera-accent));
+            z-index: 100;
+            transition: width 0.4s ease;
+        }
+
+        /* Enhanced button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--luxera-primary), var(--luxera-accent));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::after {
+            left: 100%;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--luxera-primary), var(--luxera-accent));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--luxera-accent), var(--luxera-secondary));
+        }
+
+        /* Selection color */
+        ::selection {
+            background-color: rgba(99, 102, 241, 0.3);
+            color: var(--luxera-text);
+        }
+
+        /* Card styling */
+        .card {
+            background-color: var(--luxera-surface);
+            border-radius: 1rem;
+            border: 1px solid var(--luxera-border);
+            padding: 1.5rem;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .dark .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.1);
         }
     </style>
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-900">
+<body class="h-full theme-transition">
+    <!-- Theme loading bar -->
+    <div id="theme-loading-bar" class="theme-loading-bar"></div>
+
     <!-- Main Container -->
     <div class="main-container">
         <!-- Sidebar Overlay (Mobile) -->
         <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <aside id="sidebar" class="sidebar">
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                     <a href="{{ url_for('main.index') }}" class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-12 h-12 bg-gradient-to-br from-luxera-primary to-luxera-accent rounded-xl flex items-center justify-center shadow-lg animate-float">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
                         </div>
@@ -276,11 +680,24 @@
                     </a>
 
                     <!-- Close button (Mobile) -->
-                    <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
+                </div>
+
+                <!-- Dark Mode Toggle for Desktop -->
+                <div class="desktop-dark-toggle px-6 py-4">
+                    <div class="dark-mode-toggle-container">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                                <i class="fas fa-palette mr-2 text-luxera-primary"></i>
+                                Tema
+                            </span>
+                            <div class="dark-mode-toggle" onclick="toggleDarkMode()"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Navigation - Scrollable content -->
@@ -304,7 +721,7 @@
                             <span>Inventario</span>
                         </a>
 
-                        <!-- Facturas - NUEVO -->
+                        <!-- Facturas -->
                         <a href="{{ url_for('invoices.invoices_list') }}" class="nav-link {% if request.endpoint and 'invoices' in request.endpoint %}active{% endif %}">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -326,7 +743,10 @@
                         <!-- Admin Section -->
                         {% if current_user.is_admin %}
                         <div class="px-3 mb-2">
-                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">AdministraciÃ³n</p>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center">
+                                <i class="fas fa-cog mr-2 text-luxera-primary"></i>
+                                Administración
+                            </p>
                         </div>
 
                         <a href="{{ url_for('main.admin_panel') }}" class="nav-link {% if request.endpoint == 'main.admin_panel' %}active{% endif %}">
@@ -334,7 +754,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span>ConfiguraciÃ³n</span>
+                            <span>Configuración</span>
                         </a>
 
                         <a href="{{ url_for('main.admin_users') }}" class="nav-link {% if request.endpoint == 'main.admin_users' %}active{% endif %}">
@@ -378,15 +798,15 @@
                     {% if current_user.is_authenticated %}
                     <!-- User Menu -->
                     <div class="relative">
-                        <button onclick="toggleUserDropdown()" class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        <button onclick="toggleUserDropdown()" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 group">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-luxera-primary to-luxera-accent flex items-center justify-center text-white font-semibold shadow-lg group-hover:scale-105 transition-transform">
                                 {{ current_user.username[0].upper() }}
                             </div>
                             <div class="flex-1 text-left">
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ current_user.username }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ current_user.email }}</p>
                             </div>
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-gray-400 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -394,33 +814,38 @@
                         <!-- Dropdown Menu -->
                         <div id="user-dropdown" class="user-dropdown">
                             <div class="py-2">
-                                <!-- Dark Mode Toggle -->
-                                <div class="px-4 py-2 flex items-center justify-between">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Modo Oscuro</span>
-                                    <div class="dark-mode-toggle" onclick="toggleDarkMode()"></div>
-                                </div>
-
-                                <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-
                                 <!-- Profile -->
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <i class="fas fa-user mr-2"></i> Mi Perfil
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+                                    <i class="fas fa-user-circle mr-3 text-luxera-primary"></i>
+                                    <span>Mi Perfil</span>
                                 </a>
 
+                                <!-- Settings -->
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+                                    <i class="fas fa-cog mr-3 text-luxera-primary"></i>
+                                    <span>Configuración</span>
+                                </a>
+
+                                <!-- Divider -->
+                                <div class="my-2 border-t border-gray-200 dark:border-gray-700"></div>
+
                                 <!-- Logout -->
-                                <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar SesiÃ³n
+                                <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+                                    <i class="fas fa-sign-out-alt mr-3"></i>
+                                    <span>Cerrar Sesión</span>
                                 </a>
                             </div>
                         </div>
                     </div>
                     {% else %}
                     <!-- Auth Links -->
-                    <div class="space-y-2">
-                        <a href="{{ url_for('auth.login') }}" class="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                            Iniciar SesiÃ³n
+                    <div class="space-y-3">
+                        <a href="{{ url_for('auth.login') }}" class="btn-primary block w-full text-center">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Iniciar Sesión
                         </a>
-                        <a href="{{ url_for('auth.register') }}" class="block w-full text-center px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <a href="{{ url_for('auth.register') }}" class="block w-full text-center px-4 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-md">
+                            <i class="fas fa-user-plus mr-2"></i>
                             Registrarse
                         </a>
                     </div>
@@ -432,8 +857,8 @@
         <!-- Main Content Area -->
         <div class="content-area">
             <!-- Top Bar (Mobile) -->
-            <div class="md:hidden mobile-top-bar bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <div class="md:hidden mobile-top-bar px-4 py-3 flex items-center justify-between">
+                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
@@ -441,7 +866,9 @@
 
                 <span class="text-xl font-bold logo-text">LuxeraRD</span>
 
-                <div class="dark-mode-toggle" onclick="toggleDarkMode()"></div>
+                <div class="dark-mode-toggle-container">
+                    <div class="dark-mode-toggle" onclick="toggleDarkMode()"></div>
+                </div>
             </div>
 
             <!-- Flash Messages -->
@@ -449,31 +876,39 @@
                 {% if messages %}
                     <div class="fixed top-4 right-4 z-50 space-y-2" style="max-width: 24rem;">
                         {% for category, message in messages %}
-                            <div class="flash-message alert alert-{{ category }} flex items-start p-4 rounded-lg shadow-lg">
+                            <div class="flash-message {{ category }} flex items-start p-4 rounded-xl shadow-xl">
                                 <div class="flex-shrink-0">
                                     {% if category == 'success' %}
-                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                        </svg>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
                                     {% elif category == 'error' %}
-                                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                        </svg>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
                                     {% elif category == 'warning' %}
-                                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                        </svg>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
                                     {% else %}
-                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                        </svg>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
                                     {% endif %}
                                 </div>
                                 <div class="ml-3 flex-1">
                                     <p class="text-sm font-medium">{{ message }}</p>
                                 </div>
-                                <button onclick="this.parentElement.remove()" class="ml-3 flex-shrink-0">
-                                    <svg class="w-4 h-4 text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <button onclick="this.parentElement.remove()" class="ml-3 flex-shrink-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                     </svg>
                                 </button>
@@ -490,17 +925,27 @@
                 </main>
 
                 <!-- Footer -->
-                <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-6">
+                <footer class="py-6">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Â© {{ now.year if now else '2025' }} LuxeraRD. Todos los derechos reservados.
+                                <i class="fas fa-copyright mr-1"></i>
+                                {{ now.year if now else '2025' }} LuxeraRD. Todos los derechos reservados.
                             </p>
                             <div class="flex space-x-6 mt-4 md:mt-0">
-                                <a href="{{ url_for('main.about') }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Acerca de</a>
-                                <a href="{{ url_for('main.contact') }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Contacto</a>
-                                <a href="#" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Privacidad</a>
+                                <a href="{{ url_for('main.about') }}" class="text-sm text-gray-500 hover:text-luxera-primary dark:text-gray-400 dark:hover:text-luxera-primary-dark transition-colors flex items-center">
+                                    <i class="fas fa-info-circle mr-1"></i> Acerca de
+                                </a>
+                                <a href="{{ url_for('main.contact') }}" class="text-sm text-gray-500 hover:text-luxera-primary dark:text-gray-400 dark:hover:text-luxera-primary-dark transition-colors flex items-center">
+                                    <i class="fas fa-envelope mr-1"></i> Contacto
+                                </a>
+                                <a href="#" class="text-sm text-gray-500 hover:text-luxera-primary dark:text-gray-400 dark:hover:text-luxera-primary-dark transition-colors flex items-center">
+                                    <i class="fas fa-shield-alt mr-1"></i> Privacidad
+                                </a>
                             </div>
+                        </div>
+                        <div class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
+                            <p>Experiencia diseñada con <i class="fas fa-heart text-red-500 mx-1"></i> por LuxeraRD</p>
                         </div>
                     </div>
                 </footer>
@@ -510,79 +955,236 @@
 
     <!-- Scripts -->
     <script>
-        // Dark Mode Toggle
+        // Dark Mode Toggle with enhanced transition
         function toggleDarkMode() {
             const html = document.documentElement;
             const isDark = html.classList.contains('dark');
+            const loadingBar = document.getElementById('theme-loading-bar');
 
-            if (isDark) {
-                html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
+            // Show loading bar
+            loadingBar.style.width = '100%';
+
+            // Add transition class to body for smooth effect
+            document.body.classList.add('theme-transition');
+
+            // Toggle dark class after a short delay for visual effect
+            setTimeout(() => {
+                if (isDark) {
+                    html.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    html.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+
+                // Add subtle animation to the toggle button
+                const toggleBtn = document.querySelector('.dark-mode-toggle');
+                toggleBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    toggleBtn.style.transform = 'scale(1)';
+                }, 150);
+
+                // Hide loading bar
+                setTimeout(() => {
+                    loadingBar.style.width = '0%';
+                }, 400);
+
+                // Remove transition class after animation completes
+                setTimeout(() => {
+                    document.body.classList.remove('theme-transition');
+                }, 500);
+            }, 50);
         }
 
-        // Initialize Dark Mode from localStorage
+        // Initialize Dark Mode from localStorage with smooth transition
         (function initDarkMode() {
             const theme = localStorage.getItem('theme');
-            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            // Apply theme after page loads to avoid flash
+            setTimeout(() => {
+                if (theme === 'dark' || (!theme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+
+                // Add fade-in animation to content
+                document.body.classList.add('theme-transition');
+                setTimeout(() => {
+                    document.body.classList.remove('theme-transition');
+                }, 600);
+            }, 10);
         })();
 
-        // Sidebar Toggle (Mobile)
+        // Sidebar Toggle (Mobile) with enhanced animation
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
 
-            sidebar.classList.toggle('sidebar-visible');
-            overlay.classList.toggle('active');
+            if (sidebar.classList.contains('sidebar-visible')) {
+                // Closing sidebar
+                sidebar.classList.remove('sidebar-visible');
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 300);
+            } else {
+                // Opening sidebar
+                overlay.classList.add('active');
+                setTimeout(() => {
+                    sidebar.classList.add('sidebar-visible');
+                }, 10);
+            }
         }
 
-        // User Dropdown Toggle
+        // User Dropdown Toggle with animation
         function toggleUserDropdown() {
             const dropdown = document.getElementById('user-dropdown');
-            dropdown.classList.toggle('active');
+            const isActive = dropdown.classList.contains('active');
+
+            if (isActive) {
+                dropdown.classList.remove('active');
+            } else {
+                // Close any other open dropdowns
+                document.querySelectorAll('.user-dropdown.active').forEach(el => {
+                    el.classList.remove('active');
+                });
+
+                dropdown.classList.add('active');
+            }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('user-dropdown');
-            const userButton = dropdown?.previousElementSibling;
+            const userButton = dropdown?.closest('.relative')?.querySelector('button');
 
-            if (dropdown && !dropdown.contains(event.target) && !userButton.contains(event.target)) {
+            if (dropdown && !dropdown.contains(event.target) && userButton && !userButton.contains(event.target)) {
                 dropdown.classList.remove('active');
+            }
+
+            // Close sidebar overlay when clicking on it
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay && overlay.contains(event.target)) {
+                toggleSidebar();
             }
         });
 
-        // Auto-hide flash messages after 5 seconds
+        // Auto-hide flash messages with enhanced animation
         setTimeout(function() {
             const flashMessages = document.querySelectorAll('.flash-message');
             flashMessages.forEach(function(message) {
-                message.style.animation = 'fadeOut 0.5s ease-out forwards';
+                message.style.animation = 'slideInRight 0.3s ease-out reverse forwards';
                 setTimeout(function() {
-                    message.remove();
-                }, 500);
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function() {
+                        if (message.parentNode) {
+                            message.remove();
+                        }
+                    }, 300);
+                }, 300);
             });
         }, 5000);
 
-        // Add fadeOut animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeOut {
-                from {
-                    opacity: 1;
-                    transform: translateX(0);
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Toggle sidebar with Ctrl+B or Cmd+B
+            if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+                event.preventDefault();
+                toggleSidebar();
+            }
+
+            // Toggle dark mode with Ctrl+D or Cmd+D
+            if ((event.ctrlKey || event.metaKey) && event.key === 'd') {
+                event.preventDefault();
+                toggleDarkMode();
+            }
+
+            // Close dropdowns with Escape
+            if (event.key === 'Escape') {
+                const dropdowns = document.querySelectorAll('.user-dropdown.active');
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+
+                // Close sidebar on mobile
+                if (window.innerWidth < 768) {
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar.classList.contains('sidebar-visible')) {
+                        toggleSidebar();
+                    }
                 }
+            }
+        });
+
+        // Add hover effect to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+
+        // System theme change listener
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('theme')) {
+                if (e.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        });
+
+        // Add ripple effect to buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-primary') || e.target.closest('.btn-primary')) {
+                const btn = e.target.classList.contains('btn-primary') ? e.target : e.target.closest('.btn-primary');
+                const ripple = document.createElement('span');
+                const rect = btn.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.7);
+                    transform: scale(0);
+                    animation: ripple-animation 0.6s linear;
+                    width: ${size}px;
+                    height: ${size}px;
+                    top: ${y}px;
+                    left: ${x}px;
+                    pointer-events: none;
+                `;
+
+                btn.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+
+        // Add ripple animation
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple-animation {
                 to {
+                    transform: scale(4);
                     opacity: 0;
-                    transform: translateX(100%);
                 }
             }
         `;
-        document.head.appendChild(style);
+        document.head.appendChild(rippleStyle);
     </script>
 
     {% block extra_js %}{% endblock %}
