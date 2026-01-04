@@ -1,5 +1,5 @@
 # ============================================
-# RUTAS DE FACTURACIÓN
+# RUTAS DE FACTURACIÃ“N
 # ============================================
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
@@ -15,7 +15,7 @@ import io
 from sqlalchemy import or_, and_
 
 # ============================================
-# CREAR BLUEPRINT DE FACTURACIÓN
+# CREAR BLUEPRINT DE FACTURACIÃ“N
 # ============================================
 
 invoices_bp = Blueprint(
@@ -33,11 +33,11 @@ invoices_bp = Blueprint(
 @login_required
 def invoices_list():
     """
-    Lista de todas las facturas con búsqueda y filtros
+    Lista de todas las facturas con bÃºsqueda y filtros
 
     URL: /invoices/
     """
-    # Parámetros de búsqueda
+    # ParÃ¡metros de bÃºsqueda
     search_query = request.args.get('q', '').strip()
     status_filter = request.args.get('status', '').strip()
     date_from = request.args.get('date_from', '').strip()
@@ -46,7 +46,7 @@ def invoices_list():
     # Query base
     query = Invoice.query
 
-    # Aplicar búsqueda
+    # Aplicar bÃºsqueda
     if search_query:
         query = query.join(Customer).filter(
             or_(
@@ -81,7 +81,7 @@ def invoices_list():
     # Ordenar por fecha descendente
     invoices = query.order_by(Invoice.invoice_date.desc(), Invoice.id.desc()).all()
 
-    # Calcular estadísticas
+    # Calcular estadÃ­sticas
     total_invoices = len(invoices)
     total_amount = sum(inv.total for inv in invoices)
 
@@ -119,7 +119,7 @@ def invoice_new():
 
     URL: /invoices/new
     """
-    # Obtener configuración
+    # Obtener configuraciÃ³n
     settings = InvoiceSettings.get_settings()
 
     # Obtener clientes activos
@@ -152,7 +152,7 @@ def invoice_new():
 @login_required
 def invoice_create():
     """
-    Procesar creación de nueva factura
+    Procesar creaciÃ³n de nueva factura
 
     URL: /invoices/create (POST)
     """
@@ -173,7 +173,7 @@ def invoice_create():
 
         customer = Customer.query.get_or_404(int(customer_id))
 
-        # Obtener configuración y generar números
+        # Obtener configuraciÃ³n y generar nÃºmeros
         settings = InvoiceSettings.get_settings()
         invoice_number = settings.get_next_invoice_number()
         ncf = settings.get_next_ncf()
@@ -234,7 +234,7 @@ def invoice_create():
         # Calcular totales
         invoice.calculate_totals()
 
-        # Guardar configuración actualizada
+        # Guardar configuraciÃ³n actualizada
         db.session.add(settings)
         db.session.commit()
 
@@ -297,15 +297,10 @@ def invoice_edit(invoice_id):
         Laptop.quantity > 0
     ).order_by(Laptop.display_name).all()
 
-    # Serializar laptops a diccionarios
-    laptops = [{
-        'id': laptop.id,
-        'display_name': laptop.display_name,
-        'sku': laptop.sku,
-        'sale_price': float(laptop.sale_price),
-        'quantity': laptop.quantity,
-        'short_description': laptop.short_description or ''
-    } for laptop in laptops_query]
+    # Serializar laptops a diccionarios con todas las relaciones
+    # IMPORTANTE: Usar to_dict(include_relationships=True) para incluir brand, model, processor, ram, etc.
+    # El frontend necesita estos campos para la búsqueda y visualización correcta
+    laptops = [laptop.to_dict(include_relationships=True) for laptop in laptops_query]
 
     return render_template(
         'invoices/invoice_form.html',
@@ -336,7 +331,7 @@ def invoice_update(invoice_id):
         return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
     try:
-        # Actualizar datos básicos
+        # Actualizar datos bÃ¡sicos
         invoice.invoice_date = datetime.strptime(request.form.get('invoice_date'), '%Y-%m-%d').date()
         due_date = request.form.get('due_date')
         invoice.due_date = datetime.strptime(due_date, '%Y-%m-%d').date() if due_date else None
@@ -415,7 +410,7 @@ def invoice_change_status(invoice_id):
         db.session.commit()
         flash(f'Estado actualizado a {new_status}', 'success')
     else:
-        flash('Estado inválido', 'error')
+        flash('Estado invÃ¡lido', 'error')
 
     return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
@@ -506,8 +501,8 @@ def export_csv():
 
     # Encabezados
     writer.writerow([
-        'Número', 'NCF', 'Fecha', 'Cliente', 'RNC/Cédula',
-        'Subtotal', 'ITBIS', 'Total', 'Estado', 'Método de Pago'
+        'NÃºmero', 'NCF', 'Fecha', 'Cliente', 'RNC/CÃ©dula',
+        'Subtotal', 'ITBIS', 'Total', 'Estado', 'MÃ©todo de Pago'
     ])
 
     # Datos
@@ -536,19 +531,19 @@ def export_csv():
 
 
 # ============================================
-# RUTA: CONFIGURACIÓN DE FACTURACIÓN
+# RUTA: CONFIGURACIÃ“N DE FACTURACIÃ“N
 # ============================================
 
 @invoices_bp.route('/settings', methods=['GET'])
 @login_required
 def settings():
     """
-    Mostrar configuración de facturación
+    Mostrar configuraciÃ³n de facturaciÃ³n
 
     URL: /invoices/settings
     """
     if not current_user.is_admin:
-        flash('No tienes permiso para acceder a esta página', 'error')
+        flash('No tienes permiso para acceder a esta pÃ¡gina', 'error')
         return redirect(url_for('invoices.invoices_list'))
 
     settings = InvoiceSettings.get_settings()
@@ -556,19 +551,19 @@ def settings():
 
 
 # ============================================
-# RUTA: ACTUALIZAR CONFIGURACIÓN
+# RUTA: ACTUALIZAR CONFIGURACIÃ“N
 # ============================================
 
 @invoices_bp.route('/settings/update', methods=['POST'])
 @login_required
 def settings_update():
     """
-    Actualizar configuración de facturación
+    Actualizar configuraciÃ³n de facturaciÃ³n
 
     URL: /invoices/settings/update (POST)
     """
     if not current_user.is_admin:
-        flash('No tienes permiso para realizar esta acción', 'error')
+        flash('No tienes permiso para realizar esta acciÃ³n', 'error')
         return redirect(url_for('invoices.invoices_list'))
 
     settings = InvoiceSettings.get_settings()
@@ -588,10 +583,10 @@ def settings_update():
             settings.ncf_valid_until = datetime.strptime(ncf_valid_until, '%Y-%m-%d').date()
 
         db.session.commit()
-        flash('Configuración actualizada exitosamente', 'success')
+        flash('ConfiguraciÃ³n actualizada exitosamente', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Error al actualizar configuración: {str(e)}', 'error')
+        flash(f'Error al actualizar configuraciÃ³n: {str(e)}', 'error')
 
     return redirect(url_for('invoices.settings'))
 
