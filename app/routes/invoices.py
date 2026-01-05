@@ -1,5 +1,5 @@
 # ============================================
-# RUTAS DE FACTURACIÃ“N
+# RUTAS DE FACTURACIÃ"N
 # ============================================
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
@@ -8,14 +8,16 @@ from app import db
 from app.models.invoice import Invoice, InvoiceItem, InvoiceSettings
 from app.models.customer import Customer
 from app.models.laptop import Laptop
+from app.services.invoice_inventory_service import InvoiceInventoryService
 from datetime import datetime, date
 from decimal import Decimal
 import csv
 import io
+import json
 from sqlalchemy import or_, and_
 
 # ============================================
-# CREAR BLUEPRINT DE FACTURACIÃ“N
+# CREAR BLUEPRINT DE FACTURACIÃ"N
 # ============================================
 
 invoices_bp = Blueprint(
@@ -173,6 +175,21 @@ def invoice_create():
 
         customer = Customer.query.get_or_404(int(customer_id))
 
+        # Procesar items del formulario
+        items_data = []
+        raw_items = request.form.getlist('items')
+
+        for item_json in raw_items:
+            item_data = json.loads(item_json)
+            items_data.append(item_data)
+
+        # VALIDAR STOCK antes de crear la factura
+        if status == 'paid':  # Solo validar stock si se va a marcar como pagada inmediatamente
+            is_valid, error_msg = InvoiceInventoryService.validate_stock_for_invoice_items(items_data)
+            if not is_valid:
+                flash(f'Error de stock: {error_msg}', 'error')
+                return redirect(url_for('invoices.invoice_new'))
+
         # Obtener configuraciÃ³n y generar nÃºmeros
         settings = InvoiceSettings.get_settings()
         invoice_number = settings.get_next_invoice_number()
@@ -196,13 +213,9 @@ def invoice_create():
         db.session.flush()  # Para obtener el ID
 
         # Procesar items
-        items_data = request.form.getlist('items')
         line_order = 0
 
-        for item_json in items_data:
-            import json
-            item_data = json.loads(item_json)
-
+        for item_data in items_data:
             item_type = item_data.get('type', 'custom')
             description = item_data.get('description', '').strip()
             quantity = int(item_data.get('quantity', 1))
@@ -234,6 +247,14 @@ def invoice_create():
         # Calcular totales
         invoice.calculate_totals()
 
+        # Si la factura se crea como pagada, descontar inventario
+        if status == 'paid':
+            success, error_msg = InvoiceInventoryService.update_inventory_for_invoice(invoice, action='subtract')
+            if not success:
+                db.session.rollback()
+                flash(f'Error al actualizar inventario: {error_msg}', 'error')
+                return redirect(url_for('invoices.invoice_new'))
+
         # Guardar configuraciÃ³n actualizada
         db.session.add(settings)
         db.session.commit()
@@ -262,10 +283,18 @@ def invoice_detail(invoice_id):
     invoice = Invoice.query.get_or_404(invoice_id)
     settings = InvoiceSettings.get_settings()
 
+    # Obtener resumen de inventario para mostrar en el detalle
+    inventory_summary = InvoiceInventoryService.get_inventory_summary_for_invoice(invoice)
+
+    # Verificar disponibilidad de items
+    availability_check = InvoiceInventoryService.check_invoice_items_availability(invoice)
+
     return render_template(
         'invoices/invoice_detail.html',
         invoice=invoice,
-        settings=settings
+        settings=settings,
+        inventory_summary=inventory_summary,
+        availability_check=availability_check
     )
 
 
@@ -331,6 +360,24 @@ def invoice_update(invoice_id):
         return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
     try:
+        # Procesar items del formulario
+        items_data = []
+        raw_items = request.form.getlist('items')
+
+        for item_json in raw_items:
+            item_data = json.loads(item_json)
+            items_data.append(item_data)
+
+        # Obtener el nuevo estado del formulario
+        new_status = request.form.get('status', 'draft')
+
+        # Si se está cambiando a 'paid', validar stock
+        if new_status == 'paid':
+            is_valid, error_msg = InvoiceInventoryService.validate_stock_for_invoice_items(items_data)
+            if not is_valid:
+                flash(f'Error de stock: {error_msg}', 'error')
+                return redirect(url_for('invoices.invoice_edit', invoice_id=invoice.id))
+
         # Actualizar datos bÃ¡sicos
         invoice.invoice_date = datetime.strptime(request.form.get('invoice_date'), '%Y-%m-%d').date()
         due_date = request.form.get('due_date')
@@ -338,19 +385,19 @@ def invoice_update(invoice_id):
         invoice.payment_method = request.form.get('payment_method', 'cash')
         invoice.notes = request.form.get('notes', '').strip()
         invoice.terms = request.form.get('terms', '').strip()
-        invoice.status = request.form.get('status', 'draft')
+
+        # Guardar el estado anterior para comparar
+        old_status = invoice.status
+        invoice.status = new_status
 
         # Eliminar items anteriores
         InvoiceItem.query.filter_by(invoice_id=invoice.id).delete()
+        db.session.flush()
 
         # Agregar nuevos items
-        items_data = request.form.getlist('items')
         line_order = 0
 
-        for item_json in items_data:
-            import json
-            item_data = json.loads(item_json)
-
+        for item_data in items_data:
             item_type = item_data.get('type', 'custom')
             description = item_data.get('description', '').strip()
             quantity = int(item_data.get('quantity', 1))
@@ -380,6 +427,24 @@ def invoice_update(invoice_id):
         # Recalcular totales
         invoice.calculate_totals()
 
+        # Manejar cambios de estado que afectan el inventario
+        if old_status != new_status:
+            # Si estaba pagada y ahora no (ej: cancelled), restaurar inventario
+            if old_status == 'paid' and new_status != 'paid':
+                success, error_msg = InvoiceInventoryService.update_inventory_for_invoice(invoice, action='add')
+                if not success:
+                    db.session.rollback()
+                    flash(f'Error al restaurar inventario: {error_msg}', 'error')
+                    return redirect(url_for('invoices.invoice_edit', invoice_id=invoice.id))
+
+            # Si no estaba pagada y ahora sí, descontar inventario
+            elif old_status != 'paid' and new_status == 'paid':
+                success, error_msg = InvoiceInventoryService.update_inventory_for_invoice(invoice, action='subtract')
+                if not success:
+                    db.session.rollback()
+                    flash(f'Error al actualizar inventario: {error_msg}', 'error')
+                    return redirect(url_for('invoices.invoice_edit', invoice_id=invoice.id))
+
         db.session.commit()
         flash('Factura actualizada exitosamente', 'success')
         return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
@@ -404,13 +469,62 @@ def invoice_change_status(invoice_id):
     """
     invoice = Invoice.query.get_or_404(invoice_id)
     new_status = request.form.get('status')
+    old_status = invoice.status
 
-    if new_status in ['draft', 'issued', 'paid', 'cancelled', 'overdue']:
+    if new_status not in ['draft', 'issued', 'paid', 'cancelled', 'overdue']:
+        flash('Estado invÃ¡lido', 'error')
+        return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
+
+    try:
+        # Validar stock si se va a marcar como pagada
+        if new_status == 'paid' and old_status != 'paid':
+            # Verificar disponibilidad de items
+            availability = InvoiceInventoryService.check_invoice_items_availability(invoice)
+
+            if not availability['can_process']:
+                error_msg = "No se puede marcar como pagada: "
+                if availability['unavailable_items']:
+                    error_msg += "Algunos items no existen en inventario. "
+                if availability['warnings']:
+                    for warning in availability['warnings']:
+                        error_msg += f"{warning['description']}: Stock insuficiente (disponible: {warning['available']}, solicitado: {warning['requested']}). "
+
+                flash(error_msg, 'error')
+                return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
+
+        # Actualizar estado
         invoice.status = new_status
+
+        # Manejar cambios de estado que afectan el inventario
+        if old_status != new_status:
+            # Si estaba pagada y ahora no (ej: cancelled), restaurar inventario
+            if old_status == 'paid' and new_status != 'paid':
+                success, error_msg = InvoiceInventoryService.update_inventory_for_invoice(invoice, action='add')
+                if not success:
+                    db.session.rollback()
+                    flash(f'Error al restaurar inventario: {error_msg}', 'error')
+                    return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
+
+            # Si no estaba pagada y ahora sí, descontar inventario
+            elif old_status != 'paid' and new_status == 'paid':
+                success, error_msg = InvoiceInventoryService.update_inventory_for_invoice(invoice, action='subtract')
+                if not success:
+                    db.session.rollback()
+                    flash(f'Error al actualizar inventario: {error_msg}', 'error')
+                    return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
+
         db.session.commit()
         flash(f'Estado actualizado a {new_status}', 'success')
-    else:
-        flash('Estado invÃ¡lido', 'error')
+
+        # Si se marcó como pagada, mostrar resumen de inventario actualizado
+        if new_status == 'paid':
+            inventory_summary = InvoiceInventoryService.get_inventory_summary_for_invoice(invoice)
+            if inventory_summary['has_laptops']:
+                flash(f'Inventario actualizado: {inventory_summary["total_units"]} unidades vendidas', 'info')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al cambiar estado: {str(e)}', 'error')
 
     return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
@@ -433,6 +547,14 @@ def invoice_delete(invoice_id):
     if invoice.status != 'draft':
         flash('Solo se pueden eliminar facturas en borrador', 'warning')
         return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
+
+    # Si la factura tiene items de laptop y está pagada, restaurar inventario primero
+    if invoice.status == 'paid':
+        has_laptops = any(item.item_type == 'laptop' for item in invoice.items.all())
+        if has_laptops:
+            flash('No se puede eliminar una factura pagada con laptops. Primero cámbiale el estado a "cancelled"',
+                  'error')
+            return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
     try:
         db.session.delete(invoice)
@@ -531,7 +653,7 @@ def export_csv():
 
 
 # ============================================
-# RUTA: CONFIGURACIÃ“N DE FACTURACIÃ“N
+# RUTA: CONFIGURACIÃ"N DE FACTURACIÃ"N
 # ============================================
 
 @invoices_bp.route('/settings', methods=['GET'])
@@ -551,7 +673,7 @@ def settings():
 
 
 # ============================================
-# RUTA: ACTUALIZAR CONFIGURACIÃ“N
+# RUTA: ACTUALIZAR CONFIGURACIÃ"N
 # ============================================
 
 @invoices_bp.route('/settings/update', methods=['POST'])
