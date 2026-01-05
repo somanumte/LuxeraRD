@@ -5,44 +5,101 @@
 {% block extra_css %}
 <style>
     @media print {
-        @page { margin: 0; }
+        @page {
+            margin: 0.5cm;
+            size: A4;
+        }
+
         body {
             background: white !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-size: 12px !important;
+            line-height: 1.2 !important;
         }
-        .no-print { display: none !important; }
+
+        .no-print {
+            display: none !important;
+        }
+
         .print-area {
             box-shadow: none !important;
             border: none !important;
             margin: 0 !important;
+            padding: 0 !important;
             width: 100% !important;
             max-width: none !important;
-            padding: 2cm !important;
         }
-        /* Asegurar que el fondo blanco se imprima */
+
+        /* Optimizar espacios para impresión */
+        .print-optimize {
+            margin-bottom: 0.5cm !important;
+            padding: 0.3cm !important;
+        }
+
+        .print-compact {
+            margin: 0.2cm 0 !important;
+            padding: 0.2cm !important;
+        }
+
+        /* Evitar saltos de página en elementos importantes */
+        table {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        .summary-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        /* Asegurar colores de impresión */
         .bg-gray-50 { background-color: #f9fafb !important; }
         .bg-gray-100 { background-color: #f3f4f6 !important; }
+        .text-indigo-700 { color: #4338ca !important; }
+    }
+
+    /* Mejoras estéticas para vista normal */
+    .invoice-header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .total-highlight {
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <div class="no-print mb-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                        Factura {{ invoice.invoice_number }}
-                    </h1>
-                    <p class="mt-1 text-gray-600 dark:text-gray-400 font-mono">
-                        NCF: {{ invoice.ncf }}
-                    </p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6">
+        <!-- Encabezado de acciones (no se imprime) -->
+        <div class="no-print mb-6">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                Factura {{ invoice.invoice_number }}
+                            </h1>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                                NCF: {{ invoice.ncf }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 font-medium">
+
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="window.print()"
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 font-medium shadow-sm">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                         </svg>
@@ -51,7 +108,7 @@
 
                     {% if invoice.status == 'draft' %}
                     <a href="{{ url_for('invoices.invoice_edit', invoice_id=invoice.id) }}"
-                       class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                       class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
@@ -60,38 +117,52 @@
                     {% endif %}
 
                     <a href="{{ url_for('invoices.invoices_list') }}"
-                       class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium shadow-sm">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
                         Volver
                     </a>
                 </div>
             </div>
 
-            <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+            <!-- Estado de la factura -->
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado actual:</span>
+                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado:</span>
                         {% if invoice.is_overdue %}
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">Vencida</span>
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white border border-yellow-300 shadow-sm">
+                                Vencida
+                            </span>
                         {% elif invoice.status == 'draft' %}
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">Borrador</span>
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-gray-400 to-gray-600 text-white border border-gray-300 shadow-sm">
+                                Borrador
+                            </span>
                         {% elif invoice.status == 'issued' %}
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Emitida</span>
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white border border-blue-300 shadow-sm">
+                                Emitida
+                            </span>
                         {% elif invoice.status == 'paid' %}
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800">Pagada</span>
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white border border-emerald-300 shadow-sm">
+                                Pagada
+                            </span>
                         {% elif invoice.status == 'cancelled' %}
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800">Cancelada</span>
+                            <span class="px-3 py-1.5 text-xs font-bold rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white border border-red-300 shadow-sm">
+                                Cancelada
+                            </span>
                         {% endif %}
                     </div>
 
                     {% if invoice.status != 'cancelled' %}
                     <form method="POST" action="{{ url_for('invoices.invoice_change_status', invoice_id=invoice.id) }}" class="flex w-full sm:w-auto gap-2">
-                        <select name="status" class="flex-1 sm:flex-none px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <select name="status" class="flex-1 sm:flex-auto px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">
                             <option value="draft" {% if invoice.status == 'draft' %}selected{% endif %}>Borrador</option>
                             <option value="issued" {% if invoice.status == 'issued' %}selected{% endif %}>Emitida</option>
                             <option value="paid" {% if invoice.status == 'paid' %}selected{% endif %}>Pagada</option>
                             <option value="cancelled" {% if invoice.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
                         </select>
-                        <button type="submit" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                        <button type="submit" class="px-4 py-2 text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-md transition-all duration-300 font-medium shadow-sm">
                             Actualizar
                         </button>
                     </form>
@@ -100,25 +171,35 @@
             </div>
         </div>
 
-        <div class="print-area max-w-4xl mx-auto bg-white text-gray-900 p-8 sm:p-12 rounded-xl shadow-lg border border-gray-200">
-
-            <div class="border-b-2 border-indigo-600 pb-8 mb-8">
-                <div class="flex flex-col sm:flex-row justify-between items-start gap-6">
+        <!-- Área de impresión (factura) -->
+        <div class="print-area max-w-4xl mx-auto bg-white text-gray-900 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 print-optimize">
+            <!-- Encabezado de la factura -->
+            <div class="border-b-2 border-indigo-600 pb-4 mb-4 print-compact">
+                <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                     <div class="flex-1">
-                        <h1 class="text-3xl font-bold text-indigo-700 mb-2">{{ settings.company_name }}</h1>
-                        <div class="text-sm text-gray-600 space-y-1">
-                            <p class="font-semibold">RNC: {{ settings.company_rnc }}</p>
-                            <p>{{ settings.company_address }}</p>
-                            <p>Tel: {{ settings.company_phone }}</p>
-                            {% if settings.company_email %}
-                            <p>Email: {{ settings.company_email }}</p>
-                            {% endif %}
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-indigo-100 rounded-lg">
+                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-indigo-700 mb-1">{{ settings.company_name }}</h1>
+                                <div class="text-xs text-gray-600 space-y-0.5">
+                                    <p class="font-medium">RNC: {{ settings.company_rnc }}</p>
+                                    <p>{{ settings.company_address }}</p>
+                                    <p>Tel: {{ settings.company_phone }}</p>
+                                    {% if settings.company_email %}
+                                    <p>Email: {{ settings.company_email }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="text-left sm:text-right">
-                        <div class="text-3xl font-bold text-gray-800 tracking-wider mb-2">FACTURA</div>
-                        <div class="text-sm space-y-1">
+                    <div class="text-left md:text-right mt-2 md:mt-0">
+                        <div class="text-2xl font-bold text-gray-800 tracking-tight mb-2">FACTURA</div>
+                        <div class="text-xs space-y-0.5 bg-gray-50 p-3 rounded-lg">
                             <p><span class="font-bold text-gray-700">Fecha:</span> {{ invoice.invoice_date.strftime('%d/%m/%Y') }}</p>
                             <p><span class="font-bold text-gray-700">No:</span> {{ invoice.invoice_number }}</p>
                             <p><span class="font-bold text-gray-700">NCF:</span> {{ invoice.ncf }}</p>
@@ -131,107 +212,127 @@
                 </div>
             </div>
 
-            <div class="mb-10">
-                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Facturar a:</h2>
-                <div class="bg-gray-50 border border-gray-200 p-5 rounded-lg">
-                    <p class="text-xl font-bold text-gray-900 mb-2">{{ invoice.customer.full_name }}</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600">
-                        <p><span class="font-semibold">{{ invoice.customer.id_type|upper }}:</span> {{ invoice.customer.id_number }}</p>
-                        {% if invoice.customer.phone_primary %}
-                        <p><span class="font-semibold">Tel:</span> {{ invoice.customer.phone_primary }}</p>
-                        {% endif %}
-                        {% if invoice.customer.email %}
-                        <p><span class="font-semibold">Email:</span> {{ invoice.customer.email }}</p>
-                        {% endif %}
-                        {% if invoice.customer.full_address != 'Sin dirección' %}
-                        <p class="sm:col-span-2"><span class="font-semibold">Dir:</span> {{ invoice.customer.full_address }}</p>
-                        {% endif %}
+            <!-- Información del cliente -->
+            <div class="mb-6 print-compact">
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Facturar a:</h2>
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-300 p-4 rounded-lg">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-lg font-bold text-gray-900 mb-1">{{ invoice.customer.full_name }}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-gray-600">
+                                <p><span class="font-semibold">{{ invoice.customer.id_type|upper }}:</span> {{ invoice.customer.id_number }}</p>
+                                {% if invoice.customer.phone_primary %}
+                                <p><span class="font-semibold">Tel:</span> {{ invoice.customer.phone_primary }}</p>
+                                {% endif %}
+                                {% if invoice.customer.email %}
+                                <p><span class="font-semibold">Email:</span> {{ invoice.customer.email }}</p>
+                                {% endif %}
+                                {% if invoice.customer.full_address != 'Sin dirección' %}
+                                <p class="sm:col-span-2"><span class="font-semibold">Dir:</span> {{ invoice.customer.full_address }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="hidden sm:block p-2 bg-indigo-50 rounded-lg">
+                            <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-10 overflow-hidden">
-                <table class="w-full">
+            <!-- Tabla de items -->
+            <div class="mb-6 overflow-hidden print-compact">
+                <table class="w-full border-collapse">
                     <thead>
-                        <tr class="bg-gray-100 border-b-2 border-gray-300">
-                            <th class="text-left py-3 px-4 font-bold text-gray-700 uppercase text-xs tracking-wider">Cant.</th>
-                            <th class="text-left py-3 px-4 font-bold text-gray-700 uppercase text-xs tracking-wider w-1/2">Descripción</th>
-                            <th class="text-right py-3 px-4 font-bold text-gray-700 uppercase text-xs tracking-wider">Precio Unit.</th>
-                            <th class="text-right py-3 px-4 font-bold text-gray-700 uppercase text-xs tracking-wider">Total</th>
+                        <tr class="bg-gradient-to-r from-gray-100 to-gray-200 border-b-2 border-gray-300">
+                            <th class="text-left py-2 px-3 font-bold text-gray-700 uppercase text-xs tracking-wider w-12">Cant.</th>
+                            <th class="text-left py-2 px-3 font-bold text-gray-700 uppercase text-xs tracking-wider">Descripción</th>
+                            <th class="text-right py-2 px-3 font-bold text-gray-700 uppercase text-xs tracking-wider w-28">Precio Unit.</th>
+                            <th class="text-right py-2 px-3 font-bold text-gray-700 uppercase text-xs tracking-wider w-28">Total</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         {% for item in invoice.items.order_by('line_order').all() %}
-                        <tr>
-                            <td class="py-4 px-4 text-gray-900 font-medium align-top">{{ item.quantity }}</td>
-                            <td class="py-4 px-4 text-gray-900 align-top">
-                                <div class="font-medium">{{ item.description }}</div>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-3 text-gray-900 font-medium align-top">{{ item.quantity }}</td>
+                            <td class="py-2 px-3 text-gray-900 align-top">
+                                <div class="font-medium text-sm">{{ item.description }}</div>
                                 {% if item.laptop %}
                                 <div class="text-xs text-gray-500 mt-0.5">SKU: {{ item.laptop.sku }}</div>
                                 {% endif %}
                             </td>
-                            <td class="py-4 px-4 text-right text-gray-900 whitespace-nowrap align-top">RD$ {{ "{:,.2f}".format(item.unit_price|float) }}</td>
-                            <td class="py-4 px-4 text-right font-bold text-gray-900 whitespace-nowrap align-top">RD$ {{ "{:,.2f}".format(item.line_total|float) }}</td>
+                            <td class="py-2 px-3 text-right text-gray-900 whitespace-nowrap align-top text-sm">RD$ {{ "{:,.2f}".format(item.unit_price|float) }}</td>
+                            <td class="py-2 px-3 text-right font-bold text-gray-900 whitespace-nowrap align-top text-sm">RD$ {{ "{:,.2f}".format(item.line_total|float) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-end mb-10">
-                <div class="w-full sm:w-80 space-y-3">
+            <!-- Resumen de totales -->
+            <div class="flex flex-col md:flex-row justify-end mb-6 summary-section">
+                <div class="w-full md:w-96 space-y-2 bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-300">
                     <div class="flex justify-between text-gray-600">
-                        <span>Subtotal:</span>
+                        <span class="font-medium">Subtotal:</span>
                         <span class="font-semibold">RD$ {{ "{:,.2f}".format(invoice.subtotal|float) }}</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
-                        <span>ITBIS (18%):</span>
+                        <span class="font-medium">ITBIS (18%):</span>
                         <span class="font-semibold">RD$ {{ "{:,.2f}".format(invoice.tax_amount|float) }}</span>
                     </div>
-                    <div class="flex justify-between py-3 border-t-2 border-gray-900 text-xl font-bold text-gray-900">
+                    <div class="flex justify-between pt-3 border-t-2 border-gray-300 text-xl font-bold text-gray-900">
                         <span>TOTAL:</span>
-                        <span>RD$ {{ "{:,.2f}".format(invoice.total|float) }}</span>
+                        <span class="total-highlight text-2xl">RD$ {{ "{:,.2f}".format(invoice.total|float) }}</span>
                     </div>
 
-                    <div class="pt-4 border-t border-gray-200">
+                    <div class="pt-3 border-t border-gray-200 mt-2">
                         <div class="flex justify-between text-sm text-gray-600">
-                            <span>Método de Pago:</span>
-                            <span class="font-semibold text-gray-900">{{ invoice.payment_method|title }}</span>
+                            <span class="font-medium">Método de Pago:</span>
+                            <span class="font-bold text-gray-900 bg-indigo-100 px-2 py-1 rounded">{{ invoice.payment_method|title }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 mb-8">
+            <!-- Términos y notas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 print-compact">
                 {% if invoice.terms %}
-                <div>
-                    <h3 class="font-bold text-gray-700 text-sm mb-2 uppercase">Términos y Condiciones:</h3>
-                    <div class="text-sm text-gray-600 whitespace-pre-line bg-gray-50 p-3 rounded border border-gray-200">{{ invoice.terms }}</div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <h3 class="font-bold text-blue-700 text-xs mb-1 uppercase">Términos y Condiciones:</h3>
+                    <div class="text-xs text-gray-700 whitespace-pre-line">{{ invoice.terms }}</div>
                 </div>
                 {% endif %}
 
                 {% if invoice.notes %}
-                <div class="no-print">
-                    <h3 class="font-bold text-gray-700 text-sm mb-2 uppercase">Notas Internas:</h3>
-                    <div class="text-sm text-gray-600 whitespace-pre-line bg-yellow-50 p-3 rounded border border-yellow-200">{{ invoice.notes }}</div>
+                <div class="no-print bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <h3 class="font-bold text-yellow-700 text-xs mb-1 uppercase">Notas Internas:</h3>
+                    <div class="text-xs text-gray-700 whitespace-pre-line">{{ invoice.notes }}</div>
                 </div>
                 {% endif %}
             </div>
 
-            <div class="border-t border-gray-200 pt-6 text-center">
-                <p class="mt-2 text-indigo-600 font-medium">Gracias por su preferencia</p>
+            <!-- Pie de página -->
+            <div class="border-t border-gray-300 pt-4 text-center print-compact">
+                <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 mb-2">
+                    <div>Factura generada el {{ invoice.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                    <div>Página 1 de 1</div>
+                </div>
+                <p class="text-indigo-600 font-bold text-sm">¡Gracias por su preferencia!</p>
+                <p class="text-gray-500 text-xs mt-1">{{ settings.company_name }} - Todos los derechos reservados</p>
             </div>
         </div>
 
+        <!-- Botón de eliminación (solo borradores) -->
         {% if invoice.status == 'draft' %}
-        <div class="no-print max-w-4xl mx-auto mt-8 flex justify-end">
+        <div class="no-print max-w-4xl mx-auto mt-6 flex justify-center">
             <form method="POST" action="{{ url_for('invoices.invoice_delete', invoice_id=invoice.id) }}"
                   onsubmit="return confirm('¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.')">
-                <button type="submit" class="flex items-center text-red-600 hover:text-red-800 text-sm font-medium transition-colors p-2 hover:bg-red-50 rounded-lg">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="submit" class="flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 font-medium shadow-sm">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
-                    Eliminar Factura Permanentemente
+                    Eliminar Factura
                 </button>
             </form>
         </div>
