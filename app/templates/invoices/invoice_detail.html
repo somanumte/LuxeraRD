@@ -119,9 +119,10 @@
                     <div class="text-left sm:text-right">
                         <div class="text-3xl font-bold text-gray-800 tracking-wider mb-2">FACTURA</div>
                         <div class="text-sm space-y-1">
+                            <p><span class="font-bold text-gray-700">Fecha:</span> {{ invoice.invoice_date.strftime('%d/%m/%Y') }}</p>
                             <p><span class="font-bold text-gray-700">No:</span> {{ invoice.invoice_number }}</p>
                             <p><span class="font-bold text-gray-700">NCF:</span> {{ invoice.ncf }}</p>
-                            <p><span class="font-bold text-gray-700">Fecha:</span> {{ invoice.invoice_date.strftime('%d/%m/%Y') }}</p>
+                            <p><span class="font-bold text-gray-700">Válido hasta:</span> {{ settings.ncf_valid_until.strftime('%d/%m/%Y') if settings.ncf_valid_until else 'N/A' }}</p>
                             {% if invoice.due_date %}
                             <p><span class="font-bold text-gray-700">Vence:</span> {{ invoice.due_date.strftime('%d/%m/%Y') }}</p>
                             {% endif %}
@@ -218,7 +219,6 @@
             </div>
 
             <div class="border-t border-gray-200 pt-6 text-center">
-                <p class="text-sm text-gray-500">Válido hasta: {{ settings.ncf_valid_until.strftime('%d/%m/%Y') if settings.ncf_valid_until else 'N/A' }}</p>
                 <p class="mt-2 text-indigo-600 font-medium">Gracias por su preferencia</p>
             </div>
         </div>
