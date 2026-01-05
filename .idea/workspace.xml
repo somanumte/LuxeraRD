@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.1.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/invoices.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/invoices.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/invoices/invoice_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/invoices/invoice_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,7 +198,7 @@
       <workItem from="1767314960289" duration="631000" />
       <workItem from="1767350951084" duration="5331000" />
       <workItem from="1767546171116" duration="656000" />
-      <workItem from="1767546883254" duration="403000" />
+      <workItem from="1767546883254" duration="19189000" />
     </task>
     <task id="LOCAL-00001" summary="Proyecto Luxera, V.01">
       <option name="closed" value="true" />
@@ -361,7 +360,63 @@
       <option name="project" value="LOCAL" />
       <updated>1767477231016</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767547289204</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1767547289204</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767554114508</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1767554114508</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767555886576</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1767555886576</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767562107687</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1767562107687</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767563029764</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1767563029764</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767565211795</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1767565211795</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767569477419</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1767569477419</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -377,7 +432,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1767466106955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1767546901947" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1767574048822" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1766812318026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$config.coverage" NAME="config Coverage Results" MODIFIED="1767096506857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1766791114868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
