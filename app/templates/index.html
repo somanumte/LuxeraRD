@@ -1,222 +1,1111 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Inicio{% endblock %}
+{% block title %}Dashboard - LuxeraRD{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ========================================
+       VARIABLES Y ANIMACIONES
+       ======================================== */
+
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    /* ========================================
+       METRIC CARDS - ESTILO SHOPIFY
+       ======================================== */
+
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dark .metric-card {
+        background: #1f2937;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .metric-card:hover::before {
+        left: 100%;
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0.5rem 0;
+    }
+
+    .metric-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .dark .metric-label {
+        color: #9ca3af;
+    }
+
+    .metric-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+    }
+
+    .metric-change.positive {
+        color: #059669;
+        background-color: #d1fae5;
+    }
+
+    .metric-change.negative {
+        color: #dc2626;
+        background-color: #fee2e2;
+    }
+
+    .metric-change.neutral {
+        color: #6b7280;
+        background-color: #f3f4f6;
+    }
+
+    .dark .metric-change.positive {
+        background-color: rgba(5, 150, 105, 0.2);
+    }
+
+    .dark .metric-change.negative {
+        background-color: rgba(220, 38, 38, 0.2);
+    }
+
+    .metric-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ========================================
+       ALERTS MEJORADAS
+       ======================================== */
+
+    .alert-card {
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        border-left-width: 4px;
+        background: white;
+    }
+
+    .dark .alert-card {
+        background: #1f2937;
+    }
+
+    .alert-card:hover {
+        transform: translateX(4px);
+    }
+
+    .alert-card.alert-danger {
+        border-left-color: #ef4444;
+        background-color: #fef2f2;
+    }
+
+    .alert-card.alert-warning {
+        border-left-color: #f59e0b;
+        background-color: #fffbeb;
+    }
+
+    .alert-card.alert-info {
+        border-left-color: #3b82f6;
+        background-color: #eff6ff;
+    }
+
+    .dark .alert-card.alert-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .dark .alert-card.alert-warning {
+        background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    .dark .alert-card.alert-info {
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    /* ========================================
+       TABLES MEJORADAS
+       ======================================== */
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table thead th {
+        background-color: #f9fafb;
+        padding: 0.875rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        border-bottom: 2px solid #e5e7eb;
+        white-space: nowrap;
+    }
+
+    .dark .data-table thead th {
+        background-color: #111827;
+        color: #9ca3af;
+        border-bottom-color: #374151;
+    }
+
+    .data-table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 0.875rem;
+    }
+
+    .dark .data-table tbody td {
+        border-bottom-color: #1f2937;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .dark .data-table tbody tr:hover {
+        background-color: #1f2937;
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ========================================
+       BADGES Y PILLS
+       ======================================== */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .status-badge.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.warning {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-badge.info {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-badge.neutral {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    /* ========================================
+       PROGRESS BARS
+       ======================================== */
+
+    .progress-container {
+        width: 100%;
+        height: 8px;
+        background-color: #e5e7eb;
+        border-radius: 9999px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .dark .progress-container {
+        background-color: #374151;
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 9999px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
+        animation: shimmer 2s infinite;
+    }
+
+    .progress-primary {
+        background: var(--primary-gradient);
+    }
+
+    .progress-success {
+        background: var(--success-gradient);
+    }
+
+    .progress-warning {
+        background: var(--warning-gradient);
+    }
+
+    /* ========================================
+       CHART CONTAINERS
+       ======================================== */
+
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .dark .chart-container {
+        background: #1f2937;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .chart-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .dark .chart-title {
+        color: #f9fafb;
+    }
+
+    /* ========================================
+       INSIGHTS CARDS
+       ======================================== */
+
+    .insight-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 1.25rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .insight-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+    }
+
+    .insight-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .insight-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        opacity: 0.9;
+    }
+
+    .insight-message {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .insight-suggestion {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    /* ========================================
+       PERIOD SELECTOR
+       ======================================== */
+
+    .period-selector {
+        display: inline-flex;
+        background: white;
+        border-radius: 10px;
+        padding: 0.25rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #e5e7eb;
+    }
+
+    .dark .period-selector {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .period-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6b7280;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .period-btn:hover {
+        color: #111827;
+        background: #f3f4f6;
+    }
+
+    .dark .period-btn:hover {
+        color: #f9fafb;
+        background: #374151;
+    }
+
+    .period-btn.active {
+        color: white;
+        background: var(--primary-gradient);
+        font-weight: 600;
+    }
+
+    /* ========================================
+       QUICK ACTIONS
+       ======================================== */
+
+    .quick-action {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .dark .quick-action {
+        background: #1f2937;
+    }
+
+    .quick-action:hover {
+        transform: translateY(-4px);
+        border-color: #667eea;
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+    }
+
+    .quick-action-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .quick-action-text {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .dark .quick-action-text {
+        color: #f9fafb;
+    }
+
+    /* ========================================
+       RESPONSIVE
+       ======================================== */
+
+    @media (max-width: 768px) {
+        .metric-value {
+            font-size: 1.5rem;
+        }
+
+        .chart-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .period-selector {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<!-- ===== HERO SECTION ===== -->
-<div class="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            
-            <!-- Columna izquierda: Texto -->
-            <div class="text-center lg:text-left animate-fade-in">
-                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6">
-                    <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        Bienvenido a
-                    </span>
-                    <br>
-                    <span class="text-gray-900 dark:text-white">Luxera</span>
-                </h1>
-                
-                <p class="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
-                    Sistema de gestión moderno, potente y fácil de usar para llevar tu negocio al siguiente nivel.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('inventory.laptops_list') }}" class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-                            Ir al Inventario
-                            <svg class="inline-block w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                            </svg>
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-                            Comenzar Ahora
-                            <svg class="inline-block w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                            </svg>
-                        </a>
-
-                        {% if allow_registration %}
-                        <a href="{{ url_for('auth.register') }}" class="px-8 py-4 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400 rounded-xl font-semibold text-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transform hover:-translate-y-1 transition-all duration-300">
-                            Registrarse Gratis
-                        </a>
-                        {% endif %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Columna derecha: Ilustración/Imagen -->
-            <div class="relative animate-slide-in-right">
-                <div class="relative">
-                    <!-- Card principal con glassmorphism -->
-                    <div class="glass rounded-2xl p-8 shadow-2xl">
-                        <div class="space-y-4">
-                            <!-- Barra de progreso animada -->
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Productividad</span>
-                                <span class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">95%</span>
-                            </div>
-                            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full animate-pulse" style="width: 95%"></div>
-                            </div>
-
-                            <!-- Stats cards -->
-                            <div class="grid grid-cols-2 gap-4 mt-6">
-                                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
-                                    <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">150+</div>
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">Usuarios</div>
-                                </div>
-                                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
-                                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">24/7</div>
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">Soporte</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Elementos decorativos flotantes -->
-                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full opacity-20 blur-2xl animate-pulse"></div>
-                    <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-pink-400 to-indigo-600 rounded-full opacity-20 blur-2xl animate-pulse" style="animation-delay: 1s"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Onda decorativa -->
-    <div class="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z" class="fill-white dark:fill-gray-900"/>
-        </svg>
-    </div>
-</div>
-
-<!-- ===== CARACTERÍSTICAS ===== -->
-<section class="py-20 bg-white dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16 animate-fade-in">
-            <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                Características Principales
-            </h2>
-            <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Todo lo que necesitas para gestionar tu negocio de manera eficiente
+<!-- Dashboard Header con Period Selector -->
+<div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 sticky top-0 z-10">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Bienvenido de nuevo, {{ current_user.username }} 👋
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-            <!-- Feature 1 -->
-            <div class="card p-8 hover-lift">
-                <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Rápido y Eficiente</h3>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Optimizado para el máximo rendimiento. Accede a tus datos en milisegundos.
-                </p>
+        <div class="flex items-center gap-3">
+            <!-- Period Selector -->
+            <div class="period-selector">
+                <button class="period-btn {% if current_period == 'today' %}active{% endif %}"
+                        onclick="window.location.href='?period=today'">
+                    Hoy
+                </button>
+                <button class="period-btn {% if current_period == 'week' %}active{% endif %}"
+                        onclick="window.location.href='?period=week'">
+                    Semana
+                </button>
+                <button class="period-btn {% if current_period == 'month' or not current_period %}active{% endif %}"
+                        onclick="window.location.href='?period=month'">
+                    Mes
+                </button>
+                <button class="period-btn {% if current_period == 'quarter' %}active{% endif %}"
+                        onclick="window.location.href='?period=quarter'">
+                    Trimestre
+                </button>
+                <button class="period-btn {% if current_period == 'year' %}active{% endif %}"
+                        onclick="window.location.href='?period=year'">
+                    Año
+                </button>
             </div>
 
-            <!-- Feature 2 -->
-            <div class="card p-8 hover-lift">
-                <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Seguro y Confiable</h3>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Encriptación de datos de nivel empresarial. Tus datos están protegidos 24/7.
-                </p>
-            </div>
-
-            <!-- Feature 3 -->
-            <div class="card p-8 hover-lift">
-                <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">100% Responsive</h3>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Funciona perfectamente en cualquier dispositivo. Móvil, tablet o desktop.
-                </p>
-            </div>
-
-            <!-- Feature 4 -->
-            <div class="card p-8 hover-lift">
-                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Personalizable</h3>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Temas claro y oscuro. Personaliza colores según tu preferencia.
-                </p>
-            </div>
-
-            <!-- Feature 5 -->
-            <div class="card p-8 hover-lift">
-                <div class="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Análisis Avanzado</h3>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Reportes detallados y métricas en tiempo real para tomar mejores decisiones.
-                </p>
-            </div>
-
-            <!-- Feature 6 -->
-            <div class="card p-8 hover-lift">
-                <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Colaboración en Equipo</h3>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Trabaja con tu equipo en tiempo real. Roles y permisos personalizados.
-                </p>
-            </div>
+            <!-- Refresh Button -->
+            <button onclick="window.location.reload()"
+                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                <i class="fas fa-sync-alt mr-2"></i>Actualizar
+            </button>
         </div>
     </div>
-</section>
+</div>
 
-<!-- ===== CTA FINAL ===== -->
-<section class="py-20 bg-gradient-to-r from-indigo-600 to-purple-600">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-4xl sm:text-5xl font-bold text-white mb-6 animate-fade-in">
-            ¿Listo para comenzar?
-        </h2>
-        <p class="text-xl text-indigo-100 mb-8 animate-fade-in">
-            Únete a cientos de empresas que ya confían en Luxera
-        </p>
+<!-- Main Content -->
+<div class="p-6 space-y-6 max-w-[1600px] mx-auto">
 
-        {% if not current_user.is_authenticated %}
-        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-in-right">
-            <a href="{{ url_for('auth.login') }}" class="px-8 py-4 bg-white text-indigo-600 rounded-xl font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-                Iniciar Sesión
+    <!-- Alertas Prioritarias -->
+    {% if alerts %}
+    <div class="space-y-3">
+        {% for alert in alerts[:3] %}
+        <div class="alert-card alert-{{ alert.type }} animate-fade-in">
+            <div class="flex-shrink-0">
+                <i class="fas fa-{{ alert.icon }} text-2xl {% if alert.type == 'danger' %}text-red-600{% elif alert.type == 'warning' %}text-yellow-600{% else %}text-blue-600{% endif %}"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-semibold text-gray-900 dark:text-white">{{ alert.title }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ alert.message }}</p>
+            </div>
+            <a href="{{ url_for(alert.link) }}{{ alert.filters or '' }}"
+               class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                {{ alert.action }} →
             </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-            {% if allow_registration %}
-            <a href="{{ url_for('auth.register') }}" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-xl font-semibold text-lg hover:bg-white hover:text-indigo-600 transform hover:-translate-y-1 transition-all duration-300">
-                Crear Cuenta Gratis
-            </a>
+    <!-- Primary Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <!-- Ventas / Revenue -->
+        <div class="metric-card animate-fade-in animate-delay-1">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-dollar-sign text-white"></i>
+            </div>
+            <div class="metric-label">Ventas Totales</div>
+            <div class="metric-value text-gray-900 dark:text-white">
+                ${{ "{:,.2f}".format(revenue_current) }}
+            </div>
+            {% if growth_indicators.revenue.color == 'green' %}
+            <div class="metric-change positive">
+            {% elif growth_indicators.revenue.color == 'red' %}
+            <div class="metric-change negative">
+            {% else %}
+            <div class="metric-change neutral">
             {% endif %}
+                <i class="fas fa-{{ growth_indicators.revenue.icon }}"></i>
+                {{ growth_indicators.revenue.text }}
+                <span class="text-xs opacity-75 ml-1">vs período anterior</span>
+            </div>
         </div>
-        {% else %}
-        <a href="{{ url_for('inventory.laptops_list') }}" class="inline-block px-8 py-4 bg-white text-indigo-600 rounded-xl font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-            Ir al Inventario
-            <svg class="inline-block w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
-        </a>
-        {% endif %}
+
+        <!-- Órdenes -->
+        <div class="metric-card animate-fade-in animate-delay-2">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <i class="fas fa-shopping-cart text-white"></i>
+            </div>
+            <div class="metric-label">Órdenes Procesadas</div>
+            <div class="metric-value text-gray-900 dark:text-white">
+                {{ orders_current }}
+            </div>
+            {% if growth_indicators.orders.color == 'green' %}
+            <div class="metric-change positive">
+            {% elif growth_indicators.orders.color == 'red' %}
+            <div class="metric-change negative">
+            {% else %}
+            <div class="metric-change neutral">
+            {% endif %}
+                <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
+                {{ growth_indicators.orders.text }}
+                <span class="text-xs opacity-75 ml-1">vs período anterior</span>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                AOV: ${{ "{:,.2f}".format(aov_current) }}
+            </div>
+        </div>
+
+        <!-- Ganancia Bruta -->
+        <div class="metric-card animate-fade-in animate-delay-3">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <i class="fas fa-chart-line text-white"></i>
+            </div>
+            <div class="metric-label">Ganancia Bruta</div>
+            <div class="metric-value text-gray-900 dark:text-white">
+                ${{ "{:,.2f}".format(gross_profit_current) }}
+            </div>
+            {% if growth_indicators.profit.color == 'green' %}
+            <div class="metric-change positive">
+            {% elif growth_indicators.profit.color == 'red' %}
+            <div class="metric-change negative">
+            {% else %}
+            <div class="metric-change neutral">
+            {% endif %}
+                <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
+                {{ growth_indicators.profit.text }}
+                <span class="text-xs opacity-75 ml-1">vs período anterior</span>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Margen: {{ "{:.1f}".format(gross_margin_current) }}%
+            </div>
+        </div>
+
+        <!-- Clientes Activos -->
+        <div class="metric-card animate-fade-in animate-delay-4">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="fas fa-users text-white"></i>
+            </div>
+            <div class="metric-label">Clientes Activos</div>
+            <div class="metric-value text-gray-900 dark:text-white">
+                {{ active_customers }}
+            </div>
+            {% if growth_indicators.customers.color == 'green' %}
+            <div class="metric-change positive">
+            {% elif growth_indicators.customers.color == 'red' %}
+            <div class="metric-change negative">
+            {% else %}
+            <div class="metric-change neutral">
+            {% endif %}
+                <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
+                +{{ new_customers_current }} nuevos
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Conversión: {{ "{:.1f}".format(conversion_rate) }}%
+            </div>
+        </div>
+
     </div>
-</section>
+
+    <!-- Insights Section -->
+    {% if insights %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for insight in insights[:3] %}
+        <div class="insight-card animate-fade-in"
+             style="background: {% if insight.type == 'success' %}var(--success-gradient){% elif insight.type == 'warning' %}var(--warning-gradient){% else %}var(--info-gradient){% endif %};">
+            <div class="insight-icon">
+                <i class="fas fa-{{ insight.icon }} text-2xl"></i>
+            </div>
+            <div class="insight-title">{{ insight.title }}</div>
+            <div class="insight-message">{{ insight.message }}</div>
+            <div class="insight-suggestion">💡 {{ insight.suggestion }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Sales Chart (2 cols) -->
+        <div class="lg:col-span-2 chart-container animate-fade-in">
+            <div class="chart-header">
+                <div>
+                    <h3 class="chart-title">Tendencia de Ventas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales) }}
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full" style="background: var(--primary-gradient);"></div>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Ventas</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Órdenes</span>
+                    </div>
+                </div>
+            </div>
+            <div style="height: 320px; position: relative;">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Inventory Status (1 col) -->
+        <div class="chart-container animate-fade-in">
+            <div class="chart-header">
+                <h3 class="chart-title">Estado del Inventario</h3>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Disponibles</div>
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ total_available }}</div>
+                    </div>
+                    <i class="fas fa-check-circle text-4xl text-green-600 dark:text-green-400"></i>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Stock Bajo</div>
+                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ low_stock_count }}</div>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Sin Stock</div>
+                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ out_of_stock_count }}</div>
+                    </div>
+                    <i class="fas fa-times-circle text-4xl text-red-600 dark:text-red-400"></i>
+                </div>
+
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Valor Total del Inventario</div>
+                    <div class="text-xl font-bold text-gray-900 dark:text-white">${{ "{:,.2f}".format(inventory_value) }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Ganancia potencial: ${{ "{:,.2f}".format(potential_profit) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Products and Orders Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Top Products -->
+        <div class="chart-container animate-fade-in">
+            <div class="chart-header">
+                <h3 class="chart-title">Productos Más Vendidos</h3>
+                <a href="{{ url_for('inventory.laptops_list') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+                    Ver todos →
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Vendidos</th>
+                            <th>Ingresos</th>
+                            <th>Margen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in top_products[:5] %}
+                        <tr>
+                            <td>
+                                <div class="font-medium text-gray-900 dark:text-white">{{ product.name }}</div>
+                                <div class="text-xs text-gray-500">{{ product.sku }}</div>
+                            </td>
+                            <td class="font-semibold">{{ product.units_sold }}</td>
+                            <td class="font-semibold text-green-600 dark:text-green-400">
+                                ${{ "{:,.0f}".format(product.revenue) }}
+                            </td>
+                            <td>
+                                <span class="status-badge {{ 'success' if product.margin > 30 else 'warning' if product.margin > 15 else 'danger' }}">
+                                    {{ "{:.0f}".format(product.margin) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="chart-container animate-fade-in">
+            <div class="chart-header">
+                <h3 class="chart-title">Órdenes Recientes</h3>
+                <a href="{{ url_for('invoices.invoices_list') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+                    Ver todas →
+                </a>
+            </div>
+            <div class="space-y-3">
+                {% for invoice in recent_invoices[:5] %}
+                <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                            <i class="fas fa-file-invoice text-indigo-600 dark:text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ invoice.invoice_number }}</div>
+                            <div class="text-xs text-gray-500">{{ invoice.customer_name }}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900 dark:text-white">${{ "{:,.2f}".format(invoice.total) }}</div>
+                        <span class="status-badge {{ 'success' if invoice.status == 'paid' or invoice.status == 'completed' else 'warning' if invoice.status == 'issued' else 'info' }}">
+                            {{ invoice.status }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Category Distribution -->
+    <div class="chart-container animate-fade-in">
+        <div class="chart-header">
+            <h3 class="chart-title">Rendimiento por Categoría</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for category in category_distribution %}
+            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-semibold text-gray-900 dark:text-white capitalize">{{ category.category }}</span>
+                    <span class="text-sm text-gray-500">{{ category.products }} productos</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Unidades vendidas</span>
+                        <span class="font-semibold">{{ category.units_sold }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">Ingresos</span>
+                        <span class="font-semibold text-green-600 dark:text-green-400">${{ "{:,.0f}".format(category.revenue) }}</span>
+                    </div>
+                    <div class="progress-container mt-3">
+                        <div class="progress-bar progress-primary" style="width: {{ (category.revenue / category_distribution[0].revenue * 100) if category_distribution[0].revenue > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="chart-container animate-fade-in">
+        <h3 class="chart-title mb-6">Acciones Rápidas</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+
+            <a href="{{ url_for('inventory.laptop_add') }}" class="quick-action">
+                <div class="quick-action-icon" style="background: var(--primary-gradient);">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="quick-action-text">Nueva Laptop</div>
+            </a>
+
+            <a href="{{ url_for('invoices.invoice_new') }}" class="quick-action">
+                <div class="quick-action-icon" style="background: var(--success-gradient);">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="quick-action-text">Nueva Factura</div>
+            </a>
+
+            <a href="{{ url_for('customers.customer_add') }}" class="quick-action">
+                <div class="quick-action-icon" style="background: var(--info-gradient);">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="quick-action-text">Nuevo Cliente</div>
+            </a>
+
+            <a href="{{ url_for('inventory.laptops_list') }}" class="quick-action">
+                <div class="quick-action-icon" style="background: var(--warning-gradient);">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <div class="quick-action-text">Ver Inventario</div>
+            </a>
+
+            <a href="{{ url_for('invoices.invoices_list') }}" class="quick-action">
+                <div class="quick-action-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="quick-action-text">Ver Facturas</div>
+            </a>
+
+            <a href="{{ url_for('customers.customers_list') }}" class="quick-action">
+                <div class="quick-action-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="quick-action-text">Ver Clientes</div>
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Datos del dashboard
+    const salesData = {{ daily_sales|tojson }};
+    const isDarkMode = document.documentElement.classList.contains('dark');
+
+    // Configuración del gráfico de ventas
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    const salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: salesData.map(d => d.date),
+            datasets: [{
+                label: 'Ventas ($)',
+                data: salesData.map(d => d.amount),
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: '#667eea',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2,
+                yAxisID: 'y'
+            }, {
+                label: 'Órdenes',
+                data: salesData.map(d => d.orders),
+                borderColor: '#9ca3af',
+                backgroundColor: 'rgba(156, 163, 175, 0.1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: isDarkMode ? '#1f2937' : '#fff',
+                    titleColor: isDarkMode ? '#f9fafb' : '#111827',
+                    bodyColor: isDarkMode ? '#f9fafb' : '#111827',
+                    borderColor: isDarkMode ? '#374151' : '#e5e7eb',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.datasetIndex === 0) {
+                                label += '$' + context.parsed.y.toFixed(2);
+                            } else {
+                                label += context.parsed.y + ' órdenes';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    grid: {
+                        color: isDarkMode ? '#374151' : '#f3f4f6',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: isDarkMode ? '#9ca3af' : '#6b7280',
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    }
+                }
+            }
+        }
+    });
+
+    // Actualizar gráfico cuando cambia el modo oscuro
+    window.addEventListener('darkModeToggled', function() {
+        const newIsDarkMode = document.documentElement.classList.contains('dark');
+
+        // Actualizar colores del tooltip
+        salesChart.options.plugins.tooltip.backgroundColor = newIsDarkMode ? '#1f2937' : '#fff';
+        salesChart.options.plugins.tooltip.titleColor = newIsDarkMode ? '#f9fafb' : '#111827';
+        salesChart.options.plugins.tooltip.bodyColor = newIsDarkMode ? '#f9fafb' : '#111827';
+        salesChart.options.plugins.tooltip.borderColor = newIsDarkMode ? '#374151' : '#e5e7eb';
+
+        // Actualizar colores de los ejes
+        salesChart.options.scales.y.grid.color = newIsDarkMode ? '#374151' : '#f3f4f6';
+        salesChart.options.scales.y.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
+        salesChart.options.scales.y1.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
+        salesChart.options.scales.x.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
+
+        salesChart.update();
+    });
+
+    // Auto-refresh cada 5 minutos (opcional)
+    // setInterval(() => window.location.reload(), 300000);
+</script>
 {% endblock %}
