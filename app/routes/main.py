@@ -714,13 +714,30 @@ def api_dashboard_stats():
 @login_required
 def admin_panel():
     """
-    Panel de administración (redirige a settings o dashboard)
+    Panel de administración
     """
     if not current_user.is_admin:
         abort(403)
 
-    # Redirigir al dashboard o a una página específica
-    return redirect(url_for('main.index'))
+    # Obtener estadísticas de usuarios
+    total_users = User.query.count()
+    active_users = User.query.filter_by(is_active=True).count()
+    admin_users = User.query.filter_by(is_admin=True).count()
+
+    # Usuarios recientes (últimos 10 registrados)
+    recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
+
+    # Obtener la fecha actual para el pie de página
+    now = datetime.now()
+
+    return render_template(
+        'admin/panel.html',
+        total_users=total_users,
+        active_users=active_users,
+        admin_users=admin_users,
+        recent_users=recent_users,
+        now=now
+    )
 
 
 @main_bp.route('/admin/users')
