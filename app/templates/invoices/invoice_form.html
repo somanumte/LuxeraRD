@@ -1,3 +1,4 @@
+[file content begin]
 {% extends "base.html" %}
 
 {% block title %}{% if is_edit %}Editar Factura{% else %}Nueva Factura{% endif %}{% endblock %}
@@ -563,12 +564,6 @@ function selectLaptop(itemId, laptop) {
         laptopName = laptop.processor;
     }
 
-    // Actualizar campo de búsqueda
-    document.getElementById(`laptop_search_${itemId}`).value = laptopName;
-
-    // Actualizar campo oculto
-    document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
-
     // Crear descripción completa con especificaciones
     let description = laptopName;
     const specs = [];
@@ -583,8 +578,13 @@ function selectLaptop(itemId, laptop) {
         description += ' - ' + specs.join(' • ');
     }
 
-    // Actualizar descripción y precio
-    document.getElementById(`desc_${itemId}`).value = description;
+    // Actualizar campo de búsqueda con la descripción completa
+    document.getElementById(`laptop_search_${itemId}`).value = description;
+
+    // Actualizar campo oculto
+    document.getElementById(`laptop_id_${itemId}`).value = laptop.id;
+
+    // Actualizar precio
     document.getElementById(`price_${itemId}`).value = laptop.sale_price;
 
     calculateTotals();
@@ -767,14 +767,6 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     if (laptopId && laptopId !== 'null' && laptopId !== '') {
         currentLaptop = laptops.find(l => l.id == laptopId);
         if (currentLaptop) {
-            // Construir nombre para mostrar
-            if (currentLaptop.brand && currentLaptop.model) {
-                laptopName = `${currentLaptop.brand} ${currentLaptop.model}`;
-            } else if (currentLaptop.brand) {
-                laptopName = currentLaptop.brand;
-            } else if (currentLaptop.model) {
-                laptopName = currentLaptop.model;
-            }
             laptopIdValue = laptopId;
         }
     }
@@ -786,13 +778,13 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     itemDiv.innerHTML = `
         <div class="flex items-start gap-4">
             <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4">
-                <div class="md:col-span-5">
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Laptop</label>
+                <div class="md:col-span-6">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Laptop / Descripción</label>
                     <div class="relative">
                         <input type="text"
                                id="laptop_search_${itemId}"
-                               value="${laptopName}"
-                               placeholder="Buscar laptop por marca, modelo..."
+                               value="${description}"
+                               placeholder="Buscar laptop por marca, modelo o escribe descripción manualmente..."
                                autocomplete="off"
                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center hidden" id="laptop_search_loading_${itemId}">
@@ -809,15 +801,7 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
                     </div>
                     <input type="hidden" id="laptop_id_${itemId}" value="${laptopIdValue}">
                 </div>
-                <div class="md:col-span-4">
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</label>
-                    <input type="text"
-                           id="desc_${itemId}"
-                           value="${description}"
-                           placeholder="Descripción adicional..."
-                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-500">
-                </div>
-                <div class="md:col-span-1">
+                <div class="md:col-span-2">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Cant.</label>
                     <input type="number"
                            id="qty_${itemId}"
@@ -836,6 +820,12 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-right focus:ring-1 focus:ring-indigo-500"
                            onchange="calculateTotals()">
                 </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Total</label>
+                    <div class="w-full px-3 py-2 text-sm bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-right font-medium text-gray-900 dark:text-white" id="total_${itemId}">
+                        RD$ ${(quantity * price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                </div>
             </div>
             <button type="button" onclick="removeItem(${itemId})" class="mt-6 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" title="Eliminar item">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -851,6 +841,17 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     // Configurar el buscador de laptops para este item
     setupLaptopSearch(itemId);
 
+    // Agregar event listeners para calcular total por item
+    document.getElementById(`qty_${itemId}`).addEventListener('input', function() {
+        updateItemTotal(itemId);
+        calculateTotals();
+    });
+    
+    document.getElementById(`price_${itemId}`).addEventListener('input', function() {
+        updateItemTotal(itemId);
+        calculateTotals();
+    });
+
     // Si es un item nuevo (sin laptopId), enfocar el campo de búsqueda y mostrar opciones recientes
     if (!laptopIdValue) {
         setTimeout(() => {
@@ -861,6 +862,17 @@ function addLaptopItem(laptopId = null, description = '', quantity = 1, price = 
     }
 
     calculateTotals();
+}
+
+function updateItemTotal(itemId) {
+    const qty = parseFloat(document.getElementById(`qty_${itemId}`).value) || 0;
+    const price = parseFloat(document.getElementById(`price_${itemId}`).value) || 0;
+    const total = qty * price;
+    
+    const totalElement = document.getElementById(`total_${itemId}`);
+    if (totalElement) {
+        totalElement.textContent = `RD$ ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
 }
 
 function addCustomItem(description = '', quantity = 1, price = 0) {
@@ -875,7 +887,7 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
     itemDiv.innerHTML = `
         <div class="flex items-start gap-4">
             <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4">
-                <div class="md:col-span-7">
+                <div class="md:col-span-6">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</label>
                     <input type="text"
                            id="desc_${itemId}"
@@ -892,7 +904,7 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-center focus:ring-1 focus:ring-indigo-500"
                            onchange="calculateTotals()">
                 </div>
-                <div class="md:col-span-3">
+                <div class="md:col-span-2">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Precio Unitario</label>
                     <input type="number"
                            id="price_${itemId}"
@@ -901,6 +913,12 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
                            min="0"
                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-right focus:ring-1 focus:ring-indigo-500"
                            onchange="calculateTotals()">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Total</label>
+                    <div class="w-full px-3 py-2 text-sm bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-right font-medium text-gray-900 dark:text-white" id="total_${itemId}">
+                        RD$ ${(quantity * price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
                 </div>
             </div>
             <button type="button" onclick="removeItem(${itemId})" class="mt-6 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" title="Eliminar item">
@@ -913,6 +931,18 @@ function addCustomItem(description = '', quantity = 1, price = 0) {
     `;
 
     container.appendChild(itemDiv);
+    
+    // Agregar event listeners para calcular total por item
+    document.getElementById(`qty_${itemId}`).addEventListener('input', function() {
+        updateItemTotal(itemId);
+        calculateTotals();
+    });
+    
+    document.getElementById(`price_${itemId}`).addEventListener('input', function() {
+        updateItemTotal(itemId);
+        calculateTotals();
+    });
+    
     calculateTotals();
 }
 
@@ -937,7 +967,11 @@ function calculateTotals() {
         const itemId = item.id.split('_')[1];
         const qty = parseFloat(document.getElementById(`qty_${itemId}`).value) || 0;
         const price = parseFloat(document.getElementById(`price_${itemId}`).value) || 0;
-        subtotal += qty * price;
+        const itemTotal = qty * price;
+        subtotal += itemTotal;
+        
+        // Actualizar total por item
+        updateItemTotal(itemId);
     });
 
     const tax = subtotal * 0.18;
@@ -965,7 +999,14 @@ document.getElementById('invoiceForm').addEventListener('submit', function(e) {
     document.querySelectorAll('[id^="item_"]').forEach(item => {
         const itemId = item.id.split('_')[1];
         const type = document.getElementById(`type_${itemId}`).value;
-        const description = document.getElementById(`desc_${itemId}`).value.trim();
+        
+        let description = '';
+        if (type === 'laptop') {
+            description = document.getElementById(`laptop_search_${itemId}`).value.trim();
+        } else {
+            description = document.getElementById(`desc_${itemId}`).value.trim();
+        }
+        
         const quantity = parseInt(document.getElementById(`qty_${itemId}`).value) || 0;
         const price = parseFloat(document.getElementById(`price_${itemId}`).value) || 0;
 
@@ -1007,3 +1048,4 @@ document.getElementById('invoiceForm').addEventListener('submit', function(e) {
 });
 </script>
 {% endblock %}
+[file content end]
