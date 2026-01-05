@@ -1,0 +1,813 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para la página de usuarios */
+    .user-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .status-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    
+    .table-row {
+        transition: all 0.2s ease;
+    }
+    
+    .table-row:hover {
+        background-color: rgba(99, 102, 241, 0.05);
+    }
+    
+    .dark .table-row:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+    }
+    
+    .action-button {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    
+    .table-row:hover .action-button {
+        opacity: 1;
+    }
+    
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+    }
+    
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+    }
+    
+    /* Checkbox personalizado */
+    .custom-checkbox {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+    }
+    
+    /* Animación de carga */
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    .dark .skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+        background-size: 1000px 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Gestión de Usuarios</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Administra usuarios, permisos y accesos del sistema
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="exportUsers()" 
+                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Exportar
+            </button>
+            <a href="{{ url_for('main.admin_panel') }}" 
+               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2 font-semibold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Usuarios</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" id="stat-total">{{ users|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activos -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Activos</p>
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="stat-active">
+                        {{ users|selectattr('is_active')|list|length }}
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inactivos -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Inactivos</p>
+                    <p class="text-2xl font-bold text-red-600 dark:text-red-400" id="stat-inactive">
+                        {{ users|rejectattr('is_active')|list|length }}
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Administradores -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Administradores</p>
+                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="stat-admin">
+                        {{ users|selectattr('is_admin')|list|length }}
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Búsqueda -->
+            <div class="md:col-span-2">
+                <div class="relative">
+                    <input type="text" 
+                           id="search-input"
+                           placeholder="Buscar por nombre, email o username..."
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Filtro por Estado -->
+            <div>
+                <select id="filter-status" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <option value="all">Todos los estados</option>
+                    <option value="active">Solo Activos</option>
+                    <option value="inactive">Solo Inactivos</option>
+                    <option value="locked">Solo Bloqueados</option>
+                </select>
+            </div>
+
+            <!-- Filtro por Rol -->
+            <div>
+                <select id="filter-role" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <option value="all">Todos los roles</option>
+                    <option value="admin">Administradores</option>
+                    <option value="user">Usuarios</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Acciones en masa -->
+        <div id="bulk-actions" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 hidden">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <span id="selected-count">0</span> usuarios seleccionados
+                </p>
+                <div class="flex gap-2">
+                    <button onclick="bulkActivate()" 
+                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition-colors">
+                        Activar
+                    </button>
+                    <button onclick="bulkDeactivate()" 
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors">
+                        Desactivar
+                    </button>
+                    <button onclick="clearSelection()" 
+                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-semibold transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Usuarios -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <tr>
+                        <th class="px-6 py-3 text-left">
+                            <input type="checkbox" id="select-all" class="custom-checkbox">
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400" onclick="sortTable('username')">
+                            Usuario
+                            <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                            </svg>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            Email
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            Rol
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400" onclick="sortTable('status')">
+                            Estado
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400" onclick="sortTable('last_login')">
+                            Último Login
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400" onclick="sortTable('created_at')">
+                            Registro
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for user in users %}
+                    <tr class="table-row" data-user-id="{{ user.id }}"
+                        data-username="{{ user.username|lower }}"
+                        data-email="{{ user.email|lower }}"
+                        data-fullname="{{ (user.full_name or '')|lower }}"
+                        data-status="{{ 'locked' if user.is_locked() else ('active' if user.is_active else 'inactive') }}"
+                        data-role="{{ 'admin' if user.is_admin else 'user' }}"
+                        data-last-login="{{ user.last_login.timestamp() if user.last_login else 0 }}"
+                        data-created-at="{{ user.created_at.timestamp() }}">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" class="user-checkbox custom-checkbox" value="{{ user.id }}">
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="user-avatar">
+                                    {{ user.username[0].upper() }}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900 dark:text-white">
+                                        {{ user.username }}
+                                        {% if user.id == current_user.id %}
+                                        <span class="text-xs text-indigo-600 dark:text-indigo-400">(Tú)</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if user.full_name %}
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.full_name }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">{{ user.email }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.is_admin %}
+                            <span class="badge bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Admin
+                            </span>
+                            {% else %}
+                            <span class="badge bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                                Usuario
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.is_locked() %}
+                            <span class="badge bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300">
+                                <span class="status-dot bg-orange-500"></span>
+                                Bloqueado
+                            </span>
+                            {% elif user.is_active %}
+                            <span class="badge bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                                <span class="status-dot bg-green-500"></span>
+                                Activo
+                            </span>
+                            {% else %}
+                            <span class="badge bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300">
+                                <span class="status-dot bg-red-500"></span>
+                                Inactivo
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {% if user.last_login %}
+                            <div>{{ user.last_login.strftime('%d/%m/%Y') }}</div>
+                            <div class="text-xs">{{ user.last_login.strftime('%H:%M') }}</div>
+                            {% else %}
+                            <span class="text-gray-400 dark:text-gray-500">Nunca</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div>{{ user.created_at.strftime('%d/%m/%Y') }}</div>
+                            <div class="text-xs">{{ user.created_at.strftime('%H:%M') }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2 action-button">
+                                <!-- Ver detalles -->
+                                <button onclick="viewUser({{ user.id }})" 
+                                        class="p-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        title="Ver detalles">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                
+                                <!-- Editar -->
+                                <button onclick="editUser({{ user.id }})" 
+                                        class="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        title="Editar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+
+                                {% if user.id != current_user.id %}
+                                <!-- Activar/Desactivar -->
+                                {% if user.is_active %}
+                                <button onclick="deactivateUser({{ user.id }}, '{{ user.username }}')" 
+                                        class="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        title="Desactivar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                    </svg>
+                                </button>
+                                {% else %}
+                                <button onclick="activateUser({{ user.id }}, '{{ user.username }}')" 
+                                        class="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        title="Activar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </button>
+                                {% endif %}
+
+                                <!-- Resetear contraseña -->
+                                {% if user.is_locked() %}
+                                <button onclick="unlockUser({{ user.id }}, '{{ user.username }}')" 
+                                        class="p-2 text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        title="Desbloquear">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sin resultados -->
+        <div id="no-results" class="hidden p-12 text-center">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No se encontraron usuarios</h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Intenta ajustar los filtros de búsqueda</p>
+        </div>
+    </div>
+
+    <!-- Paginación (para implementación futura) -->
+    <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            Mostrando <span id="showing-count">{{ users|length }}</span> de <span id="total-count">{{ users|length }}</span> usuarios
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div id="confirmation-modal" class="modal-overlay">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center" id="modal-title">
+                ¿Confirmar acción?
+            </h3>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center" id="modal-message">
+                Esta acción no se puede deshacer.
+            </p>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex gap-3 justify-end rounded-b-lg">
+            <button onclick="closeModal()" 
+                    class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-semibold">
+                Cancelar
+            </button>
+            <button id="modal-confirm-btn" 
+                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-semibold">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Estado global
+    let selectedUsers = new Set();
+    let currentSortColumn = null;
+    let currentSortDirection = 'asc';
+
+    // Búsqueda en tiempo real
+    document.getElementById('search-input').addEventListener('input', filterUsers);
+    document.getElementById('filter-status').addEventListener('change', filterUsers);
+    document.getElementById('filter-role').addEventListener('change', filterUsers);
+
+    // Select all checkbox
+    document.getElementById('select-all').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.user-checkbox:not([style*="display: none"])');
+        checkboxes.forEach(cb => {
+            cb.checked = this.checked;
+            if (this.checked) {
+                selectedUsers.add(cb.value);
+            } else {
+                selectedUsers.delete(cb.value);
+            }
+        });
+        updateBulkActions();
+    });
+
+    // Individual checkboxes
+    document.querySelectorAll('.user-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (this.checked) {
+                selectedUsers.add(this.value);
+            } else {
+                selectedUsers.delete(this.value);
+            }
+            updateBulkActions();
+        });
+    });
+
+    function filterUsers() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const statusFilter = document.getElementById('filter-status').value;
+        const roleFilter = document.getElementById('filter-role').value;
+        
+        const rows = document.querySelectorAll('#users-table-body tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const username = row.dataset.username || '';
+            const email = row.dataset.email || '';
+            const fullname = row.dataset.fullname || '';
+            const status = row.dataset.status;
+            const role = row.dataset.role;
+            
+            // Búsqueda
+            const matchesSearch = !searchTerm || 
+                username.includes(searchTerm) || 
+                email.includes(searchTerm) || 
+                fullname.includes(searchTerm);
+            
+            // Filtro de estado
+            const matchesStatus = statusFilter === 'all' || status === statusFilter;
+            
+            // Filtro de rol
+            const matchesRole = roleFilter === 'all' || role === roleFilter;
+            
+            if (matchesSearch && matchesStatus && matchesRole) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Actualizar contador
+        document.getElementById('showing-count').textContent = visibleCount;
+        
+        // Mostrar mensaje si no hay resultados
+        const noResults = document.getElementById('no-results');
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    function sortTable(column) {
+        const tbody = document.getElementById('users-table-body');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // Determinar dirección
+        if (currentSortColumn === column) {
+            currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortColumn = column;
+            currentSortDirection = 'asc';
+        }
+        
+        // Ordenar
+        rows.sort((a, b) => {
+            let aVal, bVal;
+            
+            if (column === 'username') {
+                aVal = a.dataset.username;
+                bVal = b.dataset.username;
+            } else if (column === 'status') {
+                aVal = a.dataset.status;
+                bVal = b.dataset.status;
+            } else if (column === 'last_login') {
+                aVal = parseFloat(a.dataset.lastLogin);
+                bVal = parseFloat(b.dataset.lastLogin);
+            } else if (column === 'created_at') {
+                aVal = parseFloat(a.dataset.createdAt);
+                bVal = parseFloat(b.dataset.createdAt);
+            }
+            
+            if (currentSortDirection === 'asc') {
+                return aVal > bVal ? 1 : -1;
+            } else {
+                return aVal < bVal ? 1 : -1;
+            }
+        });
+        
+        // Reordenar en el DOM
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function updateBulkActions() {
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectedCount = document.getElementById('selected-count');
+        
+        selectedCount.textContent = selectedUsers.size;
+        
+        if (selectedUsers.size > 0) {
+            bulkActions.classList.remove('hidden');
+        } else {
+            bulkActions.classList.add('hidden');
+        }
+    }
+
+    function clearSelection() {
+        selectedUsers.clear();
+        document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('select-all').checked = false;
+        updateBulkActions();
+    }
+
+    function viewUser(userId) {
+        // Implementar vista de detalles
+        alert('Ver detalles del usuario #' + userId);
+    }
+
+    function editUser(userId) {
+        // Implementar edición
+        alert('Editar usuario #' + userId);
+    }
+
+    function activateUser(userId, username) {
+        showConfirmation(
+            '¿Activar usuario?',
+            `¿Estás seguro de que deseas activar al usuario "${username}"?`,
+            () => {
+                // Aquí iría la petición AJAX
+                console.log('Activando usuario:', userId);
+                closeModal();
+                showNotification('Usuario activado correctamente', 'success');
+            }
+        );
+    }
+
+    function deactivateUser(userId, username) {
+        showConfirmation(
+            '¿Desactivar usuario?',
+            `¿Estás seguro de que deseas desactivar al usuario "${username}"? No podrá acceder al sistema.`,
+            () => {
+                // Aquí iría la petición AJAX
+                console.log('Desactivando usuario:', userId);
+                closeModal();
+                showNotification('Usuario desactivado correctamente', 'success');
+            }
+        );
+    }
+
+    function unlockUser(userId, username) {
+        showConfirmation(
+            '¿Desbloquear usuario?',
+            `¿Deseas desbloquear al usuario "${username}" y resetear sus intentos fallidos?`,
+            () => {
+                // Aquí iría la petición AJAX
+                console.log('Desbloqueando usuario:', userId);
+                closeModal();
+                showNotification('Usuario desbloqueado correctamente', 'success');
+            }
+        );
+    }
+
+    function bulkActivate() {
+        showConfirmation(
+            '¿Activar usuarios seleccionados?',
+            `Se activarán ${selectedUsers.size} usuarios.`,
+            () => {
+                console.log('Activando usuarios:', Array.from(selectedUsers));
+                closeModal();
+                clearSelection();
+                showNotification('Usuarios activados correctamente', 'success');
+            }
+        );
+    }
+
+    function bulkDeactivate() {
+        showConfirmation(
+            '¿Desactivar usuarios seleccionados?',
+            `Se desactivarán ${selectedUsers.size} usuarios.`,
+            () => {
+                console.log('Desactivando usuarios:', Array.from(selectedUsers));
+                closeModal();
+                clearSelection();
+                showNotification('Usuarios desactivados correctamente', 'success');
+            }
+        );
+    }
+
+    function exportUsers() {
+        // Generar CSV
+        const rows = document.querySelectorAll('#users-table-body tr:not([style*="display: none"])');
+        let csv = 'Username,Email,Nombre Completo,Rol,Estado,Último Login,Fecha Registro\n';
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const username = row.dataset.username;
+            const email = row.dataset.email;
+            const fullname = row.dataset.fullname;
+            const role = row.dataset.role === 'admin' ? 'Administrador' : 'Usuario';
+            const status = row.dataset.status;
+            
+            // Obtener fechas de las celdas visibles
+            const lastLoginCell = cells[5].textContent.trim();
+            const createdCell = cells[6].textContent.trim();
+            
+            csv += `"${username}","${email}","${fullname}","${role}","${status}","${lastLoginCell}","${createdCell}"\n`;
+        });
+        
+        // Descargar
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `usuarios_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        showNotification('Usuarios exportados correctamente', 'success');
+    }
+
+    function showConfirmation(title, message, onConfirm) {
+        const modal = document.getElementById('confirmation-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const confirmBtn = document.getElementById('modal-confirm-btn');
+        
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        
+        // Limpiar eventos anteriores
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        // Agregar nuevo evento
+        document.getElementById('modal-confirm-btn').addEventListener('click', onConfirm);
+        
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('confirmation-modal').classList.remove('active');
+    }
+
+    function showNotification(message, type = 'info') {
+        // Crear notificación
+        const notification = document.createElement('div');
+        notification.className = `flash-message alert alert-${type} fixed top-4 right-4 z-50 max-w-md`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-1">${message}</div>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-3">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-eliminar después de 5 segundos
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.5s ease-out forwards';
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
+    }
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('confirmation-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Cerrar modal con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}
