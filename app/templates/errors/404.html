@@ -54,7 +54,8 @@
             <div class="flex flex-wrap justify-center gap-4 text-sm">
                 <a href="{{ url_for('main.index') }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Inicio</a>
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main.dashboard') }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Dashboard</a>
+                    <!-- CORREGIDO: Cambiado main.dashboard por main.index -->
+                    <a href="{{ url_for('main.index') }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Dashboard</a>
                 {% else %}
                     <a href="{{ url_for('auth.login') }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Iniciar Sesión</a>
                 {% endif %}

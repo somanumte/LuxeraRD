@@ -678,9 +678,10 @@
                                 </p>
                             </div>
                             <div class="space-y-1">
+                                <!-- CORREGIDO: Ahora apunta correctamente al panel de administración -->
                                 <a href="{{ url_for('main.admin_panel') }}" class="nav-link {% if request.endpoint == 'main.admin_panel' %}active{% endif %}">
                                     <i class="fas fa-sliders-h w-5 mr-3 text-center" aria-hidden="true"></i>
-                                    <span>Configuración</span>
+                                    <span>Panel de Administración</span>
                                 </a>
                                 <a href="{{ url_for('main.admin_users') }}" class="nav-link {% if request.endpoint == 'main.admin_users' %}active{% endif %}">
                                     <i class="fas fa-user-cog w-5 mr-3 text-center" aria-hidden="true"></i>
@@ -773,7 +774,7 @@
                 <!-- Mobile Theme Toggle - Compact Icon -->
                 <button onclick="toggleDarkMode()" class="theme-toggle-compact focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-luxera-primary"
                         aria-label="Alternar modo oscuro/claro" title="Cambiar tema">
-                    <i class="fas fa-sun dark:fa-moon"></i>
+                    <i class="fas fa-sun"></i>
                 </button>
             </header>
 
