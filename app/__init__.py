@@ -53,8 +53,10 @@ def create_app(config_name='development'):
     from app.routes.api.catalog_api import catalog_api_bp
     from app.routes.api.customers import customers_bp
     from app.routes.invoices import invoices_bp  # ← NUEVA LÍNEA
+    from app.routes.expenses import bp as expenses_bp
 
 
+    app.register_blueprint(expenses_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
