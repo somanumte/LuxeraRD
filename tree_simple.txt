@@ -1,0 +1,95 @@
+├── app/
+│   ├── forms/
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   ├── customer_forms.py
+│   │   └── laptop_forms.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── customer.py
+│   │   ├── invoice.py
+│   │   ├── laptop.py
+│   │   ├── mixins.py
+│   │   └── user.py
+│   ├── routes/
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── catalog_api.py
+│   │   │   └── customers.py
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   ├── dashboard.py
+│   │   ├── inventory.py
+│   │   ├── invoices.py
+│   │   └── main.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── ai_service.py
+│   │   ├── catalog_service.py
+│   │   ├── financial_service.py
+│   │   ├── inventory_service.py
+│   │   └── sku_service.py
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── custom.css
+│   │   │   ├── laptop_form.css
+│   │   │   └── price-slider.css
+│   │   ├── img/
+│   │   │   └── favicon.ico
+│   │   ├── js/
+│   │   │   ├── inventory/
+│   │   │   │   └── price-slider.js
+│   │   │   ├── laptop_form.js
+│   │   │   ├── laptop_form_submit.js
+│   │   │   ├── laptop_gallery.js
+│   │   │   └── theme.js
+│   │   └── uploads/
+│   │       └── laptops/
+│   ├── templates/
+│   │   ├── admin/
+│   │   │   ├── panel.html
+│   │   │   └── users.html
+│   │   ├── auth/
+│   │   │   ├── login.html
+│   │   │   └── register.html
+│   │   ├── customers/
+│   │   │   ├── customer_detail.html
+│   │   │   ├── customer_form.html
+│   │   │   └── customers_list.html
+│   │   ├── errors/
+│   │   │   ├── 403.html
+│   │   │   ├── 404.html
+│   │   │   └── 500.html
+│   │   ├── inventory/
+│   │   │   ├── laptop_detail.html
+│   │   │   ├── laptop_form.html
+│   │   │   └── laptops_list.html
+│   │   ├── invoices/
+│   │   │   ├── invoice_detail.html
+│   │   │   ├── invoice_form.html
+│   │   │   ├── invoices_list.html
+│   │   │   └── settings.html
+│   │   ├── about.html
+│   │   ├── base.html
+│   │   ├── contact.html
+│   │   └── index.html
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── decorators.py
+│   │   ├── dominican_validators.py
+│   │   └── validators.py
+│   └── __init__.py
+├── logs/
+│   └── luxera.log
+├── migrations/
+│   ├── versions/
+│   │   └── e006d822bd38_inicio_limpio.py
+│   ├── alembic.ini
+│   ├── env.py
+│   ├── README
+│   └── script.py.mako
+├── config.py
+├── generate_tree.bat
+├── generate_tree.py
+├── requirements.txt
+└── run.py
