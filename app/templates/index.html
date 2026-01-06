@@ -14,14 +14,18 @@
         --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
         --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --orange-gradient: linear-gradient(135deg, #fa8231 0%, #fdb850 100%);
+        --pink-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --teal-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.12);
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(40px);
         }
         to {
             opacity: 1;
@@ -29,9 +33,20 @@
         }
     }
 
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
     @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
     }
 
     @keyframes shimmer {
@@ -39,37 +54,101 @@
         100% { background-position: 1000px 0; }
     }
 
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+        50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
+    }
+
     .animate-fade-in {
-        animation: fadeInUp 0.6s ease-out forwards;
+        animation: fadeInUp 0.7s ease-out forwards;
+    }
+
+    .animate-slide-in {
+        animation: slideInRight 0.6s ease-out forwards;
     }
 
     .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
     .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
     .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
     .animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
+    .animate-delay-5 { animation-delay: 0.5s; opacity: 0; }
 
     /* ========================================
-       METRIC CARDS - ESTILO SHOPIFY
+       DASHBOARD HEADER MEJORADO
+       ======================================== */
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .dashboard-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-text {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.875rem;
+        font-weight: 800;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+    }
+
+    /* ========================================
+       METRIC CARDS - DISEÑO PREMIUM
        ======================================== */
 
     .metric-card {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 20px;
+        padding: 2rem;
         box-shadow: var(--card-shadow);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition-smooth);
+        border: 1px solid rgba(0, 0, 0, 0.04);
         position: relative;
         overflow: hidden;
     }
 
     .dark .metric-card {
-        background: #1f2937;
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
         border-color: rgba(255, 255, 255, 0.05);
     }
 
     .metric-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-8px) scale(1.02);
         box-shadow: var(--card-shadow-hover);
     }
 
@@ -80,41 +159,126 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transition: left 0.5s;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        transition: left 0.6s;
     }
 
     .metric-card:hover::before {
         left: 100%;
     }
 
+    .metric-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.03) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+
+    .metric-card:hover::after {
+        opacity: 1;
+    }
+
+    .metric-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .metric-icon-wrapper {
+        position: relative;
+    }
+
+    .metric-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        position: relative;
+        transition: var(--transition-smooth);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .metric-card:hover .metric-icon {
+        transform: rotate(-5deg) scale(1.1);
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    .metric-icon-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
     .metric-value {
-        font-size: 2rem;
-        font-weight: 700;
-        line-height: 1.2;
-        margin: 0.5rem 0;
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin: 0.75rem 0;
+        background: linear-gradient(135deg, #111827 0%, #374151 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dark .metric-value {
+        background: linear-gradient(135deg, #f9fafb 0%, #d1d5db 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .metric-label {
         font-size: 0.875rem;
         color: #6b7280;
-        font-weight: 500;
-        margin-bottom: 0.25rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
     }
 
     .dark .metric-label {
         color: #9ca3af;
     }
 
+    .metric-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .dark .metric-footer {
+        border-top-color: #374151;
+    }
+
     .metric-change {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.375rem;
         font-size: 0.875rem;
-        font-weight: 600;
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        margin-top: 0.5rem;
+        font-weight: 700;
+        padding: 0.5rem 0.875rem;
+        border-radius: 12px;
     }
 
     .metric-change.positive {
@@ -140,69 +304,358 @@
         background-color: rgba(220, 38, 38, 0.2);
     }
 
-    .metric-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+    .metric-info {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .dark .metric-info {
+        color: #9ca3af;
     }
 
     /* ========================================
-       ALERTS MEJORADAS
+       ALERTS PREMIUM
        ======================================== */
 
     .alert-card {
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
         display: flex;
         align-items: center;
-        gap: 1rem;
-        transition: all 0.3s ease;
-        border-left-width: 4px;
+        gap: 1.25rem;
+        transition: var(--transition-smooth);
+        border: 2px solid transparent;
         background: white;
+        position: relative;
+        overflow: hidden;
     }
 
     .dark .alert-card {
         background: #1f2937;
     }
 
+    .alert-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        transition: width 0.3s;
+    }
+
     .alert-card:hover {
-        transform: translateX(4px);
+        transform: translateX(8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
 
-    .alert-card.alert-danger {
-        border-left-color: #ef4444;
-        background-color: #fef2f2;
+    .alert-card:hover::before {
+        width: 100%;
+        opacity: 0.05;
     }
 
-    .alert-card.alert-warning {
-        border-left-color: #f59e0b;
-        background-color: #fffbeb;
+    .alert-card.alert-danger::before {
+        background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
     }
 
-    .alert-card.alert-info {
-        border-left-color: #3b82f6;
-        background-color: #eff6ff;
+    .alert-card.alert-warning::before {
+        background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
     }
 
-    .dark .alert-card.alert-danger {
-        background-color: rgba(239, 68, 68, 0.1);
+    .alert-card.alert-info::before {
+        background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     }
 
-    .dark .alert-card.alert-warning {
-        background-color: rgba(245, 158, 11, 0.1);
+    .alert-icon-wrapper {
+        flex-shrink: 0;
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
     }
 
-    .dark .alert-card.alert-info {
-        background-color: rgba(59, 130, 246, 0.1);
+    .alert-card.alert-danger .alert-icon-wrapper {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
+
+    .alert-card.alert-warning .alert-icon-wrapper {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #d97706;
+    }
+
+    .alert-card.alert-info .alert-icon-wrapper {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #2563eb;
+    }
+
+    .alert-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .alert-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #111827;
+        margin-bottom: 0.25rem;
+    }
+
+    .dark .alert-title {
+        color: #f9fafb;
+    }
+
+    .alert-message {
+        font-size: 0.875rem;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+
+    .dark .alert-message {
+        color: #9ca3af;
+    }
+
+    .alert-action {
+        flex-shrink: 0;
+        padding: 0.625rem 1.25rem;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dark .alert-action {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+
+    .alert-action:hover {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+        transform: scale(1.05);
     }
 
     /* ========================================
-       TABLES MEJORADAS
+       INSIGHTS CARDS PREMIUM
+       ======================================== */
+
+    .insight-card {
+        border-radius: 20px;
+        padding: 1.75rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition-smooth);
+    }
+
+    .insight-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .insight-card::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -20%;
+        width: 150%;
+        height: 150%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite reverse;
+    }
+
+    .insight-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .insight-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .insight-icon {
+        width: 56px;
+        height: 56px;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+        font-size: 1.75rem;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .insight-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        opacity: 0.95;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .insight-message {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .insight-suggestion {
+        font-size: 0.875rem;
+        opacity: 0.85;
+        line-height: 1.5;
+    }
+
+    /* ========================================
+       PERIOD SELECTOR PREMIUM
+       ======================================== */
+
+    .period-selector {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 14px;
+        padding: 0.375rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .period-btn {
+        padding: 0.625rem 1.25rem;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        position: relative;
+    }
+
+    .period-btn:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .period-btn.active {
+        color: #667eea;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ========================================
+       CHART CONTAINERS PREMIUM
+       ======================================== */
+
+    .chart-container {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        transition: var(--transition-smooth);
+    }
+
+    .dark .chart-container {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .chart-container:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dark .chart-title {
+        color: #f9fafb;
+    }
+
+    .chart-title::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: var(--primary-gradient);
+        border-radius: 4px;
+    }
+
+    .chart-subtitle {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .dark .chart-subtitle {
+        color: #9ca3af;
+    }
+
+    .chart-legend {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6b7280;
+    }
+
+    .dark .legend-item {
+        color: #9ca3af;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ========================================
+       TABLES PREMIUM
        ======================================== */
 
     .data-table {
@@ -213,15 +666,18 @@
 
     .data-table thead th {
         background-color: #f9fafb;
-        padding: 0.875rem 1rem;
+        padding: 1rem 1.25rem;
         text-align: left;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: #6b7280;
         border-bottom: 2px solid #e5e7eb;
         white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
     .dark .data-table thead th {
@@ -231,17 +687,23 @@
     }
 
     .data-table tbody td {
-        padding: 1rem;
+        padding: 1.25rem;
         border-bottom: 1px solid #f3f4f6;
         font-size: 0.875rem;
+        transition: background-color 0.2s;
     }
 
     .dark .data-table tbody td {
         border-bottom-color: #1f2937;
     }
 
+    .data-table tbody tr {
+        transition: var(--transition-smooth);
+    }
+
     .data-table tbody tr:hover {
         background-color: #f9fafb;
+        transform: scale(1.01);
     }
 
     .dark .data-table tbody tr:hover {
@@ -253,55 +715,86 @@
     }
 
     /* ========================================
-       BADGES Y PILLS
+       STATUS BADGES PREMIUM
        ======================================== */
 
     .status-badge {
         display: inline-flex;
         align-items: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: 12px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: capitalize;
+        border: 1.5px solid;
+        transition: var(--transition-smooth);
+    }
+
+    .status-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
     }
 
     .status-badge.success {
         background-color: #d1fae5;
         color: #065f46;
+        border-color: #6ee7b7;
+    }
+
+    .status-badge.success::before {
+        background: #059669;
     }
 
     .status-badge.warning {
         background-color: #fef3c7;
         color: #92400e;
+        border-color: #fcd34d;
+    }
+
+    .status-badge.warning::before {
+        background: #f59e0b;
     }
 
     .status-badge.danger {
         background-color: #fee2e2;
         color: #991b1b;
+        border-color: #fca5a5;
+    }
+
+    .status-badge.danger::before {
+        background: #ef4444;
     }
 
     .status-badge.info {
         background-color: #dbeafe;
         color: #1e40af;
+        border-color: #93c5fd;
     }
 
-    .status-badge.neutral {
-        background-color: #f3f4f6;
-        color: #374151;
+    .status-badge.info::before {
+        background: #3b82f6;
+    }
+
+    .status-badge:hover {
+        transform: scale(1.1);
     }
 
     /* ========================================
-       PROGRESS BARS
+       PROGRESS BARS PREMIUM
        ======================================== */
 
     .progress-container {
         width: 100%;
-        height: 8px;
+        height: 10px;
         background-color: #e5e7eb;
-        border-radius: 9999px;
+        border-radius: 12px;
         overflow: hidden;
         position: relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
     }
 
     .dark .progress-container {
@@ -310,10 +803,11 @@
 
     .progress-bar {
         height: 100%;
-        border-radius: 9999px;
-        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .progress-bar::after {
@@ -325,10 +819,10 @@
         bottom: 0;
         background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.3),
+            rgba(255, 255, 255, 0.4),
             transparent
         );
-        animation: shimmer 2s infinite;
+        animation: shimmer 2.5s infinite;
     }
 
     .progress-primary {
@@ -344,188 +838,364 @@
     }
 
     /* ========================================
-       CHART CONTAINERS
+       INVENTORY STATUS CARDS
        ======================================== */
 
-    .chart-container {
-        background: white;
-        border-radius: 12px;
+    .inventory-status-card {
         padding: 1.5rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .dark .chart-container {
-        background: #1f2937;
-        border-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .chart-header {
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .chart-title {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: #111827;
-    }
-
-    .dark .chart-title {
-        color: #f9fafb;
-    }
-
-    /* ========================================
-       INSIGHTS CARDS
-       ======================================== */
-
-    .insight-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
-        padding: 1.25rem;
-        color: white;
+        transition: var(--transition-smooth);
         position: relative;
         overflow: hidden;
     }
 
-    .insight-card::before {
+    .inventory-status-card::before {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: pulse 3s ease-in-out infinite;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+        transition: opacity 0.3s;
     }
 
-    .insight-icon {
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 0.75rem;
+    .inventory-status-card:hover {
+        transform: translateX(8px);
     }
 
-    .insight-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        opacity: 0.9;
+    .inventory-status-card:hover::before {
+        opacity: 0.15;
     }
 
-    .insight-message {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+    .inventory-status-card.available {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
     }
 
-    .insight-suggestion {
-        font-size: 0.75rem;
+    .inventory-status-card.available::before {
+        background: var(--success-gradient);
+    }
+
+    .inventory-status-card.low-stock {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .inventory-status-card.low-stock::before {
+        background: var(--warning-gradient);
+    }
+
+    .inventory-status-card.out-of-stock {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    }
+
+    .inventory-status-card.out-of-stock::before {
+        background: var(--danger-gradient);
+    }
+
+    .inventory-status-icon {
+        font-size: 3rem;
         opacity: 0.8;
+        transition: var(--transition-smooth);
+    }
+
+    .inventory-status-card:hover .inventory-status-icon {
+        transform: scale(1.2) rotate(10deg);
     }
 
     /* ========================================
-       PERIOD SELECTOR
-       ======================================== */
-
-    .period-selector {
-        display: inline-flex;
-        background: white;
-        border-radius: 10px;
-        padding: 0.25rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #e5e7eb;
-    }
-
-    .dark .period-selector {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .period-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #6b7280;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .period-btn:hover {
-        color: #111827;
-        background: #f3f4f6;
-    }
-
-    .dark .period-btn:hover {
-        color: #f9fafb;
-        background: #374151;
-    }
-
-    .period-btn.active {
-        color: white;
-        background: var(--primary-gradient);
-        font-weight: 600;
-    }
-
-    /* ========================================
-       QUICK ACTIONS
+       QUICK ACTIONS PREMIUM
        ======================================== */
 
     .quick-action {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 16px;
+        padding: 1.75rem;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
-        transition: all 0.3s ease;
+        transition: var(--transition-smooth);
         border: 2px solid transparent;
         cursor: pointer;
         text-decoration: none;
+        position: relative;
+        overflow: hidden;
     }
 
     .dark .quick-action {
-        background: #1f2937;
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+
+    .quick-action::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .quick-action:hover::before {
+        width: 300px;
+        height: 300px;
     }
 
     .quick-action:hover {
-        transform: translateY(-4px);
+        transform: translateY(-8px) scale(1.05);
         border-color: #667eea;
-        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+        box-shadow: 0 16px 32px rgba(102, 126, 234, 0.25);
     }
 
     .quick-action-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.75rem;
-        margin-bottom: 1rem;
+        font-size: 2rem;
+        margin-bottom: 1.25rem;
         color: white;
+        position: relative;
+        z-index: 1;
+        transition: var(--transition-smooth);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .quick-action:hover .quick-action-icon {
+        transform: rotate(-10deg) scale(1.1);
     }
 
     .quick-action-text {
-        font-weight: 600;
+        font-weight: 700;
         color: #111827;
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 1;
     }
 
     .dark .quick-action-text {
         color: #f9fafb;
+    }
+
+    /* ========================================
+       RECENT ORDERS CARDS
+       ======================================== */
+
+    .order-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 14px;
+        transition: var(--transition-smooth);
+        background: white;
+    }
+
+    .dark .order-card {
+        background: #111827;
+        border-color: #374151;
+    }
+
+    .order-card:hover {
+        border-color: #667eea;
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+    }
+
+    .order-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #2563eb;
+        transition: var(--transition-smooth);
+    }
+
+    .order-card:hover .order-icon-wrapper {
+        transform: rotate(-10deg) scale(1.1);
+    }
+
+    .order-info {
+        flex: 1;
+        margin-left: 1rem;
+    }
+
+    .order-number {
+        font-weight: 700;
+        color: #111827;
+        font-size: 0.95rem;
+    }
+
+    .dark .order-number {
+        color: #f9fafb;
+    }
+
+    .order-customer {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.125rem;
+    }
+
+    .dark .order-customer {
+        color: #9ca3af;
+    }
+
+    .order-details {
+        text-align: right;
+    }
+
+    .order-amount {
+        font-weight: 800;
+        color: #111827;
+        font-size: 1.1rem;
+    }
+
+    .dark .order-amount {
+        color: #f9fafb;
+    }
+
+    /* ========================================
+       CATEGORY CARDS
+       ======================================== */
+
+    .category-card {
+        padding: 1.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        transition: var(--transition-smooth);
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dark .category-card {
+        background: #111827;
+        border-color: #374151;
+    }
+
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .category-card:hover {
+        border-color: #667eea;
+        transform: translateY(-6px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .category-card:hover::before {
+        opacity: 1;
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+    .category-name {
+        font-weight: 800;
+        color: #111827;
+        text-transform: capitalize;
+        font-size: 1.05rem;
+    }
+
+    .dark .category-name {
+        color: #f9fafb;
+    }
+
+    .category-count {
+        font-size: 0.8rem;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .dark .category-count {
+        background: #374151;
+        color: #9ca3af;
+    }
+
+    .category-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+
+    .category-stat-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .dark .category-stat-label {
+        color: #9ca3af;
+    }
+
+    .category-stat-value {
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .category-revenue {
+        color: #059669;
+    }
+
+    /* ========================================
+       REFRESH BUTTON
+       ======================================== */
+
+    .refresh-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    .refresh-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.05);
+    }
+
+    .refresh-btn i {
+        transition: transform 0.6s;
+    }
+
+    .refresh-btn:active i {
+        transform: rotate(360deg);
     }
 
     /* ========================================
@@ -534,6 +1204,12 @@
 
     @media (max-width: 768px) {
         .metric-value {
+            font-size: 2rem;
+        }
+
+        .metric-icon {
+            width: 52px;
+            height: 52px;
             font-size: 1.5rem;
         }
 
@@ -546,73 +1222,104 @@
             width: 100%;
             justify-content: space-between;
         }
+
+        .period-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .welcome-text {
+            font-size: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    /* ========================================
+       LOADING STATES
+       ======================================== */
+
+    .skeleton {
+        background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+
+    .dark .skeleton {
+        background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+        background-size: 200% 100%;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Dashboard Header con Period Selector -->
-<div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 sticky top-0 z-10">
-    <div class="flex items-center justify-between flex-wrap gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Bienvenido de nuevo, {{ current_user.username }} 👋
-            </p>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <!-- Period Selector -->
-            <div class="period-selector">
-                <button class="period-btn {% if current_period == 'today' %}active{% endif %}"
-                        onclick="window.location.href='?period=today'">
-                    Hoy
-                </button>
-                <button class="period-btn {% if current_period == 'week' %}active{% endif %}"
-                        onclick="window.location.href='?period=week'">
-                    Semana
-                </button>
-                <button class="period-btn {% if current_period == 'month' or not current_period %}active{% endif %}"
-                        onclick="window.location.href='?period=month'">
-                    Mes
-                </button>
-                <button class="period-btn {% if current_period == 'quarter' %}active{% endif %}"
-                        onclick="window.location.href='?period=quarter'">
-                    Trimestre
-                </button>
-                <button class="period-btn {% if current_period == 'year' %}active{% endif %}"
-                        onclick="window.location.href='?period=year'">
-                    Año
-                </button>
+<!-- Dashboard Header Premium -->
+<div class="dashboard-header px-6 py-6 sticky top-0 z-20">
+    <div class="header-content">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="animate-slide-in">
+                <h1 class="welcome-text">Dashboard</h1>
+                <p class="welcome-subtitle mt-1">
+                    Bienvenido de nuevo, <strong>{{ current_user.username }}</strong> 👋
+                </p>
             </div>
 
-            <!-- Refresh Button -->
-            <button onclick="window.location.reload()"
-                    class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <i class="fas fa-sync-alt mr-2"></i>Actualizar
-            </button>
+            <div class="flex items-center gap-3 animate-fade-in animate-delay-1">
+                <!-- Period Selector -->
+                <div class="period-selector">
+                    <button class="period-btn {% if current_period == 'today' %}active{% endif %}"
+                            onclick="window.location.href='?period=today'">
+                        Hoy
+                    </button>
+                    <button class="period-btn {% if current_period == 'week' %}active{% endif %}"
+                            onclick="window.location.href='?period=week'">
+                        Semana
+                    </button>
+                    <button class="period-btn {% if current_period == 'month' or not current_period %}active{% endif %}"
+                            onclick="window.location.href='?period=month'">
+                        Mes
+                    </button>
+                    <button class="period-btn {% if current_period == 'quarter' %}active{% endif %}"
+                            onclick="window.location.href='?period=quarter'">
+                        Trimestre
+                    </button>
+                    <button class="period-btn {% if current_period == 'year' %}active{% endif %}"
+                            onclick="window.location.href='?period=year'">
+                        Año
+                    </button>
+                </div>
+
+                <!-- Refresh Button -->
+                <button onclick="window.location.reload()" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Actualizar
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Main Content -->
-<div class="p-6 space-y-6 max-w-[1600px] mx-auto">
+<div class="p-6 space-y-8 max-w-[1600px] mx-auto">
 
     <!-- Alertas Prioritarias -->
     {% if alerts %}
-    <div class="space-y-3">
+    <div class="space-y-4">
         {% for alert in alerts[:3] %}
-        <div class="alert-card alert-{{ alert.type }} animate-fade-in">
-            <div class="flex-shrink-0">
-                <i class="fas fa-{{ alert.icon }} text-2xl {% if alert.type == 'danger' %}text-red-600{% elif alert.type == 'warning' %}text-yellow-600{% else %}text-blue-600{% endif %}"></i>
+        <div class="alert-card alert-{{ alert.type }} animate-slide-in animate-delay-{{ loop.index }}">
+            <div class="alert-icon-wrapper">
+                <i class="fas fa-{{ alert.icon }}"></i>
             </div>
-            <div class="flex-1">
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ alert.title }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ alert.message }}</p>
+            <div class="alert-content">
+                <h4 class="alert-title">{{ alert.title }}</h4>
+                <p class="alert-message">{{ alert.message }}</p>
             </div>
-            <a href="{{ url_for(alert.link) }}{{ alert.filters or '' }}"
-               class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                {{ alert.action }} →
+            <a href="{{ url_for(alert.link) }}{{ alert.filters or '' }}" class="alert-action">
+                {{ alert.action }}
+                <i class="fas fa-arrow-right"></i>
             </a>
         </div>
         {% endfor %}
@@ -624,97 +1331,125 @@
 
         <!-- Ventas / Revenue -->
         <div class="metric-card animate-fade-in animate-delay-1">
-            <div class="metric-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <i class="fas fa-dollar-sign text-white"></i>
+            <div class="metric-header">
+                <div class="metric-icon-wrapper">
+                    <div class="metric-icon" style="background: var(--primary-gradient);">
+                        <i class="fas fa-dollar-sign text-white"></i>
+                    </div>
+                    <div class="metric-icon-badge">
+                        <i class="fas fa-chart-line text-indigo-600"></i>
+                    </div>
+                </div>
             </div>
             <div class="metric-label">Ventas Totales</div>
-            <div class="metric-value text-gray-900 dark:text-white">
+            <div class="metric-value">
                 ${{ "{:,.2f}".format(revenue_current) }}
             </div>
-            {% if growth_indicators.revenue.color == 'green' %}
-            <div class="metric-change positive">
-            {% elif growth_indicators.revenue.color == 'red' %}
-            <div class="metric-change negative">
-            {% else %}
-            <div class="metric-change neutral">
-            {% endif %}
-                <i class="fas fa-{{ growth_indicators.revenue.icon }}"></i>
-                {{ growth_indicators.revenue.text }}
-                <span class="text-xs opacity-75 ml-1">vs período anterior</span>
+            <div class="metric-footer">
+                {% if growth_indicators.revenue.color == 'green' %}
+                <div class="metric-change positive">
+                {% elif growth_indicators.revenue.color == 'red' %}
+                <div class="metric-change negative">
+                {% else %}
+                <div class="metric-change neutral">
+                {% endif %}
+                    <i class="fas fa-{{ growth_indicators.revenue.icon }}"></i>
+                    {{ growth_indicators.revenue.text }}
+                </div>
+                <span class="metric-info">vs período anterior</span>
             </div>
         </div>
 
         <!-- Órdenes -->
         <div class="metric-card animate-fade-in animate-delay-2">
-            <div class="metric-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                <i class="fas fa-shopping-cart text-white"></i>
+            <div class="metric-header">
+                <div class="metric-icon-wrapper">
+                    <div class="metric-icon" style="background: var(--success-gradient);">
+                        <i class="fas fa-shopping-cart text-white"></i>
+                    </div>
+                    <div class="metric-icon-badge">
+                        <i class="fas fa-arrow-up text-green-600"></i>
+                    </div>
+                </div>
             </div>
             <div class="metric-label">Órdenes Procesadas</div>
-            <div class="metric-value text-gray-900 dark:text-white">
+            <div class="metric-value">
                 {{ orders_current }}
             </div>
-            {% if growth_indicators.orders.color == 'green' %}
-            <div class="metric-change positive">
-            {% elif growth_indicators.orders.color == 'red' %}
-            <div class="metric-change negative">
-            {% else %}
-            <div class="metric-change neutral">
-            {% endif %}
-                <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
-                {{ growth_indicators.orders.text }}
-                <span class="text-xs opacity-75 ml-1">vs período anterior</span>
-            </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                AOV: ${{ "{:,.2f}".format(aov_current) }}
+            <div class="metric-footer">
+                {% if growth_indicators.orders.color == 'green' %}
+                <div class="metric-change positive">
+                {% elif growth_indicators.orders.color == 'red' %}
+                <div class="metric-change negative">
+                {% else %}
+                <div class="metric-change neutral">
+                {% endif %}
+                    <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
+                    {{ growth_indicators.orders.text }}
+                </div>
+                <span class="metric-info">AOV: ${{ "{:,.2f}".format(aov_current) }}</span>
             </div>
         </div>
 
         <!-- Ganancia Bruta -->
         <div class="metric-card animate-fade-in animate-delay-3">
-            <div class="metric-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <i class="fas fa-chart-line text-white"></i>
+            <div class="metric-header">
+                <div class="metric-icon-wrapper">
+                    <div class="metric-icon" style="background: var(--warning-gradient);">
+                        <i class="fas fa-chart-line text-white"></i>
+                    </div>
+                    <div class="metric-icon-badge">
+                        <i class="fas fa-percentage text-pink-600"></i>
+                    </div>
+                </div>
             </div>
             <div class="metric-label">Ganancia Bruta</div>
-            <div class="metric-value text-gray-900 dark:text-white">
+            <div class="metric-value">
                 ${{ "{:,.2f}".format(gross_profit_current) }}
             </div>
-            {% if growth_indicators.profit.color == 'green' %}
-            <div class="metric-change positive">
-            {% elif growth_indicators.profit.color == 'red' %}
-            <div class="metric-change negative">
-            {% else %}
-            <div class="metric-change neutral">
-            {% endif %}
-                <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
-                {{ growth_indicators.profit.text }}
-                <span class="text-xs opacity-75 ml-1">vs período anterior</span>
-            </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Margen: {{ "{:.1f}".format(gross_margin_current) }}%
+            <div class="metric-footer">
+                {% if growth_indicators.profit.color == 'green' %}
+                <div class="metric-change positive">
+                {% elif growth_indicators.profit.color == 'red' %}
+                <div class="metric-change negative">
+                {% else %}
+                <div class="metric-change neutral">
+                {% endif %}
+                    <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
+                    {{ growth_indicators.profit.text }}
+                </div>
+                <span class="metric-info">Margen: {{ "{:.1f}".format(gross_margin_current) }}%</span>
             </div>
         </div>
 
         <!-- Clientes Activos -->
         <div class="metric-card animate-fade-in animate-delay-4">
-            <div class="metric-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <i class="fas fa-users text-white"></i>
+            <div class="metric-header">
+                <div class="metric-icon-wrapper">
+                    <div class="metric-icon" style="background: var(--info-gradient);">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <div class="metric-icon-badge">
+                        <i class="fas fa-user-plus text-blue-600"></i>
+                    </div>
+                </div>
             </div>
             <div class="metric-label">Clientes Activos</div>
-            <div class="metric-value text-gray-900 dark:text-white">
+            <div class="metric-value">
                 {{ active_customers }}
             </div>
-            {% if growth_indicators.customers.color == 'green' %}
-            <div class="metric-change positive">
-            {% elif growth_indicators.customers.color == 'red' %}
-            <div class="metric-change negative">
-            {% else %}
-            <div class="metric-change neutral">
-            {% endif %}
-                <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
-                +{{ new_customers_current }} nuevos
-            </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Conversión: {{ "{:.1f}".format(conversion_rate) }}%
+            <div class="metric-footer">
+                {% if growth_indicators.customers.color == 'green' %}
+                <div class="metric-change positive">
+                {% elif growth_indicators.customers.color == 'red' %}
+                <div class="metric-change negative">
+                {% else %}
+                <div class="metric-change neutral">
+                {% endif %}
+                    <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
+                    +{{ new_customers_current }} nuevos
+                </div>
+                <span class="metric-info">Conversión: {{ "{:.1f}".format(conversion_rate) }}%</span>
             </div>
         </div>
 
@@ -722,16 +1457,18 @@
 
     <!-- Insights Section -->
     {% if insights %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for insight in insights[:3] %}
-        <div class="insight-card animate-fade-in"
+        <div class="insight-card animate-fade-in animate-delay-{{ loop.index }}"
              style="background: {% if insight.type == 'success' %}var(--success-gradient){% elif insight.type == 'warning' %}var(--warning-gradient){% else %}var(--info-gradient){% endif %};">
-            <div class="insight-icon">
-                <i class="fas fa-{{ insight.icon }} text-2xl"></i>
+            <div class="insight-content">
+                <div class="insight-icon">
+                    <i class="fas fa-{{ insight.icon }}"></i>
+                </div>
+                <div class="insight-title">{{ insight.title }}</div>
+                <div class="insight-message">{{ insight.message }}</div>
+                <div class="insight-suggestion">💡 {{ insight.suggestion }}</div>
             </div>
-            <div class="insight-title">{{ insight.title }}</div>
-            <div class="insight-message">{{ insight.message }}</div>
-            <div class="insight-suggestion">💡 {{ insight.suggestion }}</div>
         </div>
         {% endfor %}
     </div>
@@ -744,23 +1481,26 @@
         <div class="lg:col-span-2 chart-container animate-fade-in">
             <div class="chart-header">
                 <div>
-                    <h3 class="chart-title">Tendencia de Ventas</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-area text-indigo-600"></i>
+                        Tendencia de Ventas
+                    </h3>
+                    <p class="chart-subtitle">
                         Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales) }}
                     </p>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full" style="background: var(--primary-gradient);"></div>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Ventas</span>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: var(--primary-gradient);"></div>
+                        <span>Ventas</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-gray-300"></div>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Órdenes</span>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #9ca3af;"></div>
+                        <span>Órdenes</span>
                     </div>
                 </div>
             </div>
-            <div style="height: 320px; position: relative;">
+            <div style="height: 340px; position: relative;">
                 <canvas id="salesChart"></canvas>
             </div>
         </div>
@@ -768,37 +1508,46 @@
         <!-- Inventory Status (1 col) -->
         <div class="chart-container animate-fade-in">
             <div class="chart-header">
-                <h3 class="chart-title">Estado del Inventario</h3>
+                <h3 class="chart-title">
+                    <i class="fas fa-boxes text-indigo-600"></i>
+                    Estado del Inventario
+                </h3>
             </div>
             <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div class="inventory-status-card available">
                     <div>
-                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Disponibles</div>
-                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ total_available }}</div>
+                        <div class="text-sm font-bold text-green-900 uppercase tracking-wide mb-1">Disponibles</div>
+                        <div class="text-3xl font-black text-green-700">{{ total_available }}</div>
                     </div>
-                    <i class="fas fa-check-circle text-4xl text-green-600 dark:text-green-400"></i>
+                    <i class="fas fa-check-circle inventory-status-icon text-green-600"></i>
                 </div>
 
-                <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <div class="inventory-status-card low-stock">
                     <div>
-                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Stock Bajo</div>
-                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ low_stock_count }}</div>
+                        <div class="text-sm font-bold text-yellow-900 uppercase tracking-wide mb-1">Stock Bajo</div>
+                        <div class="text-3xl font-black text-yellow-700">{{ low_stock_count }}</div>
                     </div>
-                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-600 dark:text-yellow-400"></i>
+                    <i class="fas fa-exclamation-triangle inventory-status-icon text-yellow-600"></i>
                 </div>
 
-                <div class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div class="inventory-status-card out-of-stock">
                     <div>
-                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Sin Stock</div>
-                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ out_of_stock_count }}</div>
+                        <div class="text-sm font-bold text-red-900 uppercase tracking-wide mb-1">Sin Stock</div>
+                        <div class="text-3xl font-black text-red-700">{{ out_of_stock_count }}</div>
                     </div>
-                    <i class="fas fa-times-circle text-4xl text-red-600 dark:text-red-400"></i>
+                    <i class="fas fa-times-circle inventory-status-icon text-red-600"></i>
                 </div>
 
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Valor Total del Inventario</div>
-                    <div class="text-xl font-bold text-gray-900 dark:text-white">${{ "{:,.2f}".format(inventory_value) }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div class="pt-4 border-t-2 border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Valor Total</span>
+                        <i class="fas fa-wallet text-gray-400"></i>
+                    </div>
+                    <div class="text-2xl font-black text-gray-900 dark:text-white mb-2">
+                        ${{ "{:,.2f}".format(inventory_value) }}
+                    </div>
+                    <div class="text-sm font-medium text-green-600 dark:text-green-400">
+                        <i class="fas fa-arrow-up"></i>
                         Ganancia potencial: ${{ "{:,.2f}".format(potential_profit) }}
                     </div>
                 </div>
@@ -813,30 +1562,34 @@
         <!-- Top Products -->
         <div class="chart-container animate-fade-in">
             <div class="chart-header">
-                <h3 class="chart-title">Productos Más Vendidos</h3>
-                <a href="{{ url_for('inventory.laptops_list') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-                    Ver todos →
+                <h3 class="chart-title">
+                    <i class="fas fa-trophy text-indigo-600"></i>
+                    Productos Más Vendidos
+                </h3>
+                <a href="{{ url_for('inventory.laptops_list') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2">
+                    Ver todos
+                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
             <div class="overflow-x-auto">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Producto</th>
-                            <th>Vendidos</th>
-                            <th>Ingresos</th>
-                            <th>Margen</th>
+                            <th><i class="fas fa-laptop mr-2"></i>Producto</th>
+                            <th><i class="fas fa-shopping-bag mr-2"></i>Vendidos</th>
+                            <th><i class="fas fa-dollar-sign mr-2"></i>Ingresos</th>
+                            <th><i class="fas fa-percentage mr-2"></i>Margen</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for product in top_products[:5] %}
                         <tr>
                             <td>
-                                <div class="font-medium text-gray-900 dark:text-white">{{ product.name }}</div>
-                                <div class="text-xs text-gray-500">{{ product.sku }}</div>
+                                <div class="font-bold text-gray-900 dark:text-white">{{ product.name }}</div>
+                                <div class="text-xs text-gray-500 font-mono">{{ product.sku }}</div>
                             </td>
-                            <td class="font-semibold">{{ product.units_sold }}</td>
-                            <td class="font-semibold text-green-600 dark:text-green-400">
+                            <td class="font-bold text-lg">{{ product.units_sold }}</td>
+                            <td class="font-black text-green-600 dark:text-green-400 text-lg">
                                 ${{ "{:,.0f}".format(product.revenue) }}
                             </td>
                             <td>
@@ -854,26 +1607,30 @@
         <!-- Recent Orders -->
         <div class="chart-container animate-fade-in">
             <div class="chart-header">
-                <h3 class="chart-title">Órdenes Recientes</h3>
-                <a href="{{ url_for('invoices.invoices_list') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-                    Ver todas →
+                <h3 class="chart-title">
+                    <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
+                    Órdenes Recientes
+                </h3>
+                <a href="{{ url_for('invoices.invoices_list') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2">
+                    Ver todas
+                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
             <div class="space-y-3">
                 {% for invoice in recent_invoices[:5] %}
-                <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                            <i class="fas fa-file-invoice text-indigo-600 dark:text-indigo-400"></i>
+                <div class="order-card">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="order-icon-wrapper">
+                            <i class="fas fa-file-invoice"></i>
                         </div>
-                        <div>
-                            <div class="font-medium text-gray-900 dark:text-white">{{ invoice.invoice_number }}</div>
-                            <div class="text-xs text-gray-500">{{ invoice.customer_name }}</div>
+                        <div class="order-info">
+                            <div class="order-number">{{ invoice.invoice_number }}</div>
+                            <div class="order-customer">{{ invoice.customer_name }}</div>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-semibold text-gray-900 dark:text-white">${{ "{:,.2f}".format(invoice.total) }}</div>
-                        <span class="status-badge {{ 'success' if invoice.status == 'paid' or invoice.status == 'completed' else 'warning' if invoice.status == 'issued' else 'info' }}">
+                    <div class="order-details">
+                        <div class="order-amount">${{ "{:,.2f}".format(invoice.total) }}</div>
+                        <span class="status-badge {{ 'success' if invoice.status == 'paid' or invoice.status == 'completed' else 'warning' if invoice.status == 'issued' else 'info' }} mt-2">
                             {{ invoice.status }}
                         </span>
                     </div>
@@ -887,26 +1644,36 @@
     <!-- Category Distribution -->
     <div class="chart-container animate-fade-in">
         <div class="chart-header">
-            <h3 class="chart-title">Rendimiento por Categoría</h3>
+            <h3 class="chart-title">
+                <i class="fas fa-layer-group text-indigo-600"></i>
+                Rendimiento por Categoría
+            </h3>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for category in category_distribution %}
-            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="font-semibold text-gray-900 dark:text-white capitalize">{{ category.category }}</span>
-                    <span class="text-sm text-gray-500">{{ category.products }} productos</span>
+            <div class="category-card">
+                <div class="category-header">
+                    <span class="category-name">
+                        <i class="fas fa-tag mr-2 text-indigo-600"></i>
+                        {{ category.category }}
+                    </span>
+                    <span class="category-count">{{ category.products }} productos</span>
                 </div>
-                <div class="space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600 dark:text-gray-400">Unidades vendidas</span>
-                        <span class="font-semibold">{{ category.units_sold }}</span>
+                <div class="space-y-3">
+                    <div class="category-stats">
+                        <span class="category-stat-label">Unidades vendidas</span>
+                        <span class="category-stat-value">{{ category.units_sold }}</span>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600 dark:text-gray-400">Ingresos</span>
-                        <span class="font-semibold text-green-600 dark:text-green-400">${{ "{:,.0f}".format(category.revenue) }}</span>
+                    <div class="category-stats">
+                        <span class="category-stat-label">Ingresos</span>
+                        <span class="category-stat-value category-revenue">
+                            ${{ "{:,.0f}".format(category.revenue) }}
+                        </span>
                     </div>
-                    <div class="progress-container mt-3">
-                        <div class="progress-bar progress-primary" style="width: {{ (category.revenue / category_distribution[0].revenue * 100) if category_distribution[0].revenue > 0 else 0 }}%"></div>
+                    <div class="progress-container">
+                        <div class="progress-bar progress-primary"
+                             style="width: {{ (category.revenue / category_distribution[0].revenue * 100) if category_distribution and category_distribution[0].revenue > 0 else 0 }}%">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -916,8 +1683,11 @@
 
     <!-- Quick Actions -->
     <div class="chart-container animate-fade-in">
-        <h3 class="chart-title mb-6">Acciones Rápidas</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <h3 class="chart-title mb-8">
+            <i class="fas fa-bolt text-indigo-600"></i>
+            Acciones Rápidas
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
 
             <a href="{{ url_for('inventory.laptop_add') }}" class="quick-action">
                 <div class="quick-action-icon" style="background: var(--primary-gradient);">
@@ -948,14 +1718,14 @@
             </a>
 
             <a href="{{ url_for('invoices.invoices_list') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div class="quick-action-icon" style="background: var(--pink-gradient);">
                     <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="quick-action-text">Ver Facturas</div>
             </a>
 
             <a href="{{ url_for('customers.customers_list') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <div class="quick-action-icon" style="background: var(--teal-gradient);">
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="quick-action-text">Ver Clientes</div>
@@ -976,8 +1746,17 @@
     const salesData = {{ daily_sales|tojson }};
     const isDarkMode = document.documentElement.classList.contains('dark');
 
-    // Configuración del gráfico de ventas
+    // Configuración del gráfico de ventas con diseño premium
     const ctx = document.getElementById('salesChart').getContext('2d');
+
+    // Crear gradientes
+    const gradientSales = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientSales.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+    gradientSales.addColorStop(1, 'rgba(102, 126, 234, 0.01)');
+
+    const gradientOrders = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientOrders.addColorStop(0, 'rgba(156, 163, 175, 0.2)');
+    gradientOrders.addColorStop(1, 'rgba(156, 163, 175, 0.01)');
 
     const salesChart = new Chart(ctx, {
         type: 'line',
@@ -987,27 +1766,34 @@
                 label: 'Ventas ($)',
                 data: salesData.map(d => d.amount),
                 borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                borderWidth: 3,
+                backgroundColor: gradientSales,
+                borderWidth: 4,
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 6,
+                pointRadius: 4,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
                 pointHoverBackgroundColor: '#667eea',
                 pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2,
+                pointHoverBorderWidth: 3,
                 yAxisID: 'y'
             }, {
                 label: 'Órdenes',
                 data: salesData.map(d => d.orders),
                 borderColor: '#9ca3af',
-                backgroundColor: 'rgba(156, 163, 175, 0.1)',
-                borderWidth: 2,
-                fill: false,
+                backgroundColor: gradientOrders,
+                borderWidth: 3,
+                fill: true,
                 tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 4,
-                yAxisID: 'y1'
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#9ca3af',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                yAxisID: 'y1',
+                borderDash: [5, 5]
             }]
         },
         options: {
@@ -1022,13 +1808,24 @@
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: isDarkMode ? '#1f2937' : '#fff',
+                    backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                     titleColor: isDarkMode ? '#f9fafb' : '#111827',
                     bodyColor: isDarkMode ? '#f9fafb' : '#111827',
                     borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-                    borderWidth: 1,
-                    padding: 12,
+                    borderWidth: 2,
+                    padding: 16,
                     displayColors: true,
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    usePointStyle: true,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13,
+                        weight: '600'
+                    },
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
@@ -1036,7 +1833,7 @@
                                 label += ': ';
                             }
                             if (context.datasetIndex === 0) {
-                                label += '$' + context.parsed.y.toFixed(2);
+                                label += ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                             } else {
                                 label += context.parsed.y + ' órdenes';
                             }
@@ -1052,13 +1849,19 @@
                     position: 'left',
                     beginAtZero: true,
                     grid: {
-                        color: isDarkMode ? '#374151' : '#f3f4f6',
-                        drawBorder: false
+                        color: isDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.8)',
+                        drawBorder: false,
+                        lineWidth: 2
                     },
                     ticks: {
                         color: isDarkMode ? '#9ca3af' : '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        padding: 10,
                         callback: function(value) {
-                            return '$' + value.toLocaleString();
+                            return ' + value.toLocaleString();
                         }
                     }
                 },
@@ -1071,7 +1874,12 @@
                         drawOnChartArea: false
                     },
                     ticks: {
-                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                        color: isDarkMode ? '#9ca3af' : '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        padding: 10
                     }
                 },
                 x: {
@@ -1079,7 +1887,15 @@
                         display: false
                     },
                     ticks: {
-                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                        color: isDarkMode ? '#9ca3af' : '#6b7280',
+                        font: {
+                            size: 11,
+                            weight: '600'
+                        },
+                        padding: 8,
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 10
                     }
                 }
             }
@@ -1091,13 +1907,13 @@
         const newIsDarkMode = document.documentElement.classList.contains('dark');
 
         // Actualizar colores del tooltip
-        salesChart.options.plugins.tooltip.backgroundColor = newIsDarkMode ? '#1f2937' : '#fff';
+        salesChart.options.plugins.tooltip.backgroundColor = newIsDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)';
         salesChart.options.plugins.tooltip.titleColor = newIsDarkMode ? '#f9fafb' : '#111827';
         salesChart.options.plugins.tooltip.bodyColor = newIsDarkMode ? '#f9fafb' : '#111827';
         salesChart.options.plugins.tooltip.borderColor = newIsDarkMode ? '#374151' : '#e5e7eb';
 
         // Actualizar colores de los ejes
-        salesChart.options.scales.y.grid.color = newIsDarkMode ? '#374151' : '#f3f4f6';
+        salesChart.options.scales.y.grid.color = newIsDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.8)';
         salesChart.options.scales.y.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
         salesChart.options.scales.y1.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
         salesChart.options.scales.x.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
@@ -1105,7 +1921,24 @@
         salesChart.update();
     });
 
-    // Auto-refresh cada 5 minutos (opcional)
-    // setInterval(() => window.location.reload(), 300000);
+    // Animación de entrada para las métricas
+    document.addEventListener('DOMContentLoaded', function() {
+        const metricCards = document.querySelectorAll('.metric-card');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        metricCards.forEach(card => {
+            observer.observe(card);
+        });
+    });
 </script>
 {% endblock %}
