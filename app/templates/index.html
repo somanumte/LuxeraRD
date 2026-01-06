@@ -1343,7 +1343,7 @@
             </div>
             <div class="metric-label">Ventas Totales</div>
             <div class="metric-value">
-                ${{ "{:,.2f}".format(revenue_current) }}
+                ${{ "{:,.2f}".format(revenue_current|default(0)) }}
             </div>
             <div class="metric-footer">
                 {% if growth_indicators.revenue.color == 'green' %}
@@ -1374,7 +1374,7 @@
             </div>
             <div class="metric-label">Órdenes Procesadas</div>
             <div class="metric-value">
-                {{ orders_current }}
+                {{ orders_current|default(0) }}
             </div>
             <div class="metric-footer">
                 {% if growth_indicators.orders.color == 'green' %}
@@ -1387,7 +1387,7 @@
                     <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
                     {{ growth_indicators.orders.text }}
                 </div>
-                <span class="metric-info">AOV: ${{ "{:,.2f}".format(aov_current) }}</span>
+                <span class="metric-info">AOV: ${{ "{:,.2f}".format(aov_current|default(0)) }}</span>
             </div>
         </div>
 
@@ -1405,7 +1405,7 @@
             </div>
             <div class="metric-label">Ganancia Bruta</div>
             <div class="metric-value">
-                ${{ "{:,.2f}".format(gross_profit_current) }}
+                ${{ "{:,.2f}".format(gross_profit_current|default(0)) }}
             </div>
             <div class="metric-footer">
                 {% if growth_indicators.profit.color == 'green' %}
@@ -1418,7 +1418,7 @@
                     <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
                     {{ growth_indicators.profit.text }}
                 </div>
-                <span class="metric-info">Margen: {{ "{:.1f}".format(gross_margin_current) }}%</span>
+                <span class="metric-info">Margen: {{ "{:.1f}".format(gross_margin_current|default(0)) }}%</span>
             </div>
         </div>
 
@@ -1436,7 +1436,7 @@
             </div>
             <div class="metric-label">Clientes Activos</div>
             <div class="metric-value">
-                {{ active_customers }}
+                {{ active_customers|default(0) }}
             </div>
             <div class="metric-footer">
                 {% if growth_indicators.customers.color == 'green' %}
@@ -1447,9 +1447,9 @@
                 <div class="metric-change neutral">
                 {% endif %}
                     <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
-                    +{{ new_customers_current }} nuevos
+                    +{{ new_customers_current|default(0) }} nuevos
                 </div>
-                <span class="metric-info">Conversión: {{ "{:.1f}".format(conversion_rate) }}%</span>
+                <span class="metric-info">Conversión: {{ "{:.1f}".format(conversion_rate|default(0)) }}%</span>
             </div>
         </div>
 
@@ -1486,7 +1486,7 @@
                         Tendencia de Ventas
                     </h3>
                     <p class="chart-subtitle">
-                        Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales) }}
+                        Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales|default(0)) }}
                     </p>
                 </div>
                 <div class="chart-legend">
@@ -1517,7 +1517,7 @@
                 <div class="inventory-status-card available">
                     <div>
                         <div class="text-sm font-bold text-green-900 uppercase tracking-wide mb-1">Disponibles</div>
-                        <div class="text-3xl font-black text-green-700">{{ total_available }}</div>
+                        <div class="text-3xl font-black text-green-700">{{ total_available|default(0) }}</div>
                     </div>
                     <i class="fas fa-check-circle inventory-status-icon text-green-600"></i>
                 </div>
@@ -1525,7 +1525,7 @@
                 <div class="inventory-status-card low-stock">
                     <div>
                         <div class="text-sm font-bold text-yellow-900 uppercase tracking-wide mb-1">Stock Bajo</div>
-                        <div class="text-3xl font-black text-yellow-700">{{ low_stock_count }}</div>
+                        <div class="text-3xl font-black text-yellow-700">{{ low_stock_count|default(0) }}</div>
                     </div>
                     <i class="fas fa-exclamation-triangle inventory-status-icon text-yellow-600"></i>
                 </div>
@@ -1533,7 +1533,7 @@
                 <div class="inventory-status-card out-of-stock">
                     <div>
                         <div class="text-sm font-bold text-red-900 uppercase tracking-wide mb-1">Sin Stock</div>
-                        <div class="text-3xl font-black text-red-700">{{ out_of_stock_count }}</div>
+                        <div class="text-3xl font-black text-red-700">{{ out_of_stock_count|default(0) }}</div>
                     </div>
                     <i class="fas fa-times-circle inventory-status-icon text-red-600"></i>
                 </div>
@@ -1544,11 +1544,11 @@
                         <i class="fas fa-wallet text-gray-400"></i>
                     </div>
                     <div class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-                        ${{ "{:,.2f}".format(inventory_value) }}
+                        ${{ "{:,.2f}".format(inventory_value|default(0)) }}
                     </div>
                     <div class="text-sm font-medium text-green-600 dark:text-green-400">
                         <i class="fas fa-arrow-up"></i>
-                        Ganancia potencial: ${{ "{:,.2f}".format(potential_profit) }}
+                        Ganancia potencial: ${{ "{:,.2f}".format(potential_profit|default(0)) }}
                     </div>
                 </div>
             </div>
@@ -1671,8 +1671,9 @@
                         </span>
                     </div>
                     <div class="progress-container">
+                        {% set max_revenue = category_distribution[0].revenue if category_distribution and category_distribution[0].revenue > 0 else 1 %}
                         <div class="progress-bar progress-primary"
-                             style="width: {{ (category.revenue / category_distribution[0].revenue * 100) if category_distribution and category_distribution[0].revenue > 0 else 0 }}%">
+                             style="width: {{ (category.revenue / max_revenue * 100) if max_revenue > 0 else 0 }}%">
                         </div>
                     </div>
                 </div>
@@ -1743,7 +1744,7 @@
 
 <script>
     // Datos del dashboard
-    const salesData = {{ daily_sales|tojson }};
+    const salesData = {{ daily_sales|default([])|tojson }};
     const isDarkMode = document.documentElement.classList.contains('dark');
 
     // Configuración del gráfico de ventas con diseño premium
@@ -1833,7 +1834,7 @@
                                 label += ': ';
                             }
                             if (context.datasetIndex === 0) {
-                                label += ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                label += '$' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                             } else {
                                 label += context.parsed.y + ' órdenes';
                             }
@@ -1861,7 +1862,7 @@
                         },
                         padding: 10,
                         callback: function(value) {
-                            return ' + value.toLocaleString();
+                            return '$' + value.toLocaleString();
                         }
                     }
                 },
