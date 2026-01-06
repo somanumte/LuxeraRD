@@ -2,6 +2,133 @@
 
 {% block title %}Clientes{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Estilos para el modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-container {
+        background-color: white;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .dark .modal-container {
+        background-color: #1f2937;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dark .modal-header {
+        border-bottom-color: #374151;
+    }
+
+    .modal-content {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .dark .modal-footer {
+        border-top-color: #374151;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Estilos para errores en formulario */
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .hidden-field {
+        display: none;
+    }
+
+    .readonly-field {
+        background-color: #f3f4f6 !important;
+        cursor: not-allowed;
+    }
+
+    .dark .readonly-field {
+        background-color: #1f2937 !important;
+    }
+
+    /* Estilos para notificaciones */
+    .notification {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        z-index: 10000;
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,12 +144,13 @@
                 </p>
             </div>
 
-            <a href="{{ url_for('customers.customer_add') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+            <!-- Botón para abrir el modal -->
+            <button id="open-customer-modal" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Agregar Cliente
-            </a>
+            </button>
         </div>
 
         <!-- Estadísticas Cards -->
@@ -282,6 +410,9 @@
                                         </svg>
                                         <p class="text-lg font-medium">No hay clientes registrados</p>
                                         <p class="mt-1 text-sm">Agrega el primer cliente para comenzar</p>
+                                        <button id="open-customer-modal-empty" class="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                                            Agregar Cliente
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -317,4 +448,403 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para agregar cliente -->
+<div id="customer-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Agregar Nuevo Cliente</h2>
+            <button id="close-customer-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-content" id="modal-content">
+            <!-- El contenido del formulario se cargará aquí via AJAX -->
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando formulario...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('customer-modal');
+    const openModalBtn = document.getElementById('open-customer-modal');
+    const openModalEmptyBtn = document.getElementById('open-customer-modal-empty');
+    const closeModalBtn = document.getElementById('close-customer-modal');
+    const modalContent = document.getElementById('modal-content');
+
+    // Función para cargar el formulario en el modal
+    function loadCustomerForm() {
+        modalContent.innerHTML = `
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando formulario...</p>
+            </div>`;
+
+        fetch('/customers/add', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.form_html) {
+                modalContent.innerHTML = data.form_html;
+                initializeFormScripts();
+            } else if (data.errors) {
+                showNotification('Error al cargar el formulario', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading form:', error);
+            modalContent.innerHTML = `
+                <div class="text-center py-8 text-red-600">
+                    <p>Error al cargar el formulario. Por favor, intenta de nuevo.</p>
+                    <button onclick="loadCustomerForm()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">
+                        Reintentar
+                    </button>
+                </div>`;
+        });
+    }
+
+    // Función para inicializar los scripts del formulario
+    function initializeFormScripts() {
+        // Seleccionar elementos del formulario
+        const customerTypeSelect = document.getElementById('customer_type');
+        const idTypeSelect = document.getElementById('id_type');
+        const idNumberInput = document.getElementById('id_number');
+        const personFields = document.getElementById('person-fields');
+        const personFields2 = document.getElementById('person-fields-2');
+        const companyFields = document.getElementById('company-fields');
+        const infoHeader = document.getElementById('info-header');
+        const idErrorMessage = document.getElementById('id-error-message');
+        const emailInput = document.getElementById('email');
+        const emailErrorMessage = document.getElementById('email-error-message');
+        const phonePrimaryInput = document.getElementById('phone_primary');
+        const phoneErrorMessage = document.getElementById('phone-error-message');
+        const customerForm = document.getElementById('customer-form');
+
+        // Función para formatear el número de identificación
+        function formatIdNumber(value) {
+            const digits = value.replace(/\D/g, '');
+            if (digits.length === 11) {
+                return digits.replace(/(\d{3})(\d{7})(\d{1})/, '$1-$2-$3');
+            } else if (digits.length === 9) {
+                return digits.replace(/(\d{3})(\d{5})(\d{1})/, '$1-$2-$3');
+            }
+            return digits;
+        }
+
+        // Función para detectar automáticamente el tipo de identificación
+        function autoDetectIdType(value) {
+            const digits = value.replace(/\D/g, '');
+            if (digits.length === 11) {
+                customerTypeSelect.value = 'person';
+                idTypeSelect.value = 'cedula';
+                return 'cedula';
+            } else if (digits.length === 9) {
+                customerTypeSelect.value = 'company';
+                idTypeSelect.value = 'rnc';
+                return 'rnc';
+            } else if (digits.length > 0 && digits.length !== 11 && digits.length !== 9) {
+                if (idErrorMessage) {
+                    idErrorMessage.classList.remove('hidden');
+                    idErrorMessage.textContent = 'Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
+                }
+                return null;
+            } else {
+                if (idErrorMessage) {
+                    idErrorMessage.classList.add('hidden');
+                }
+                return null;
+            }
+        }
+
+        // Función para actualizar los campos del formulario según el tipo de cliente
+        function updateFormFields() {
+            const customerType = customerTypeSelect ? customerTypeSelect.value : 'person';
+            if (infoHeader) {
+                infoHeader.textContent = customerType === 'person' ? 'Información Personal' : 'Información de la Empresa';
+            }
+
+            if (personFields && personFields2 && companyFields) {
+                if (customerType === 'person') {
+                    personFields.classList.remove('hidden-field');
+                    personFields2.classList.remove('hidden-field');
+                    companyFields.classList.add('hidden-field');
+                } else {
+                    personFields.classList.add('hidden-field');
+                    personFields2.classList.add('hidden-field');
+                    companyFields.classList.remove('hidden-field');
+                }
+            }
+        }
+
+        // Función para validar email
+        function validateEmail() {
+            const email = emailInput ? emailInput.value.trim() : '';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                if (emailErrorMessage) {
+                    emailErrorMessage.textContent = 'El correo electrónico es requerido.';
+                    emailErrorMessage.classList.remove('hidden');
+                }
+                return false;
+            } else if (!emailRegex.test(email)) {
+                if (emailErrorMessage) {
+                    emailErrorMessage.textContent = 'Por favor ingrese un correo electrónico válido.';
+                    emailErrorMessage.classList.remove('hidden');
+                }
+                return false;
+            } else {
+                if (emailErrorMessage) {
+                    emailErrorMessage.classList.add('hidden');
+                }
+                return true;
+            }
+        }
+
+        // Función para validar teléfono
+        function validatePhone() {
+            const phonePrimary = phonePrimaryInput ? phonePrimaryInput.value.trim() : '';
+            if (!phonePrimary) {
+                if (phoneErrorMessage) {
+                    phoneErrorMessage.textContent = 'El teléfono principal es requerido.';
+                    phoneErrorMessage.classList.remove('hidden');
+                }
+                return false;
+            } else {
+                if (phoneErrorMessage) {
+                    phoneErrorMessage.classList.add('hidden');
+                }
+                return true;
+            }
+        }
+
+        // Función para validar el formulario completo
+        function validateForm() {
+            const isEmailValid = validateEmail();
+            const isPhoneValid = validatePhone();
+            const idValue = idNumberInput ? idNumberInput.value.trim() : '';
+            const digits = idValue.replace(/\D/g, '');
+            let isIdValid = true;
+
+            if (digits.length === 0) {
+                if (idErrorMessage) {
+                    idErrorMessage.textContent = 'El número de identificación es requerido.';
+                    idErrorMessage.classList.remove('hidden');
+                }
+                isIdValid = false;
+            } else if (digits.length !== 11 && digits.length !== 9) {
+                if (idErrorMessage) {
+                    idErrorMessage.textContent = 'Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
+                    idErrorMessage.classList.remove('hidden');
+                }
+                isIdValid = false;
+            } else {
+                if (idErrorMessage) {
+                    idErrorMessage.classList.add('hidden');
+                }
+            }
+
+            return isEmailValid && isPhoneValid && isIdValid;
+        }
+
+        // Event listeners para campos del formulario
+        if (idNumberInput) {
+            idNumberInput.addEventListener('input', function(e) {
+                const cursorPosition = e.target.selectionStart;
+                const formattedValue = formatIdNumber(e.target.value);
+                e.target.value = formattedValue;
+
+                const change = formattedValue.length - e.target.value.length;
+                e.target.setSelectionRange(cursorPosition + change, cursorPosition + change);
+
+                autoDetectIdType(formattedValue);
+                updateFormFields();
+            });
+
+            idNumberInput.addEventListener('blur', function() {
+                const digits = this.value.replace(/\D/g, '');
+                if (digits.length === 11 || digits.length === 9) {
+                    this.value = formatIdNumber(this.value);
+                    autoDetectIdType(this.value);
+                    updateFormFields();
+                }
+            });
+        }
+
+        if (emailInput) {
+            emailInput.addEventListener('blur', validateEmail);
+        }
+
+        if (phonePrimaryInput) {
+            phonePrimaryInput.addEventListener('blur', validatePhone);
+        }
+
+        if (customerTypeSelect) {
+            customerTypeSelect.addEventListener('change', updateFormFields);
+        }
+
+        // Modificar el submit del formulario para usar AJAX
+        const form = document.getElementById('customer-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (!validateForm()) {
+                    const firstError = document.querySelector('.error-message:not(.hidden)');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
+
+                const formData = new FormData(form);
+                const submitBtn = form.querySelector('[type="submit"]');
+                const originalText = submitBtn.textContent;
+
+                // Mostrar loading
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <div class="flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Guardando...
+                    </div>
+                `;
+
+                fetch('/customers/add', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar mensaje de éxito
+                        showNotification(data.message, 'success');
+
+                        // Cerrar modal después de 1.5 segundos
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+
+                            // Recargar la página para mostrar el nuevo cliente
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        }, 1500);
+                    } else {
+                        // Mostrar errores
+                        if (data.errors) {
+                            // Limpiar errores anteriores
+                            const existingErrors = form.querySelectorAll('.text-red-600, .text-red-400');
+                            existingErrors.forEach(el => el.remove());
+
+                            for (const [field, error] of Object.entries(data.errors)) {
+                                const fieldElement = form.querySelector(`[name="${field}"]`);
+                                if (fieldElement) {
+                                    const errorElement = document.createElement('p');
+                                    errorElement.className = 'mt-1 text-sm text-red-600 dark:text-red-400';
+                                    errorElement.textContent = error;
+                                    fieldElement.parentNode.appendChild(errorElement);
+                                }
+                            }
+                        } else if (data.message) {
+                            showNotification(data.message, 'error');
+                        }
+
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error al guardar el cliente', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                });
+            });
+        }
+
+        // Agregar botón de cancelar específico para el modal
+        const formFooter = form ? form.querySelector('.flex.items-center.justify-end') : null;
+        if (formFooter) {
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.className = 'px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold mr-3';
+            cancelBtn.textContent = 'Cancelar';
+            cancelBtn.onclick = function() {
+                modal.classList.remove('active');
+            };
+            formFooter.prepend(cancelBtn);
+        }
+
+        // Inicialización
+        if (idNumberInput && idNumberInput.value) {
+            idNumberInput.value = formatIdNumber(idNumberInput.value);
+            autoDetectIdType(idNumberInput.value);
+        }
+        updateFormFields();
+    }
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Abrir modal
+    function openModal() {
+        modal.classList.add('active');
+        loadCustomerForm();
+    }
+
+    // Event listeners para abrir modal
+    if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+    if (openModalEmptyBtn) openModalEmptyBtn.addEventListener('click', openModal);
+
+    // Event listener para cerrar modal
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+    // Cerrar modal al hacer clic fuera del contenido
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+
+    // Cerrar modal con Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            modal.classList.remove('active');
+        }
+    });
+
+    // Inicializar el formulario si ya está cargado (para recarga)
+    if (document.getElementById('customer-form')) {
+        initializeFormScripts();
+    }
+});
+</script>
 {% endblock %}

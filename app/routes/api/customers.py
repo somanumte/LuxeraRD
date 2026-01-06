@@ -151,20 +151,54 @@ def customer_add():
             db.session.add(customer)
             db.session.commit()
 
+            # Si es solicitud AJAX (desde modal), retornar JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': True,
+                    'message': f'✅ Cliente {customer.display_name} agregado exitosamente',
+                    'customer_id': customer.id,
+                    'customer_name': customer.display_name,
+                    'customer_type': customer.customer_type,
+                    'id_number': customer.formatted_id
+                })
+
             flash(f'✅ Cliente {customer.display_name} agregado exitosamente', 'success')
             return redirect(url_for('customers.customer_detail', id=customer.id))
 
         except Exception as e:
             db.session.rollback()
             logger.error(f'Error al agregar cliente: {str(e)}', exc_info=True)
+
+            # Si es solicitud AJAX, retornar error en JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': False,
+                    'message': f'❌ Error al agregar cliente: {str(e)}'
+                }), 400
+
             flash(f'❌ Error al agregar cliente: {str(e)}', 'error')
 
     # Si hay errores en el formulario
     if form.errors:
+        error_messages = {}
         for field, errors in form.errors.items():
-            for error in errors:
-                flash(f'Error en {field}: {error}', 'error')
+            error_messages[field] = errors[0]
+            if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                flash(f'Error en {field}: {errors[0]}', 'error')
 
+        # Si es AJAX, retornar errores
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': False,
+                'errors': error_messages
+            }), 400
+
+    # Si es solicitud AJAX para obtener formulario
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form_html = render_template('customers/customer_form_modal.html', form=form, mode='add')
+        return jsonify({'form_html': form_html})
+
+    # Para GET normal (si alguien accede directamente a la URL)
     return render_template('customers/customer_form.html', form=form, mode='add')
 
 

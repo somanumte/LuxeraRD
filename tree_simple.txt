@@ -55,6 +55,7 @@
 │   │   ├── customers/
 │   │   │   ├── customer_detail.html
 │   │   │   ├── customer_form.html
+│   │   │   ├── customer_form_modal
 │   │   │   └── customers_list.html
 │   │   ├── errors/
 │   │   │   ├── 403.html
