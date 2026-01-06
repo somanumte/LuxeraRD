@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - LuxeraRD{% endblock %}
+{% block title %}Dashboard Premium - LuxeraRD{% endblock %}
 
 {% block extra_css %}
 <style>
     /* ========================================
-       VARIABLES Y ANIMACIONES
+       VARIABLES Y ANIMACIONES MEJORADAS
        ======================================== */
 
     :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #5a67d8 30%, #764ba2 100%);
         --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
         --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -17,36 +17,42 @@
         --orange-gradient: linear-gradient(135deg, #fa8231 0%, #fdb850 100%);
         --pink-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
         --teal-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-        --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-        --card-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.12);
-        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+        --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        --card-shadow-hover: 0 50px 100px -20px rgba(0, 0, 0, 0.35);
+        --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
-    @keyframes fadeInUp {
-        from {
+    @keyframes professionalAppear {
+        0% {
             opacity: 0;
-            transform: translateY(40px);
+            transform: translateY(40px) scale(0.95);
+            filter: blur(10px);
         }
-        to {
+        100% {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+            filter: blur(0);
         }
     }
 
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(-30px);
+    @keyframes floatSubtle {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
         }
-        to {
-            opacity: 1;
-            transform: translateX(0);
+        50% {
+            transform: translateY(-15px) rotate(1deg);
         }
     }
 
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.05); opacity: 0.9; }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
 
     @keyframes shimmer {
@@ -54,38 +60,52 @@
         100% { background-position: 1000px 0; }
     }
 
-    @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-    }
-
     @keyframes glow {
-        0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
-        50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3),
+                        0 0 40px rgba(102, 126, 234, 0.1);
+        }
+        50% {
+            box-shadow: 0 0 40px rgba(102, 126, 234, 0.5),
+                        0 0 60px rgba(102, 126, 234, 0.2);
+        }
     }
 
-    .animate-fade-in {
-        animation: fadeInUp 0.7s ease-out forwards;
+    @keyframes borderGlow {
+        0%, 100% { border-color: rgba(102, 126, 234, 0.3); }
+        50% { border-color: rgba(102, 126, 234, 0.8); }
     }
 
-    .animate-slide-in {
-        animation: slideInRight 0.6s ease-out forwards;
+    .professional-animation {
+        animation: professionalAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
-    .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
-    .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
-    .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
-    .animate-delay-4 { animation-delay: 0.4s; opacity: 0; }
-    .animate-delay-5 { animation-delay: 0.5s; opacity: 0; }
+    .gradient-animate {
+        background-size: 200% 200%;
+        animation: gradientShift 3s ease infinite;
+    }
+
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+    .animate-delay-4 { animation-delay: 0.4s; }
+    .animate-delay-5 { animation-delay: 0.5s; }
 
     /* ========================================
-       DASHBOARD HEADER MEJORADO
+       DASHBOARD HEADER - REDISEÑO PREMIUM
        ======================================== */
 
     .dashboard-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg,
+            #667eea 0%,
+            #5a67d8 30%,
+            #764ba2 100%);
         position: relative;
         overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        background-size: 200% 200%;
+        animation: gradientShift 10s ease infinite;
     }
 
     .dashboard-header::before {
@@ -93,78 +113,163 @@
         position: absolute;
         top: -50%;
         right: -10%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: float 6s ease-in-out infinite;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.08) 40%,
+            transparent 70%
+        );
+        animation: floatSubtle 8s ease-in-out infinite;
     }
 
     .dashboard-header::after {
         content: '';
         position: absolute;
-        bottom: -30%;
-        left: -5%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-        animation: float 8s ease-in-out infinite reverse;
+        bottom: -40%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+            circle at 70% 70%,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            transparent 70%
+        );
+        animation: floatSubtle 10s ease-in-out infinite reverse;
     }
 
     .header-content {
         position: relative;
-        z-index: 1;
+        z-index: 2;
+        backdrop-filter: blur(10px);
     }
 
     .welcome-text {
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 1.875rem;
-        font-weight: 800;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        font-size: 2.25rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.025em;
+        position: relative;
+        display: inline-block;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-text::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #38ef7d, #11998e);
+        border-radius: 2px;
+        box-shadow: 0 2px 10px rgba(56, 239, 125, 0.4);
     }
 
     .welcome-subtitle {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 1rem;
+        font-weight: 500;
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+        margin-top: 0.5rem;
+    }
+
+    .welcome-subtitle strong {
+        font-weight: 700;
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     /* ========================================
-       METRIC CARDS - DISEÑO PREMIUM
+       SISTEMA DE GRID AVANZADO
+       ======================================== */
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 24px;
+        padding: 24px;
+        max-width: 1920px;
+        margin: 0 auto;
+    }
+
+    .grid-col-4 { grid-column: span 4; }
+    .grid-col-6 { grid-column: span 6; }
+    .grid-col-8 { grid-column: span 8; }
+    .grid-col-12 { grid-column: span 12; }
+
+    @media (max-width: 1400px) {
+        .grid-col-4 { grid-column: span 6; }
+        .grid-col-8 { grid-column: span 12; }
+    }
+
+    @media (max-width: 768px) {
+        .grid-col-4, .grid-col-6, .grid-col-8 {
+            grid-column: span 12;
+        }
+        .dashboard-grid {
+            gap: 16px;
+            padding: 16px;
+        }
+    }
+
+    /* ========================================
+       METRIC CARDS - DISEÑO GLASSMORPHISM
        ======================================== */
 
     .metric-card {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: var(--card-shadow);
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.85) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
         transition: var(--transition-smooth);
-        border: 1px solid rgba(0, 0, 0, 0.04);
         position: relative;
         overflow: hidden;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        transform: translateZ(0);
     }
 
     .dark .metric-card {
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-        border-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .metric-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: var(--card-shadow-hover);
+        background: linear-gradient(135deg,
+            rgba(30, 41, 59, 0.95) 0%,
+            rgba(15, 23, 42, 0.85) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .metric-card::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-        transition: left 0.6s;
+        inset: 1px;
+        border-radius: 23px;
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.4),
+            rgba(255, 255, 255, 0.1));
+        z-index: -1;
     }
 
-    .metric-card:hover::before {
-        left: 100%;
+    .dark .metric-card::before {
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1),
+            rgba(255, 255, 255, 0.05));
     }
 
     .metric-card::after {
@@ -174,9 +279,20 @@
         right: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(102, 126, 234, 0.03) 0%, transparent 70%);
+        background: radial-gradient(
+            circle,
+            rgba(102, 126, 234, 0.1) 0%,
+            transparent 70%
+        );
         opacity: 0;
-        transition: opacity 0.4s;
+        transition: opacity 0.6s;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-12px) scale(1.03);
+        box-shadow: var(--card-shadow-hover);
+        border-color: rgba(102, 126, 234, 0.5);
+        animation: borderGlow 2s ease-in-out infinite;
     }
 
     .metric-card:hover::after {
@@ -187,210 +303,364 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
     }
 
     .metric-icon-wrapper {
         position: relative;
+        width: 80px;
+        height: 80px;
     }
 
     .metric-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 18px;
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.75rem;
+        font-size: 2rem;
         position: relative;
         transition: var(--transition-smooth);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        box-shadow:
+            0 15px 30px rgba(0, 0, 0, 0.2),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.2),
+            inset 0 3px 0 rgba(255, 255, 255, 0.3);
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .metric-icon::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: inherit;
+        opacity: 0.9;
+        z-index: -1;
     }
 
     .metric-card:hover .metric-icon {
-        transform: rotate(-5deg) scale(1.1);
+        transform: rotateY(180deg) scale(1.1);
         animation: glow 2s ease-in-out infinite;
     }
 
     .metric-icon-badge {
         position: absolute;
-        top: -6px;
-        right: -6px;
-        width: 24px;
-        height: 24px;
+        top: -8px;
+        right: -8px;
+        width: 32px;
+        height: 32px;
         background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-size: 0.8rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+        border: 2px solid #fff;
+    }
+
+    .dark .metric-icon-badge {
+        background: #1f2937;
+        border-color: #374151;
     }
 
     .metric-value {
-        font-size: 2.5rem;
-        font-weight: 800;
+        font-size: 3rem;
+        font-weight: 900;
         line-height: 1.1;
-        margin: 0.75rem 0;
-        background: linear-gradient(135deg, #111827 0%, #374151 100%);
+        margin: 1rem 0;
+        background: linear-gradient(135deg,
+            #111827 0%,
+            #374151 50%,
+            #6b7280 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        position: relative;
+        display: inline-block;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-value::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     }
 
     .dark .metric-value {
-        background: linear-gradient(135deg, #f9fafb 0%, #d1d5db 100%);
+        background: linear-gradient(135deg,
+            rgba(249, 250, 251, 0.95) 0%,
+            rgba(209, 213, 219, 0.9) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
 
     .metric-label {
-        font-size: 0.875rem;
+        font-size: 0.9rem;
         color: #6b7280;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .dark .metric-label {
         color: #9ca3af;
     }
 
+    .metric-label::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.6;
+    }
+
     .metric-footer {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-top: 1.25rem;
-        padding-top: 1.25rem;
-        border-top: 1px solid #f3f4f6;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid rgba(243, 244, 246, 0.5);
+        position: relative;
+        z-index: 2;
     }
 
     .dark .metric-footer {
-        border-top-color: #374151;
+        border-top-color: rgba(55, 65, 81, 0.5);
     }
 
     .metric-change {
         display: inline-flex;
         align-items: center;
-        gap: 0.375rem;
+        gap: 0.5rem;
         font-size: 0.875rem;
-        font-weight: 700;
-        padding: 0.5rem 0.875rem;
-        border-radius: 12px;
-    }
-
-    .metric-change.positive {
-        color: #059669;
-        background-color: #d1fae5;
-    }
-
-    .metric-change.negative {
-        color: #dc2626;
-        background-color: #fee2e2;
-    }
-
-    .metric-change.neutral {
-        color: #6b7280;
-        background-color: #f3f4f6;
-    }
-
-    .dark .metric-change.positive {
-        background-color: rgba(5, 150, 105, 0.2);
-    }
-
-    .dark .metric-change.negative {
-        background-color: rgba(220, 38, 38, 0.2);
-    }
-
-    .metric-info {
-        font-size: 0.75rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-
-    .dark .metric-info {
-        color: #9ca3af;
-    }
-
-    /* ========================================
-       ALERTS PREMIUM
-       ======================================== */
-
-    .alert-card {
+        font-weight: 800;
+        padding: 0.75rem 1rem;
         border-radius: 16px;
-        padding: 1.25rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid transparent;
         transition: var(--transition-smooth);
-        border: 2px solid transparent;
-        background: white;
         position: relative;
         overflow: hidden;
     }
 
+    .metric-change::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: currentColor;
+        opacity: 0.1;
+    }
+
+    .metric-change.positive {
+        color: #059669;
+        border-color: rgba(5, 150, 105, 0.3);
+    }
+
+    .metric-change.negative {
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    .metric-change.neutral {
+        color: #6b7280;
+        border-color: rgba(107, 114, 128, 0.3);
+    }
+
+    .metric-change:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-info {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 600;
+        background: rgba(243, 244, 246, 0.5);
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+
+    .dark .metric-info {
+        color: #9ca3af;
+        background: rgba(55, 65, 81, 0.5);
+    }
+
+    /* ========================================
+       SISTEMA DE TENDENCIAS AVANZADO
+       ======================================== */
+
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition-smooth);
+    }
+
+    .trend-indicator::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: currentColor;
+        opacity: 0.1;
+    }
+
+    .trend-indicator.positive {
+        color: #059669;
+        background: linear-gradient(135deg,
+            rgba(209, 250, 229, 0.8),
+            rgba(167, 243, 208, 0.8));
+        border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .trend-indicator.negative {
+        color: #dc2626;
+        background: linear-gradient(135deg,
+            rgba(254, 226, 226, 0.8),
+            rgba(252, 165, 165, 0.8));
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .trend-sparkline {
+        width: 60px;
+        height: 24px;
+        position: relative;
+        margin-left: 8px;
+    }
+
+    .trend-sparkline svg {
+        width: 100%;
+        height: 100%;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .trend-sparkline.positive svg path {
+        stroke: #059669;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .trend-sparkline.negative svg path {
+        stroke: #dc2626;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    /* ========================================
+       ALERTAS PREMIUM REDISEÑADAS
+       ======================================== */
+
+    .alert-card {
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(255, 255, 255, 0.85));
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 24px;
+        border-left: 8px solid;
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
     .dark .alert-card {
-        background: #1f2937;
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.95),
+            rgba(17, 24, 39, 0.85));
+        border-color: rgba(255, 255, 255, 0.1);
     }
 
     .alert-card::before {
         content: '';
         position: absolute;
-        left: 0;
         top: 0;
-        bottom: 0;
-        width: 5px;
-        transition: width 0.3s;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg,
+            var(--alert-color) 0%,
+            rgba(255, 255, 255, 0.8) 100%);
+    }
+
+    .alert-card.alert-danger {
+        --alert-color: #ef4444;
+        border-left-color: #ef4444;
+        background: linear-gradient(135deg,
+            rgba(254, 226, 226, 0.95),
+            rgba(254, 202, 202, 0.85));
+    }
+
+    .alert-card.alert-warning {
+        --alert-color: #f59e0b;
+        border-left-color: #f59e0b;
+        background: linear-gradient(135deg,
+            rgba(254, 243, 199, 0.95),
+            rgba(253, 230, 138, 0.85));
+    }
+
+    .alert-card.alert-info {
+        --alert-color: #3b82f6;
+        border-left-color: #3b82f6;
+        background: linear-gradient(135deg,
+            rgba(219, 234, 254, 0.95),
+            rgba(191, 219, 254, 0.85));
     }
 
     .alert-card:hover {
-        transform: translateX(8px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    }
-
-    .alert-card:hover::before {
-        width: 100%;
-        opacity: 0.05;
-    }
-
-    .alert-card.alert-danger::before {
-        background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
-    }
-
-    .alert-card.alert-warning::before {
-        background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
-    }
-
-    .alert-card.alert-info::before {
-        background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+        transform: translateX(12px) translateY(-5px);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.15),
+            0 0 0 1px var(--alert-color, rgba(102, 126, 234, 0.2));
     }
 
     .alert-icon-wrapper {
         flex-shrink: 0;
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.75rem;
+        background: white;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        transition: var(--transition-smooth);
     }
 
-    .alert-card.alert-danger .alert-icon-wrapper {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        color: #dc2626;
-    }
-
-    .alert-card.alert-warning .alert-icon-wrapper {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        color: #d97706;
-    }
-
-    .alert-card.alert-info .alert-icon-wrapper {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #2563eb;
+    .alert-card:hover .alert-icon-wrapper {
+        transform: rotate(15deg) scale(1.1);
     }
 
     .alert-content {
@@ -399,10 +669,13 @@
     }
 
     .alert-title {
-        font-weight: 700;
-        font-size: 1rem;
+        font-weight: 800;
+        font-size: 1.125rem;
         color: #111827;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .dark .alert-title {
@@ -410,9 +683,9 @@
     }
 
     .alert-message {
-        font-size: 0.875rem;
+        font-size: 0.95rem;
         color: #6b7280;
-        line-height: 1.5;
+        line-height: 1.6;
     }
 
     .dark .alert-message {
@@ -421,18 +694,20 @@
 
     .alert-action {
         flex-shrink: 0;
-        padding: 0.625rem 1.25rem;
+        padding: 0.75rem 1.5rem;
         background: white;
         border: 2px solid #e5e7eb;
-        border-radius: 10px;
+        border-radius: 14px;
         font-size: 0.875rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #374151;
         transition: var(--transition-smooth);
         text-decoration: none;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
     }
 
     .dark .alert-action {
@@ -441,11 +716,182 @@
         color: #f9fafb;
     }
 
+    .alert-action::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--alert-color, #667eea);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
     .alert-action:hover {
-        background: #667eea;
-        border-color: #667eea;
+        transform: translateX(5px) scale(1.05);
         color: white;
-        transform: scale(1.05);
+        border-color: var(--alert-color, #667eea);
+    }
+
+    .alert-action:hover::before {
+        opacity: 1;
+    }
+
+    .alert-action span {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ========================================
+       CHART CONTAINERS PREMIUM
+       ======================================== */
+
+    .chart-container {
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(255, 255, 255, 0.85));
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.08),
+            0 0 0 1px rgba(255, 255, 255, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+        will-change: transform;
+    }
+
+    .chart-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg,
+            #667eea,
+            #764ba2,
+            #667eea);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease infinite;
+    }
+
+    .dark .chart-container {
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.95),
+            rgba(17, 24, 39, 0.85));
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .chart-container:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        padding-left: 16px;
+    }
+
+    .chart-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 32px;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .dark .chart-title {
+        color: #f9fafb;
+    }
+
+    .chart-subtitle {
+        font-size: 0.95rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+
+    .dark .chart-subtitle {
+        color: #9ca3af;
+    }
+
+    .chart-legend {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #6b7280;
+        padding: 0.5rem 1rem;
+        background: rgba(243, 244, 246, 0.5);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        transition: var(--transition-smooth);
+    }
+
+    .legend-item:hover {
+        transform: translateY(-2px);
+        background: rgba(243, 244, 246, 0.8);
+    }
+
+    .dark .legend-item {
+        color: #9ca3af;
+        background: rgba(55, 65, 81, 0.5);
+    }
+
+    .dark .legend-item:hover {
+        background: rgba(55, 65, 81, 0.8);
+    }
+
+    .legend-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    .legend-dot::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        border: 2px solid currentColor;
+        opacity: 0.3;
+        animation: pulse 2s ease-in-out infinite;
     }
 
     /* ========================================
@@ -453,39 +899,46 @@
        ======================================== */
 
     .insight-card {
-        border-radius: 20px;
-        padding: 1.75rem;
+        border-radius: 24px;
+        padding: 2rem;
         color: white;
         position: relative;
         overflow: hidden;
         transition: var(--transition-smooth);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 
     .insight-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: inherit;
+        opacity: 0.9;
+        z-index: -1;
+    }
+
+    .insight-card::after {
         content: '';
         position: absolute;
         top: -50%;
         right: -30%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
-        animation: float 8s ease-in-out infinite;
-    }
-
-    .insight-card::after {
-        content: '';
-        position: absolute;
-        bottom: -40%;
-        left: -20%;
-        width: 150%;
-        height: 150%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: float 6s ease-in-out infinite reverse;
+        background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.2) 0%,
+            transparent 60%
+        );
+        animation: floatSubtle 8s ease-in-out infinite;
     }
 
     .insight-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
     }
 
     .insight-content {
@@ -494,39 +947,59 @@
     }
 
     .insight-icon {
-        width: 56px;
-        height: 56px;
+        width: 72px;
+        height: 72px;
         background: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(10px);
-        border-radius: 16px;
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1.25rem;
-        font-size: 1.75rem;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        box-shadow:
+            0 15px 30px rgba(0, 0, 0, 0.2),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+            inset 0 2px 0 rgba(255, 255, 255, 0.2);
+        transition: var(--transition-smooth);
+    }
+
+    .insight-card:hover .insight-icon {
+        transform: rotateY(180deg) scale(1.1);
     }
 
     .insight-title {
-        font-size: 0.875rem;
-        font-weight: 700;
-        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
         opacity: 0.95;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .insight-title::before {
+        content: '💡';
+        font-size: 1.2rem;
     }
 
     .insight-message {
-        font-size: 1.25rem;
-        font-weight: 800;
-        margin-bottom: 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
         line-height: 1.3;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
     .insight-suggestion {
-        font-size: 0.875rem;
-        opacity: 0.85;
-        line-height: 1.5;
+        font-size: 0.95rem;
+        opacity: 0.9;
+        line-height: 1.6;
+        font-weight: 500;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     /* ========================================
@@ -536,178 +1009,158 @@
     .period-selector {
         display: inline-flex;
         background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 14px;
-        padding: 0.375rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+        border-radius: 18px;
+        padding: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .period-btn {
-        padding: 0.625rem 1.25rem;
-        border-radius: 10px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.8);
+        padding: 0.75rem 1.5rem;
+        border-radius: 14px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.9);
         background: transparent;
         border: none;
         cursor: pointer;
         transition: var(--transition-smooth);
         position: relative;
+        overflow: hidden;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .period-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: white;
+        opacity: 0;
+        transition: opacity 0.3s;
     }
 
     .period-btn:hover {
         color: white;
-        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .period-btn:hover::before {
+        opacity: 0.1;
     }
 
     .period-btn.active {
         color: #667eea;
         background: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .period-btn.active::before {
+        opacity: 0;
     }
 
     /* ========================================
-       CHART CONTAINERS PREMIUM
+       TABLAS PREMIUM
        ======================================== */
 
-    .chart-container {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid rgba(0, 0, 0, 0.04);
-        transition: var(--transition-smooth);
+    .data-table-wrapper {
+        overflow: hidden;
+        border-radius: 16px;
+        background: rgba(243, 244, 246, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    .dark .chart-container {
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-        border-color: rgba(255, 255, 255, 0.05);
+    .dark .data-table-wrapper {
+        background: rgba(31, 41, 55, 0.3);
+        border-color: rgba(255, 255, 255, 0.1);
     }
-
-    .chart-container:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .chart-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .chart-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #111827;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .dark .chart-title {
-        color: #f9fafb;
-    }
-
-    .chart-title::before {
-        content: '';
-        width: 4px;
-        height: 24px;
-        background: var(--primary-gradient);
-        border-radius: 4px;
-    }
-
-    .chart-subtitle {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
-
-    .dark .chart-subtitle {
-        color: #9ca3af;
-    }
-
-    .chart-legend {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #6b7280;
-    }
-
-    .dark .legend-item {
-        color: #9ca3af;
-    }
-
-    .legend-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* ========================================
-       TABLES PREMIUM
-       ======================================== */
 
     .data-table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
+        background: transparent;
     }
 
     .data-table thead th {
-        background-color: #f9fafb;
-        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.9),
+            rgba(255, 255, 255, 0.8));
+        padding: 1.25rem 1.5rem;
         text-align: left;
-        font-weight: 700;
-        font-size: 0.75rem;
+        font-weight: 800;
+        font-size: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         color: #6b7280;
         border-bottom: 2px solid #e5e7eb;
         white-space: nowrap;
         position: sticky;
         top: 0;
         z-index: 10;
+        backdrop-filter: blur(10px);
     }
 
     .dark .data-table thead th {
-        background-color: #111827;
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.9),
+            rgba(17, 24, 39, 0.8));
         color: #9ca3af;
         border-bottom-color: #374151;
     }
 
-    .data-table tbody td {
-        padding: 1.25rem;
-        border-bottom: 1px solid #f3f4f6;
-        font-size: 0.875rem;
-        transition: background-color 0.2s;
-    }
-
-    .dark .data-table tbody td {
-        border-bottom-color: #1f2937;
-    }
-
     .data-table tbody tr {
         transition: var(--transition-smooth);
+        position: relative;
+    }
+
+    .data-table tbody tr::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(102, 126, 234, 0.05),
+            transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .data-table tbody tr:hover {
-        background-color: #f9fafb;
-        transform: scale(1.01);
+        transform: translateX(8px);
+        background: linear-gradient(90deg,
+            rgba(102, 126, 234, 0.03),
+            transparent);
     }
 
-    .dark .data-table tbody tr:hover {
-        background-color: #1f2937;
+    .data-table tbody tr:hover::before {
+        opacity: 1;
+    }
+
+    .data-table tbody tr:hover td:first-child {
+        border-left: 4px solid #667eea;
+        padding-left: 20px;
+    }
+
+    .data-table tbody td {
+        padding: 1.5rem 1.5rem;
+        border-bottom: 1px solid rgba(243, 244, 246, 0.5);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .dark .data-table tbody td {
+        border-bottom-color: rgba(31, 41, 55, 0.5);
     }
 
     .data-table tbody tr:last-child td {
@@ -721,66 +1174,87 @@
     .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.375rem;
-        padding: 0.375rem 0.875rem;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: capitalize;
-        border: 1.5px solid;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 14px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 2px solid;
         transition: var(--transition-smooth);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
     }
 
     .status-badge::before {
         content: '';
-        width: 6px;
-        height: 6px;
+        position: absolute;
+        inset: 0;
+        background: currentColor;
+        opacity: 0.1;
+    }
+
+    .status-badge::after {
+        content: '';
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         animation: pulse 2s ease-in-out infinite;
     }
 
     .status-badge.success {
-        background-color: #d1fae5;
-        color: #065f46;
-        border-color: #6ee7b7;
+        color: #059669;
+        border-color: rgba(5, 150, 105, 0.4);
+        background: linear-gradient(135deg,
+            rgba(209, 250, 229, 0.8),
+            rgba(167, 243, 208, 0.8));
     }
 
-    .status-badge.success::before {
+    .status-badge.success::after {
         background: #059669;
     }
 
     .status-badge.warning {
-        background-color: #fef3c7;
-        color: #92400e;
-        border-color: #fcd34d;
+        color: #d97706;
+        border-color: rgba(217, 119, 6, 0.4);
+        background: linear-gradient(135deg,
+            rgba(254, 243, 199, 0.8),
+            rgba(253, 230, 138, 0.8));
     }
 
-    .status-badge.warning::before {
-        background: #f59e0b;
+    .status-badge.warning::after {
+        background: #d97706;
     }
 
     .status-badge.danger {
-        background-color: #fee2e2;
-        color: #991b1b;
-        border-color: #fca5a5;
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.4);
+        background: linear-gradient(135deg,
+            rgba(254, 226, 226, 0.8),
+            rgba(252, 165, 165, 0.8));
     }
 
-    .status-badge.danger::before {
-        background: #ef4444;
+    .status-badge.danger::after {
+        background: #dc2626;
     }
 
     .status-badge.info {
-        background-color: #dbeafe;
-        color: #1e40af;
-        border-color: #93c5fd;
+        color: #2563eb;
+        border-color: rgba(37, 99, 235, 0.4);
+        background: linear-gradient(135deg,
+            rgba(219, 234, 254, 0.8),
+            rgba(191, 219, 254, 0.8));
     }
 
-    .status-badge.info::before {
-        background: #3b82f6;
+    .status-badge.info::after {
+        background: #2563eb;
     }
 
     .status-badge:hover {
         transform: scale(1.1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
     /* ========================================
@@ -789,25 +1263,32 @@
 
     .progress-container {
         width: 100%;
-        height: 10px;
-        background-color: #e5e7eb;
+        height: 12px;
+        background: rgba(243, 244, 236, 0.5);
         border-radius: 12px;
         overflow: hidden;
         position: relative;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        box-shadow:
+            inset 0 2px 4px rgba(0, 0, 0, 0.06),
+            0 1px 0 rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
     }
 
     .dark .progress-container {
-        background-color: #374151;
+        background: rgba(55, 65, 81, 0.5);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .progress-bar {
         height: 100%;
         border-radius: 12px;
-        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         position: relative;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .progress-bar::after {
@@ -825,54 +1306,47 @@
         animation: shimmer 2.5s infinite;
     }
 
-    .progress-primary {
-        background: var(--primary-gradient);
-    }
-
-    .progress-success {
-        background: var(--success-gradient);
-    }
-
-    .progress-warning {
-        background: var(--warning-gradient);
-    }
-
     /* ========================================
-       INVENTORY STATUS CARDS
+       INVENTORY STATUS CARDS REDISEÑADAS
        ======================================== */
 
     .inventory-status-card {
-        padding: 1.5rem;
-        border-radius: 16px;
+        padding: 2rem;
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         transition: var(--transition-smooth);
         position: relative;
         overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .inventory-status-card::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        opacity: 0.1;
+        inset: 0;
+        opacity: 0.8;
         transition: opacity 0.3s;
     }
 
     .inventory-status-card:hover {
-        transform: translateX(8px);
+        transform: translateX(10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
     .inventory-status-card:hover::before {
-        opacity: 0.15;
+        opacity: 0.9;
     }
 
     .inventory-status-card.available {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: linear-gradient(135deg,
+            rgba(209, 250, 229, 0.9),
+            rgba(167, 243, 208, 0.8));
     }
 
     .inventory-status-card.available::before {
@@ -880,7 +1354,9 @@
     }
 
     .inventory-status-card.low-stock {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: linear-gradient(135deg,
+            rgba(254, 243, 199, 0.9),
+            rgba(253, 230, 138, 0.8));
     }
 
     .inventory-status-card.low-stock::before {
@@ -888,7 +1364,9 @@
     }
 
     .inventory-status-card.out-of-stock {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        background: linear-gradient(135deg,
+            rgba(254, 226, 226, 0.9),
+            rgba(252, 165, 165, 0.8));
     }
 
     .inventory-status-card.out-of-stock::before {
@@ -896,38 +1374,57 @@
     }
 
     .inventory-status-icon {
-        font-size: 3rem;
-        opacity: 0.8;
+        font-size: 3.5rem;
+        opacity: 0.9;
         transition: var(--transition-smooth);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     }
 
     .inventory-status-card:hover .inventory-status-icon {
-        transform: scale(1.2) rotate(10deg);
+        transform: scale(1.3) rotate(15deg);
     }
 
     /* ========================================
        QUICK ACTIONS PREMIUM
        ======================================== */
 
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 20px;
+    }
+
     .quick-action {
-        background: white;
-        border-radius: 16px;
-        padding: 1.75rem;
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(255, 255, 255, 0.85));
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem 1.5rem;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
         transition: var(--transition-smooth);
-        border: 2px solid transparent;
+        border: 2px solid rgba(255, 255, 255, 0.4);
         cursor: pointer;
         text-decoration: none;
         position: relative;
         overflow: hidden;
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
     .dark .quick-action {
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.95),
+            rgba(17, 24, 39, 0.85));
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .quick-action::before {
@@ -938,7 +1435,7 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(102, 126, 234, 0.1);
+        background: rgba(102, 126, 234, 0.15);
         transform: translate(-50%, -50%);
         transition: width 0.6s, height 0.6s;
     }
@@ -949,142 +1446,80 @@
     }
 
     .quick-action:hover {
-        transform: translateY(-8px) scale(1.05);
+        transform: translateY(-10px) scale(1.05);
         border-color: #667eea;
-        box-shadow: 0 16px 32px rgba(102, 126, 234, 0.25);
+        box-shadow:
+            0 25px 50px rgba(102, 126, 234, 0.25),
+            0 0 0 1px rgba(102, 126, 234, 0.1);
     }
 
     .quick-action-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 2rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
         color: white;
         position: relative;
         z-index: 1;
         transition: var(--transition-smooth);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        box-shadow:
+            0 15px 30px rgba(0, 0, 0, 0.2),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.2),
+            inset 0 3px 0 rgba(255, 255, 255, 0.3);
     }
 
     .quick-action:hover .quick-action-icon {
-        transform: rotate(-10deg) scale(1.1);
+        transform: rotateY(180deg) scale(1.1);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.2),
+            inset 0 3px 0 rgba(255, 255, 255, 0.4);
     }
 
     .quick-action-text {
-        font-weight: 700;
+        font-weight: 800;
         color: #111827;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         position: relative;
         z-index: 1;
+        transition: var(--transition-smooth);
     }
 
     .dark .quick-action-text {
         color: #f9fafb;
     }
 
-    /* ========================================
-       RECENT ORDERS CARDS
-       ======================================== */
-
-    .order-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.25rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 14px;
-        transition: var(--transition-smooth);
-        background: white;
-    }
-
-    .dark .order-card {
-        background: #111827;
-        border-color: #374151;
-    }
-
-    .order-card:hover {
-        border-color: #667eea;
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
-    }
-
-    .order-icon-wrapper {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #2563eb;
-        transition: var(--transition-smooth);
-    }
-
-    .order-card:hover .order-icon-wrapper {
-        transform: rotate(-10deg) scale(1.1);
-    }
-
-    .order-info {
-        flex: 1;
-        margin-left: 1rem;
-    }
-
-    .order-number {
-        font-weight: 700;
-        color: #111827;
-        font-size: 0.95rem;
-    }
-
-    .dark .order-number {
-        color: #f9fafb;
-    }
-
-    .order-customer {
-        font-size: 0.8rem;
-        color: #6b7280;
-        margin-top: 0.125rem;
-    }
-
-    .dark .order-customer {
-        color: #9ca3af;
-    }
-
-    .order-details {
-        text-align: right;
-    }
-
-    .order-amount {
-        font-weight: 800;
-        color: #111827;
-        font-size: 1.1rem;
-    }
-
-    .dark .order-amount {
-        color: #f9fafb;
+    .quick-action:hover .quick-action-text {
+        color: #667eea;
     }
 
     /* ========================================
-       CATEGORY CARDS
+       CATEGORY CARDS REDISEÑADAS
        ======================================== */
 
     .category-card {
-        padding: 1.5rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 16px;
+        padding: 1.75rem;
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(255, 255, 255, 0.85));
+        border-radius: 20px;
+        border: 2px solid rgba(229, 231, 235, 0.5);
         transition: var(--transition-smooth);
-        background: white;
+        backdrop-filter: blur(10px);
         position: relative;
         overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
     }
 
     .dark .category-card {
-        background: #111827;
-        border-color: #374151;
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.95),
+            rgba(17, 24, 39, 0.85));
+        border-color: rgba(55, 65, 81, 0.5);
     }
 
     .category-card::before {
@@ -1092,106 +1527,227 @@
         position: absolute;
         top: 0;
         right: 0;
-        width: 100px;
-        height: 100px;
-        background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
         opacity: 0;
         transition: opacity 0.3s;
     }
 
     .category-card:hover {
         border-color: #667eea;
-        transform: translateY(-6px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
     }
 
     .category-card:hover::before {
         opacity: 1;
     }
 
-    .category-header {
+    /* ========================================
+       FILTROS AVANZADOS
+       ======================================== */
+
+    .advanced-filters {
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(255, 255, 255, 0.85));
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .dark .advanced-filters {
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.95),
+            rgba(17, 24, 39, 0.85));
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .filter-group {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
     }
 
-    .category-name {
-        font-weight: 800;
-        color: #111827;
-        text-transform: capitalize;
-        font-size: 1.05rem;
-    }
-
-    .dark .category-name {
-        color: #f9fafb;
-    }
-
-    .category-count {
-        font-size: 0.8rem;
-        color: #6b7280;
-        background: #f3f4f6;
-        padding: 0.25rem 0.75rem;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-
-    .dark .category-count {
-        background: #374151;
-        color: #9ca3af;
-    }
-
-    .category-stats {
+    .filter-label {
         display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-    }
-
-    .category-stat-label {
-        font-size: 0.8rem;
-        color: #6b7280;
-    }
-
-    .dark .category-stat-label {
-        color: #9ca3af;
-    }
-
-    .category-stat-value {
+        align-items: center;
+        gap: 0.75rem;
         font-weight: 700;
-        font-size: 0.875rem;
+        color: #374151;
+        font-size: 0.95rem;
     }
 
-    .category-revenue {
-        color: #059669;
+    .dark .filter-label {
+        color: #f3f4f6;
+    }
+
+    .filter-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        position: relative;
+        min-width: 200px;
+    }
+
+    .custom-select {
+        appearance: none;
+        background: rgba(243, 244, 236, 0.5);
+        border: 2px solid rgba(229, 231, 235, 0.5);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        padding-right: 3rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #374151;
+        width: 100%;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        backdrop-filter: blur(10px);
+    }
+
+    .custom-select:hover {
+        border-color: #667eea;
+        background: rgba(243, 244, 236, 0.8);
+    }
+
+    .filter-select i {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        pointer-events: none;
+    }
+
+    .date-range-picker {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(243, 244, 236, 0.5);
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        border: 2px solid rgba(229, 231, 235, 0.5);
+        backdrop-filter: blur(10px);
+        transition: var(--transition-smooth);
+    }
+
+    .date-range-picker:hover {
+        border-color: #667eea;
+        background: rgba(243, 244, 236, 0.8);
+    }
+
+    .date-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #374151;
+        min-width: 200px;
+    }
+
+    .filter-apply {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .filter-reset {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(243, 244, 236, 0.5);
+        color: #6b7280;
+        border: 2px solid rgba(229, 231, 235, 0.5);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        backdrop-filter: blur(10px);
+    }
+
+    .filter-reset:hover {
+        background: rgba(243, 244, 236, 0.8);
+        border-color: #6b7280;
+        color: #374151;
     }
 
     /* ========================================
-       REFRESH BUTTON
+       REFRESH BUTTON PREMIUM
        ======================================== */
 
     .refresh-btn {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.25rem;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        font-size: 0.875rem;
-        font-weight: 600;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 14px;
+        font-size: 0.9rem;
+        font-weight: 700;
         color: white;
         cursor: pointer;
         transition: var(--transition-smooth);
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .refresh-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: white;
+        opacity: 0;
+        transition: opacity 0.3s;
     }
 
     .refresh-btn:hover {
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.3);
         transform: scale(1.05);
+        box-shadow:
+            0 12px 25px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .refresh-btn:hover::before {
+        opacity: 0.1;
     }
 
     .refresh-btn i {
-        transition: transform 0.6s;
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .refresh-btn:active i {
@@ -1199,100 +1755,232 @@
     }
 
     /* ========================================
-       RESPONSIVE
+       LOADING STATES MEJORADOS
        ======================================== */
 
+    .skeleton-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+    }
+
+    .skeleton-card {
+        background: linear-gradient(135deg,
+            rgba(243, 244, 236, 0.8),
+            rgba(229, 231, 235, 0.6));
+        border-radius: 20px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dark .skeleton-card {
+        background: linear-gradient(135deg,
+            rgba(31, 41, 55, 0.8),
+            rgba(17, 24, 39, 0.6));
+    }
+
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* ========================================
+       RESPONSIVE DESIGN
+       ======================================== */
+
+    @media (max-width: 1200px) {
+        .metric-value {
+            font-size: 2.5rem;
+        }
+
+        .metric-icon-wrapper {
+            width: 70px;
+            height: 70px;
+        }
+
+        .chart-container {
+            padding: 1.5rem;
+        }
+    }
+
     @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+
+        .welcome-text {
+            font-size: 1.75rem;
+        }
+
+        .metric-card {
+            padding: 1.5rem;
+        }
+
         .metric-value {
             font-size: 2rem;
         }
 
+        .metric-icon-wrapper {
+            width: 60px;
+            height: 60px;
+        }
+
         .metric-icon {
-            width: 52px;
-            height: 52px;
             font-size: 1.5rem;
         }
 
-        .chart-header {
+        .filter-group {
             flex-direction: column;
-            align-items: flex-start;
+            align-items: stretch;
+        }
+
+        .filter-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .filter-select,
+        .date-range-picker,
+        .filter-apply,
+        .filter-reset {
+            width: 100%;
         }
 
         .period-selector {
-            width: 100%;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .period-btn {
-            padding: 0.5rem 0.75rem;
+            min-width: 60px;
+            padding: 0.5rem 1rem;
             font-size: 0.8rem;
         }
 
-        .welcome-text {
-            font-size: 1.5rem;
+        .alert-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
         }
 
-        .chart-title {
-            font-size: 1.1rem;
+        .alert-action {
+            align-self: stretch;
+            justify-content: center;
+        }
+
+        .quick-actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .quick-actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .metric-change {
+            flex-direction: column;
+            gap: 0.25rem;
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .metric-footer {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
         }
     }
 
     /* ========================================
-       LOADING STATES
+       ACCESSIBILITY
        ======================================== */
 
-    .skeleton {
-        background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 8px;
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 
-    .dark .skeleton {
-        background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
-        background-size: 200% 100%;
+    .focus-visible:focus {
+        outline: 3px solid #667eea;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+
+    /* ========================================
+       DARK MODE TRANSITIONS
+       ======================================== */
+
+    .dark-mode-transition {
+        transition: background-color 0.3s ease,
+                    border-color 0.3s ease,
+                    color 0.3s ease,
+                    box-shadow 0.3s ease;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Dashboard Header Premium -->
-<div class="dashboard-header px-6 py-6 sticky top-0 z-20">
+<div class="dashboard-header px-6 py-8 sticky top-0 z-30">
     <div class="header-content">
-        <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="animate-slide-in">
-                <h1 class="welcome-text">Dashboard</h1>
-                <p class="welcome-subtitle mt-1">
+        <div class="flex items-center justify-between flex-wrap gap-6">
+            <div class="professional-animation">
+                <h1 class="welcome-text">Dashboard Premium</h1>
+                <p class="welcome-subtitle mt-3">
                     Bienvenido de nuevo, <strong>{{ current_user.username }}</strong> 👋
+                    <span class="mx-2">•</span>
+                    Última actualización: <span id="current-time">Cargando...</span>
                 </p>
             </div>
 
-            <div class="flex items-center gap-3 animate-fade-in animate-delay-1">
-                <!-- Period Selector -->
+            <div class="flex items-center gap-4 professional-animation animate-delay-1">
+                <!-- Period Selector Premium -->
                 <div class="period-selector">
                     <button class="period-btn {% if current_period == 'today' %}active{% endif %}"
                             onclick="window.location.href='?period=today'">
+                        <i class="fas fa-calendar-day mr-2"></i>
                         Hoy
                     </button>
                     <button class="period-btn {% if current_period == 'week' %}active{% endif %}"
                             onclick="window.location.href='?period=week'">
+                        <i class="fas fa-calendar-week mr-2"></i>
                         Semana
                     </button>
                     <button class="period-btn {% if current_period == 'month' or not current_period %}active{% endif %}"
                             onclick="window.location.href='?period=month'">
+                        <i class="fas fa-calendar-alt mr-2"></i>
                         Mes
                     </button>
                     <button class="period-btn {% if current_period == 'quarter' %}active{% endif %}"
                             onclick="window.location.href='?period=quarter'">
+                        <i class="fas fa-chart-bar mr-2"></i>
                         Trimestre
                     </button>
                     <button class="period-btn {% if current_period == 'year' %}active{% endif %}"
                             onclick="window.location.href='?period=year'">
+                        <i class="fas fa-calendar-star mr-2"></i>
                         Año
                     </button>
                 </div>
 
-                <!-- Refresh Button -->
+                <!-- Refresh Button Premium -->
                 <button onclick="window.location.reload()" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Actualizar
@@ -1302,183 +1990,244 @@
     </div>
 </div>
 
-<!-- Main Content -->
-<div class="p-6 space-y-8 max-w-[1600px] mx-auto">
+<!-- Advanced Filters -->
+<div class="advanced-filters mx-6 mt-6 professional-animation animate-delay-2">
+    <div class="filter-group">
+        <div class="filter-label">
+            <i class="fas fa-filter text-indigo-600"></i>
+            Filtros Avanzados
+        </div>
+        <div class="filter-controls">
+            <div class="filter-select">
+                <select class="custom-select focus-visible">
+                    <option value="all">Todos los Productos</option>
+                    <option value="category">Por Categoría</option>
+                    <option value="brand">Por Marca</option>
+                    <option value="price">Por Rango de Precio</option>
+                </select>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+
+            <div class="date-range-picker">
+                <i class="fas fa-calendar-alt text-indigo-600"></i>
+                <input type="text" class="date-input focus-visible"
+                       placeholder="Seleccionar rango de fechas"
+                       id="date-range-picker">
+            </div>
+
+            <button class="filter-apply focus-visible">
+                <i class="fas fa-check"></i>
+                Aplicar Filtros
+            </button>
+
+            <button class="filter-reset focus-visible" onclick="resetFilters()">
+                <i class="fas fa-redo"></i>
+                Limpiar Filtros
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="dashboard-grid">
+
+    <!-- Primary Metrics Grid -->
+    <div class="grid-col-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Ventas / Revenue -->
+            <div class="metric-card professional-animation animate-delay-1">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper">
+                        <div class="metric-icon" style="background: var(--primary-gradient);">
+                            <i class="fas fa-dollar-sign text-white"></i>
+                        </div>
+                        <div class="metric-icon-badge">
+                            <i class="fas fa-chart-line text-indigo-600"></i>
+                        </div>
+                    </div>
+                    <div class="trend-indicator positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12.5%</span>
+                        <div class="trend-sparkline positive">
+                            <svg viewBox="0 0 60 24">
+                                <path d="M0,20 L15,12 L30,16 L45,8 L60,14" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-label">Ventas Totales</div>
+                <div class="metric-value">
+                    ${{ "{:,.2f}".format(revenue_current) }}
+                </div>
+                <div class="metric-footer">
+                    {% if growth_indicators.revenue.color == 'green' %}
+                    <div class="metric-change positive">
+                    {% elif growth_indicators.revenue.color == 'red' %}
+                    <div class="metric-change negative">
+                    {% else %}
+                    <div class="metric-change neutral">
+                    {% endif %}
+                        <i class="fas fa-{{ growth_indicators.revenue.icon }}"></i>
+                        {{ growth_indicators.revenue.text }}
+                    </div>
+                    <span class="metric-info">vs período anterior</span>
+                </div>
+            </div>
+
+            <!-- Órdenes -->
+            <div class="metric-card professional-animation animate-delay-2">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper">
+                        <div class="metric-icon" style="background: var(--success-gradient);">
+                            <i class="fas fa-shopping-cart text-white"></i>
+                        </div>
+                        <div class="metric-icon-badge">
+                            <i class="fas fa-arrow-up text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="trend-indicator positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+8.3%</span>
+                    </div>
+                </div>
+                <div class="metric-label">Órdenes Procesadas</div>
+                <div class="metric-value">
+                    {{ orders_current }}
+                </div>
+                <div class="metric-footer">
+                    {% if growth_indicators.orders.color == 'green' %}
+                    <div class="metric-change positive">
+                    {% elif growth_indicators.orders.color == 'red' %}
+                    <div class="metric-change negative">
+                    {% else %}
+                    <div class="metric-change neutral">
+                    {% endif %}
+                        <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
+                        {{ growth_indicators.orders.text }}
+                    </div>
+                    <span class="metric-info">AOV: ${{ "{:,.2f}".format(aov_current) }}</span>
+                </div>
+            </div>
+
+            <!-- Ganancia Bruta -->
+            <div class="metric-card professional-animation animate-delay-3">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper">
+                        <div class="metric-icon" style="background: var(--warning-gradient);">
+                            <i class="fas fa-chart-line text-white"></i>
+                        </div>
+                        <div class="metric-icon-badge">
+                            <i class="fas fa-percentage text-pink-600"></i>
+                        </div>
+                    </div>
+                    <div class="trend-indicator positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+15.2%</span>
+                    </div>
+                </div>
+                <div class="metric-label">Ganancia Bruta</div>
+                <div class="metric-value">
+                    ${{ "{:,.2f}".format(gross_profit_current) }}
+                </div>
+                <div class="metric-footer">
+                    {% if growth_indicators.profit.color == 'green' %}
+                    <div class="metric-change positive">
+                    {% elif growth_indicators.profit.color == 'red' %}
+                    <div class="metric-change negative">
+                    {% else %}
+                    <div class="metric-change neutral">
+                    {% endif %}
+                        <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
+                        {{ growth_indicators.profit.text }}
+                    </div>
+                    <span class="metric-info">Margen: {{ "{:.1f}".format(gross_margin_current) }}%</span>
+                </div>
+            </div>
+
+            <!-- Clientes Activos -->
+            <div class="metric-card professional-animation animate-delay-4">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper">
+                        <div class="metric-icon" style="background: var(--info-gradient);">
+                            <i class="fas fa-users text-white"></i>
+                        </div>
+                        <div class="metric-icon-badge">
+                            <i class="fas fa-user-plus text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="trend-indicator positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+5.7%</span>
+                    </div>
+                </div>
+                <div class="metric-label">Clientes Activos</div>
+                <div class="metric-value">
+                    {{ active_customers }}
+                </div>
+                <div class="metric-footer">
+                    {% if growth_indicators.customers.color == 'green' %}
+                    <div class="metric-change positive">
+                    {% elif growth_indicators.customers.color == 'red' %}
+                    <div class="metric-change negative">
+                    {% else %}
+                    <div class="metric-change neutral">
+                    {% endif %}
+                        <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
+                        +{{ new_customers_current }} nuevos
+                    </div>
+                    <span class="metric-info">Conversión: {{ "{:.1f}".format(conversion_rate) }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Alertas Prioritarias -->
     {% if alerts %}
-    <div class="space-y-4">
-        {% for alert in alerts[:3] %}
-        <div class="alert-card alert-{{ alert.type }} animate-slide-in animate-delay-{{ loop.index }}">
-            <div class="alert-icon-wrapper">
-                <i class="fas fa-{{ alert.icon }}"></i>
+    <div class="grid-col-12">
+        <div class="space-y-4">
+            {% for alert in alerts[:3] %}
+            <div class="alert-card alert-{{ alert.type }} professional-animation animate-delay-{{ loop.index }}">
+                <div class="alert-icon-wrapper">
+                    <i class="fas fa-{{ alert.icon }}"></i>
+                </div>
+                <div class="alert-content">
+                    <h4 class="alert-title">{{ alert.title }}</h4>
+                    <p class="alert-message">{{ alert.message }}</p>
+                </div>
+                <a href="{{ url_for(alert.link) }}{{ alert.filters or '' }}" class="alert-action">
+                    <span>{{ alert.action }}</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
-            <div class="alert-content">
-                <h4 class="alert-title">{{ alert.title }}</h4>
-                <p class="alert-message">{{ alert.message }}</p>
-            </div>
-            <a href="{{ url_for(alert.link) }}{{ alert.filters or '' }}" class="alert-action">
-                {{ alert.action }}
-                <i class="fas fa-arrow-right"></i>
-            </a>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Primary Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-        <!-- Ventas / Revenue -->
-        <div class="metric-card animate-fade-in animate-delay-1">
-            <div class="metric-header">
-                <div class="metric-icon-wrapper">
-                    <div class="metric-icon" style="background: var(--primary-gradient);">
-                        <i class="fas fa-dollar-sign text-white"></i>
-                    </div>
-                    <div class="metric-icon-badge">
-                        <i class="fas fa-chart-line text-indigo-600"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="metric-label">Ventas Totales</div>
-            <div class="metric-value">
-                ${{ "{:,.2f}".format(revenue_current|default(0)) }}
-            </div>
-            <div class="metric-footer">
-                {% if growth_indicators.revenue.color == 'green' %}
-                <div class="metric-change positive">
-                {% elif growth_indicators.revenue.color == 'red' %}
-                <div class="metric-change negative">
-                {% else %}
-                <div class="metric-change neutral">
-                {% endif %}
-                    <i class="fas fa-{{ growth_indicators.revenue.icon }}"></i>
-                    {{ growth_indicators.revenue.text }}
-                </div>
-                <span class="metric-info">vs período anterior</span>
-            </div>
-        </div>
-
-        <!-- Órdenes -->
-        <div class="metric-card animate-fade-in animate-delay-2">
-            <div class="metric-header">
-                <div class="metric-icon-wrapper">
-                    <div class="metric-icon" style="background: var(--success-gradient);">
-                        <i class="fas fa-shopping-cart text-white"></i>
-                    </div>
-                    <div class="metric-icon-badge">
-                        <i class="fas fa-arrow-up text-green-600"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="metric-label">Órdenes Procesadas</div>
-            <div class="metric-value">
-                {{ orders_current|default(0) }}
-            </div>
-            <div class="metric-footer">
-                {% if growth_indicators.orders.color == 'green' %}
-                <div class="metric-change positive">
-                {% elif growth_indicators.orders.color == 'red' %}
-                <div class="metric-change negative">
-                {% else %}
-                <div class="metric-change neutral">
-                {% endif %}
-                    <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
-                    {{ growth_indicators.orders.text }}
-                </div>
-                <span class="metric-info">AOV: ${{ "{:,.2f}".format(aov_current|default(0)) }}</span>
-            </div>
-        </div>
-
-        <!-- Ganancia Bruta -->
-        <div class="metric-card animate-fade-in animate-delay-3">
-            <div class="metric-header">
-                <div class="metric-icon-wrapper">
-                    <div class="metric-icon" style="background: var(--warning-gradient);">
-                        <i class="fas fa-chart-line text-white"></i>
-                    </div>
-                    <div class="metric-icon-badge">
-                        <i class="fas fa-percentage text-pink-600"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="metric-label">Ganancia Bruta</div>
-            <div class="metric-value">
-                ${{ "{:,.2f}".format(gross_profit_current|default(0)) }}
-            </div>
-            <div class="metric-footer">
-                {% if growth_indicators.profit.color == 'green' %}
-                <div class="metric-change positive">
-                {% elif growth_indicators.profit.color == 'red' %}
-                <div class="metric-change negative">
-                {% else %}
-                <div class="metric-change neutral">
-                {% endif %}
-                    <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
-                    {{ growth_indicators.profit.text }}
-                </div>
-                <span class="metric-info">Margen: {{ "{:.1f}".format(gross_margin_current|default(0)) }}%</span>
-            </div>
-        </div>
-
-        <!-- Clientes Activos -->
-        <div class="metric-card animate-fade-in animate-delay-4">
-            <div class="metric-header">
-                <div class="metric-icon-wrapper">
-                    <div class="metric-icon" style="background: var(--info-gradient);">
-                        <i class="fas fa-users text-white"></i>
-                    </div>
-                    <div class="metric-icon-badge">
-                        <i class="fas fa-user-plus text-blue-600"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="metric-label">Clientes Activos</div>
-            <div class="metric-value">
-                {{ active_customers|default(0) }}
-            </div>
-            <div class="metric-footer">
-                {% if growth_indicators.customers.color == 'green' %}
-                <div class="metric-change positive">
-                {% elif growth_indicators.customers.color == 'red' %}
-                <div class="metric-change negative">
-                {% else %}
-                <div class="metric-change neutral">
-                {% endif %}
-                    <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
-                    +{{ new_customers_current|default(0) }} nuevos
-                </div>
-                <span class="metric-info">Conversión: {{ "{:.1f}".format(conversion_rate|default(0)) }}%</span>
-            </div>
-        </div>
-
-    </div>
-
     <!-- Insights Section -->
     {% if insights %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for insight in insights[:3] %}
-        <div class="insight-card animate-fade-in animate-delay-{{ loop.index }}"
-             style="background: {% if insight.type == 'success' %}var(--success-gradient){% elif insight.type == 'warning' %}var(--warning-gradient){% else %}var(--info-gradient){% endif %};">
-            <div class="insight-content">
-                <div class="insight-icon">
-                    <i class="fas fa-{{ insight.icon }}"></i>
+    <div class="grid-col-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for insight in insights[:3] %}
+            <div class="insight-card professional-animation animate-delay-{{ loop.index }} gradient-animate"
+                 style="background: {% if insight.type == 'success' %}var(--success-gradient){% elif insight.type == 'warning' %}var(--warning-gradient){% else %}var(--info-gradient){% endif %};">
+                <div class="insight-content">
+                    <div class="insight-icon">
+                        <i class="fas fa-{{ insight.icon }}"></i>
+                    </div>
+                    <div class="insight-title">{{ insight.title }}</div>
+                    <div class="insight-message">{{ insight.message }}</div>
+                    <div class="insight-suggestion">💡 {{ insight.suggestion }}</div>
                 </div>
-                <div class="insight-title">{{ insight.title }}</div>
-                <div class="insight-message">{{ insight.message }}</div>
-                <div class="insight-suggestion">💡 {{ insight.suggestion }}</div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
     {% endif %}
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Sales Chart (2 cols) -->
-        <div class="lg:col-span-2 chart-container animate-fade-in">
+    <div class="grid-col-8">
+        <div class="chart-container professional-animation">
             <div class="chart-header">
                 <div>
                     <h3 class="chart-title">
@@ -1486,92 +2235,110 @@
                         Tendencia de Ventas
                     </h3>
                     <p class="chart-subtitle">
-                        Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales|default(0)) }}
+                        Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales) }}
                     </p>
                 </div>
                 <div class="chart-legend">
                     <div class="legend-item">
                         <div class="legend-dot" style="background: var(--primary-gradient);"></div>
-                        <span>Ventas</span>
+                        <span>Ventas ($)</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-dot" style="background: #9ca3af;"></div>
                         <span>Órdenes</span>
                     </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: var(--success-gradient);"></div>
+                        <span>Clientes</span>
+                    </div>
                 </div>
             </div>
-            <div style="height: 340px; position: relative;">
+            <div style="height: 360px; position: relative;">
                 <canvas id="salesChart"></canvas>
             </div>
         </div>
+    </div>
 
-        <!-- Inventory Status (1 col) -->
-        <div class="chart-container animate-fade-in">
+    <!-- Inventory Status -->
+    <div class="grid-col-4">
+        <div class="chart-container professional-animation">
             <div class="chart-header">
                 <h3 class="chart-title">
                     <i class="fas fa-boxes text-indigo-600"></i>
                     Estado del Inventario
                 </h3>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div class="inventory-status-card available">
                     <div>
-                        <div class="text-sm font-bold text-green-900 uppercase tracking-wide mb-1">Disponibles</div>
-                        <div class="text-3xl font-black text-green-700">{{ total_available|default(0) }}</div>
+                        <div class="text-sm font-black text-green-900 uppercase tracking-wider mb-2">Disponibles</div>
+                        <div class="text-4xl font-black text-green-800">{{ total_available }}</div>
+                        <div class="text-xs font-semibold text-green-700 mt-1">
+                            {{ ((total_available/(total_available+low_stock_count+out_of_stock_count))*100)|round|int if (total_available+low_stock_count+out_of_stock_count) > 0 else 0 }}% del total
+                        </div>
                     </div>
-                    <i class="fas fa-check-circle inventory-status-icon text-green-600"></i>
+                    <i class="fas fa-check-circle inventory-status-icon text-green-700"></i>
                 </div>
 
                 <div class="inventory-status-card low-stock">
                     <div>
-                        <div class="text-sm font-bold text-yellow-900 uppercase tracking-wide mb-1">Stock Bajo</div>
-                        <div class="text-3xl font-black text-yellow-700">{{ low_stock_count|default(0) }}</div>
+                        <div class="text-sm font-black text-yellow-900 uppercase tracking-wider mb-2">Stock Bajo</div>
+                        <div class="text-4xl font-black text-yellow-800">{{ low_stock_count }}</div>
+                        <div class="text-xs font-semibold text-yellow-700 mt-1">
+                            Requiere atención inmediata
+                        </div>
                     </div>
-                    <i class="fas fa-exclamation-triangle inventory-status-icon text-yellow-600"></i>
+                    <i class="fas fa-exclamation-triangle inventory-status-icon text-yellow-700"></i>
                 </div>
 
                 <div class="inventory-status-card out-of-stock">
                     <div>
-                        <div class="text-sm font-bold text-red-900 uppercase tracking-wide mb-1">Sin Stock</div>
-                        <div class="text-3xl font-black text-red-700">{{ out_of_stock_count|default(0) }}</div>
+                        <div class="text-sm font-black text-red-900 uppercase tracking-wider mb-2">Sin Stock</div>
+                        <div class="text-4xl font-black text-red-800">{{ out_of_stock_count }}</div>
+                        <div class="text-xs font-semibold text-red-700 mt-1">
+                            Pérdida de ventas potencial
+                        </div>
                     </div>
-                    <i class="fas fa-times-circle inventory-status-icon text-red-600"></i>
+                    <i class="fas fa-times-circle inventory-status-icon text-red-700"></i>
                 </div>
 
-                <div class="pt-4 border-t-2 border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Valor Total</span>
-                        <i class="fas fa-wallet text-gray-400"></i>
+                <div class="pt-5 border-t-2 border-gray-300 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-400 uppercase tracking-wide">Valor Total del Inventario</span>
+                        <i class="fas fa-wallet text-gray-500"></i>
                     </div>
-                    <div class="text-2xl font-black text-gray-900 dark:text-white mb-2">
-                        ${{ "{:,.2f}".format(inventory_value|default(0)) }}
+                    <div class="text-3xl font-black text-gray-900 dark:text-white mb-3">
+                        ${{ "{:,.2f}".format(inventory_value) }}
                     </div>
-                    <div class="text-sm font-medium text-green-600 dark:text-green-400">
-                        <i class="fas fa-arrow-up"></i>
-                        Ganancia potencial: ${{ "{:,.2f}".format(potential_profit|default(0)) }}
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-bold text-green-600 dark:text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            Ganancia potencial: ${{ "{:,.2f}".format(potential_profit) }}
+                        </div>
+                        <div class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full">
+                            {{ "{:.1f}".format((potential_profit/inventory_value)*100) if inventory_value > 0 else 0 }}% ROI
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Products and Orders Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- Top Products -->
-        <div class="chart-container animate-fade-in">
+    <div class="grid-col-6">
+        <div class="chart-container professional-animation">
             <div class="chart-header">
                 <h3 class="chart-title">
                     <i class="fas fa-trophy text-indigo-600"></i>
                     Productos Más Vendidos
                 </h3>
-                <a href="{{ url_for('inventory.laptops_list') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2">
+                <a href="{{ url_for('inventory.laptops_list') }}"
+                   class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 focus-visible">
                     Ver todos
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="overflow-x-auto">
+            <div class="data-table-wrapper mt-4">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -1583,12 +2350,12 @@
                     </thead>
                     <tbody>
                         {% for product in top_products[:5] %}
-                        <tr>
+                        <tr class="focus-visible">
                             <td>
-                                <div class="font-bold text-gray-900 dark:text-white">{{ product.name }}</div>
-                                <div class="text-xs text-gray-500 font-mono">{{ product.sku }}</div>
+                                <div class="font-black text-gray-900 dark:text-white">{{ product.name }}</div>
+                                <div class="text-xs text-gray-500 font-mono mt-1">{{ product.sku }}</div>
                             </td>
-                            <td class="font-bold text-lg">{{ product.units_sold }}</td>
+                            <td class="font-black text-lg">{{ product.units_sold }}</td>
                             <td class="font-black text-green-600 dark:text-green-400 text-lg">
                                 ${{ "{:,.0f}".format(product.revenue) }}
                             </td>
@@ -1603,135 +2370,183 @@
                 </table>
             </div>
         </div>
+    </div>
 
-        <!-- Recent Orders -->
-        <div class="chart-container animate-fade-in">
+    <!-- Recent Orders -->
+    <div class="grid-col-6">
+        <div class="chart-container professional-animation">
             <div class="chart-header">
                 <h3 class="chart-title">
                     <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
                     Órdenes Recientes
                 </h3>
-                <a href="{{ url_for('invoices.invoices_list') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2">
+                <a href="{{ url_for('invoices.invoices_list') }}"
+                   class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 focus-visible">
                     Ver todas
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="space-y-3">
+            <div class="space-y-4 mt-4">
                 {% for invoice in recent_invoices[:5] %}
-                <div class="order-card">
-                    <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <div class="order-icon-wrapper">
+                <div class="order-card bg-white dark:bg-gray-900 rounded-2xl p-4 border-2 border-gray-200 dark:border-gray-800 hover:border-indigo-500 transition-all duration-300 hover:shadow-xl">
+                    <div class="flex items-center gap-4">
+                        <div class="order-icon-wrapper bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-600 dark:text-blue-400">
                             <i class="fas fa-file-invoice"></i>
                         </div>
-                        <div class="order-info">
-                            <div class="order-number">{{ invoice.invoice_number }}</div>
-                            <div class="order-customer">{{ invoice.customer_name }}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="order-number font-black text-gray-900 dark:text-white truncate">
+                                {{ invoice.invoice_number }}
+                            </div>
+                            <div class="order-customer text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                {{ invoice.customer_name }}
+                                <span class="mx-2">•</span>
+                                {{ invoice.created_at.strftime('%b %d') if invoice.created_at else 'N/A' }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="order-details">
-                        <div class="order-amount">${{ "{:,.2f}".format(invoice.total) }}</div>
-                        <span class="status-badge {{ 'success' if invoice.status == 'paid' or invoice.status == 'completed' else 'warning' if invoice.status == 'issued' else 'info' }} mt-2">
-                            {{ invoice.status }}
-                        </span>
+                        <div class="text-right">
+                            <div class="order-amount font-black text-gray-900 dark:text-white">
+                                ${{ "{:,.2f}".format(invoice.total) }}
+                            </div>
+                            <div class="mt-2">
+                                <span class="status-badge {{ 'success' if invoice.status == 'paid' or invoice.status == 'completed' else 'warning' if invoice.status == 'issued' else 'info' }}">
+                                    {{ invoice.status|title if invoice.status else 'N/A' }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
-
     </div>
 
     <!-- Category Distribution -->
-    <div class="chart-container animate-fade-in">
-        <div class="chart-header">
-            <h3 class="chart-title">
-                <i class="fas fa-layer-group text-indigo-600"></i>
-                Rendimiento por Categoría
-            </h3>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for category in category_distribution %}
-            <div class="category-card">
-                <div class="category-header">
-                    <span class="category-name">
-                        <i class="fas fa-tag mr-2 text-indigo-600"></i>
-                        {{ category.category }}
-                    </span>
-                    <span class="category-count">{{ category.products }} productos</span>
+    <div class="grid-col-12">
+        <div class="chart-container professional-animation">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-layer-group text-indigo-600"></i>
+                    Rendimiento por Categoría
+                </h3>
+                <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                    Distribución de ingresos por categoría
                 </div>
-                <div class="space-y-3">
-                    <div class="category-stats">
-                        <span class="category-stat-label">Unidades vendidas</span>
-                        <span class="category-stat-value">{{ category.units_sold }}</span>
-                    </div>
-                    <div class="category-stats">
-                        <span class="category-stat-label">Ingresos</span>
-                        <span class="category-stat-value category-revenue">
-                            ${{ "{:,.0f}".format(category.revenue) }}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                {% for category in category_distribution %}
+                <div class="category-card">
+                    <div class="category-header mb-6">
+                        <span class="category-name">
+                            <i class="fas fa-tag mr-3 text-indigo-600 text-lg"></i>
+                            {{ category.category|title if category.category else 'Sin categoría' }}
                         </span>
+                        <span class="category-count">{{ category.products if category.products else 0 }} productos</span>
                     </div>
-                    <div class="progress-container">
-                        {% set max_revenue = category_distribution[0].revenue if category_distribution and category_distribution[0].revenue > 0 else 1 %}
-                        <div class="progress-bar progress-primary"
-                             style="width: {{ (category.revenue / max_revenue * 100) if max_revenue > 0 else 0 }}%">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="category-stat-label">Unidades vendidas</span>
+                            <span class="category-stat-value font-black">{{ category.units_sold if category.units_sold else 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="category-stat-label">Ingresos totales</span>
+                            <span class="category-stat-value category-revenue font-black">
+                                ${{ "{:,.0f}".format(category.revenue if category.revenue else 0) }}
+                            </span>
+                        </div>
+                        <div class="pt-4">
+                            <div class="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                                <span>Porcentaje de participación</span>
+                                <span>
+                                    {% set total_revenue = category_distribution|sum(attribute='revenue') %}
+                                    {{ "%.1f"|format((category.revenue/total_revenue)*100) if total_revenue > 0 and category.revenue else 0 }}%
+                                </span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar progress-primary"
+                                     style="width: {% if category_distribution and category_distribution[0].revenue and category_distribution[0].revenue > 0 %}{{ (category.revenue / category_distribution[0].revenue * 100) if category.revenue else 0 }}{% else %}0{% endif %}%">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="chart-container animate-fade-in">
-        <h3 class="chart-title mb-8">
-            <i class="fas fa-bolt text-indigo-600"></i>
-            Acciones Rápidas
-        </h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-
-            <a href="{{ url_for('inventory.laptop_add') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: var(--primary-gradient);">
-                    <i class="fas fa-plus"></i>
+    <div class="grid-col-12">
+        <div class="chart-container professional-animation">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-bolt text-indigo-600"></i>
+                    Acciones Rápidas
+                </h3>
+                <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                    Acciones frecuentes para optimizar tu flujo de trabajo
                 </div>
-                <div class="quick-action-text">Nueva Laptop</div>
-            </a>
+            </div>
+            <div class="quick-actions-grid mt-8">
+                <a href="{{ url_for('inventory.laptop_add') }}" class="quick-action focus-visible">
+                    <div class="quick-action-icon" style="background: var(--primary-gradient);">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="quick-action-text">Nueva Laptop</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Agregar nuevo producto
+                    </div>
+                </a>
 
-            <a href="{{ url_for('invoices.invoice_new') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: var(--success-gradient);">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                </div>
-                <div class="quick-action-text">Nueva Factura</div>
-            </a>
+                <a href="{{ url_for('invoices.invoice_new') }}" class="quick-action focus-visible">
+                    <div class="quick-action-icon" style="background: var(--success-gradient);">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="quick-action-text">Nueva Factura</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Crear nueva venta
+                    </div>
+                </a>
 
-            <a href="{{ url_for('customers.customer_add') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: var(--info-gradient);">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <div class="quick-action-text">Nuevo Cliente</div>
-            </a>
+                <a href="{{ url_for('customers.customer_add') }}" class="quick-action focus-visible">
+                    <div class="quick-action-icon" style="background: var(--info-gradient);">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="quick-action-text">Nuevo Cliente</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Registrar cliente
+                    </div>
+                </a>
 
-            <a href="{{ url_for('inventory.laptops_list') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: var(--warning-gradient);">
-                    <i class="fas fa-laptop"></i>
-                </div>
-                <div class="quick-action-text">Ver Inventario</div>
-            </a>
+                <a href="{{ url_for('inventory.laptops_list') }}" class="quick-action focus-visible">
+                    <div class="quick-action-icon" style="background: var(--warning-gradient);">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <div class="quick-action-text">Ver Inventario</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Gestionar productos
+                    </div>
+                </a>
 
-            <a href="{{ url_for('invoices.invoices_list') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: var(--pink-gradient);">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="quick-action-text">Ver Facturas</div>
-            </a>
+                <a href="{{ url_for('invoices.invoices_list') }}" class="quick-action focus-visible">
+                    <div class="quick-action-icon" style="background: var(--pink-gradient);">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="quick-action-text">Ver Facturas</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Historial de ventas
+                    </div>
+                </a>
 
-            <a href="{{ url_for('customers.customers_list') }}" class="quick-action">
-                <div class="quick-action-icon" style="background: var(--teal-gradient);">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="quick-action-text">Ver Clientes</div>
-            </a>
-
+                <a href="{{ url_for('customers.customers_list') }}" class="quick-action focus-visible">
+                    <div class="quick-action-icon" style="background: var(--teal-gradient);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="quick-action-text">Ver Clientes</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Base de datos
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -1741,205 +2556,455 @@
 {% block extra_js %}
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Flatpickr for Date Range Picker -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-    // Datos del dashboard
-    const salesData = {{ daily_sales|default([])|tojson }};
+    // Initialize date range picker
+    flatpickr("#date-range-picker", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        locale: {
+            firstDayOfWeek: 1
+        },
+        theme: "material_blue"
+    });
+
+    // Update current time function
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        const dateString = now.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+        document.getElementById('current-time').textContent = `${timeString} (${dateString})`;
+    }
+
+    // Update time every minute
+    setInterval(updateCurrentTime, 60000);
+    updateCurrentTime(); // Call immediately on load
+
+    // Dashboard Effects Class
+    class DashboardEffects {
+        constructor() {
+            this.initParallax();
+            this.initScrollAnimations();
+            this.initIntersectionObservers();
+            this.bindEvents();
+        }
+
+        initParallax() {
+            const header = document.querySelector('.dashboard-header');
+            if (header) {
+                window.addEventListener('scroll', () => {
+                    const scrolled = window.pageYOffset;
+                    const speed = 0.5;
+                    header.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+            }
+        }
+
+        initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '50px'
+            });
+
+            document.querySelectorAll('.professional-animation').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        initIntersectionObservers() {
+            const cards = document.querySelectorAll('.metric-card, .chart-container, .alert-card');
+
+            const cardObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0) scale(1)';
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px) scale(0.95)';
+                card.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                cardObserver.observe(card);
+            });
+        }
+
+        bindEvents() {
+            // Quick action hover effects
+            document.querySelectorAll('.quick-action').forEach(action => {
+                action.addEventListener('mouseenter', (e) => {
+                    const icon = e.currentTarget.querySelector('.quick-action-icon');
+                    if (icon) {
+                        icon.style.transform = 'rotateY(180deg) scale(1.1)';
+                    }
+                });
+
+                action.addEventListener('mouseleave', (e) => {
+                    const icon = e.currentTarget.querySelector('.quick-action-icon');
+                    if (icon) {
+                        icon.style.transform = '';
+                    }
+                });
+            });
+
+            // Metric card hover effects
+            document.querySelectorAll('.metric-card').forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    const icon = e.currentTarget.querySelector('.metric-icon');
+                    if (icon) {
+                        icon.style.animation = 'glow 2s ease-in-out infinite';
+                    }
+                });
+
+                card.addEventListener('mouseleave', (e) => {
+                    const icon = e.currentTarget.querySelector('.metric-icon');
+                    if (icon) {
+                        icon.style.animation = '';
+                    }
+                });
+            });
+        }
+    }
+
+    // Initialize dashboard effects
+    new DashboardEffects();
+
+    // Filter functions
+    function resetFilters() {
+        document.querySelector('.custom-select').value = 'all';
+        document.getElementById('date-range-picker').value = '';
+
+        // Show notification
+        showNotification('Filtros reiniciados correctamente', 'success');
+    }
+
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-2xl shadow-xl backdrop-filter backdrop-blur-lg border-2 ${
+            type === 'success'
+                ? 'bg-green-50/90 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300'
+                : 'bg-blue-50/90 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center gap-3">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} text-lg"></i>
+                <span class="font-bold">${message}</span>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Chart.js Configuration
+    const salesData = {{ daily_sales|tojson|safe }};
     const isDarkMode = document.documentElement.classList.contains('dark');
 
-    // Configuración del gráfico de ventas con diseño premium
-    const ctx = document.getElementById('salesChart').getContext('2d');
+    // Get chart context
+    const ctx = document.getElementById('salesChart');
 
-    // Crear gradientes
-    const gradientSales = ctx.createLinearGradient(0, 0, 0, 400);
-    gradientSales.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
-    gradientSales.addColorStop(1, 'rgba(102, 126, 234, 0.01)');
+    if (ctx) {
+        const chartCtx = ctx.getContext('2d');
 
-    const gradientOrders = ctx.createLinearGradient(0, 0, 0, 400);
-    gradientOrders.addColorStop(0, 'rgba(156, 163, 175, 0.2)');
-    gradientOrders.addColorStop(1, 'rgba(156, 163, 175, 0.01)');
+        // Create gradients
+        const gradientSales = chartCtx.createLinearGradient(0, 0, 0, 400);
+        gradientSales.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+        gradientSales.addColorStop(0.7, 'rgba(102, 126, 234, 0.1)');
+        gradientSales.addColorStop(1, 'rgba(102, 126, 234, 0.01)');
 
-    const salesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: salesData.map(d => d.date),
-            datasets: [{
-                label: 'Ventas ($)',
-                data: salesData.map(d => d.amount),
-                borderColor: '#667eea',
-                backgroundColor: gradientSales,
-                borderWidth: 4,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 4,
-                pointHoverRadius: 8,
-                pointBackgroundColor: '#667eea',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 3,
-                pointHoverBackgroundColor: '#667eea',
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 3,
-                yAxisID: 'y'
-            }, {
-                label: 'Órdenes',
-                data: salesData.map(d => d.orders),
-                borderColor: '#9ca3af',
-                backgroundColor: gradientOrders,
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#9ca3af',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                yAxisID: 'y1',
-                borderDash: [5, 5]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false
+        const gradientOrders = chartCtx.createLinearGradient(0, 0, 0, 400);
+        gradientOrders.addColorStop(0, 'rgba(156, 163, 175, 0.2)');
+        gradientOrders.addColorStop(0.7, 'rgba(156, 163, 175, 0.08)');
+        gradientOrders.addColorStop(1, 'rgba(156, 163, 175, 0.01)');
+
+        // Enhanced chart configuration
+        const salesChart = new Chart(chartCtx, {
+            type: 'line',
+            data: {
+                labels: salesData.map(d => d.date),
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: salesData.map(d => d.amount || 0),
+                    borderColor: '#667eea',
+                    backgroundColor: gradientSales,
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 10,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointHoverBackgroundColor: '#667eea',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3,
+                    yAxisID: 'y',
+                    cubicInterpolationMode: 'monotone'
+                }, {
+                    label: 'Órdenes',
+                    data: salesData.map(d => d.orders || 0),
+                    borderColor: '#9ca3af',
+                    backgroundColor: gradientOrders,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#9ca3af',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    yAxisID: 'y1',
+                    borderDash: [5, 5]
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
-                tooltip: {
-                    backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                    titleColor: isDarkMode ? '#f9fafb' : '#111827',
-                    bodyColor: isDarkMode ? '#f9fafb' : '#111827',
-                    borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-                    borderWidth: 2,
-                    padding: 16,
-                    displayColors: true,
-                    boxWidth: 12,
-                    boxHeight: 12,
-                    usePointStyle: true,
-                    titleFont: {
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    bodyFont: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.datasetIndex === 0) {
-                                label += '$' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            } else {
-                                label += context.parsed.y + ' órdenes';
-                            }
-                            return label;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    beginAtZero: true,
-                    grid: {
-                        color: isDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.8)',
-                        drawBorder: false,
-                        lineWidth: 2
-                    },
-                    ticks: {
-                        color: isDarkMode ? '#9ca3af' : '#6b7280',
-                        font: {
-                            size: 12,
-                            weight: '600'
-                        },
-                        padding: 10,
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    beginAtZero: true,
-                    grid: {
-                        drawOnChartArea: false
-                    },
-                    ticks: {
-                        color: isDarkMode ? '#9ca3af' : '#6b7280',
-                        font: {
-                            size: 12,
-                            weight: '600'
-                        },
-                        padding: 10
-                    }
-                },
-                x: {
-                    grid: {
+                plugins: {
+                    legend: {
                         display: false
                     },
-                    ticks: {
-                        color: isDarkMode ? '#9ca3af' : '#6b7280',
-                        font: {
-                            size: 11,
-                            weight: '600'
+                    tooltip: {
+                        backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        titleColor: isDarkMode ? '#f9fafb' : '#111827',
+                        bodyColor: isDarkMode ? '#f9fafb' : '#111827',
+                        borderColor: isDarkMode ? '#374151' : '#e5e7eb',
+                        borderWidth: 2,
+                        padding: 16,
+                        cornerRadius: 12,
+                        displayColors: false,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold',
+                            family: "'Inter', sans-serif"
                         },
-                        padding: 8,
-                        maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 10
+                        bodyFont: {
+                            size: 13,
+                            weight: '600',
+                            family: "'Inter', sans-serif"
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.datasetIndex === 0) {
+                                    label += '$' + context.parsed.y.toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                } else {
+                                    label += context.parsed.y + ' órdenes';
+                                }
+                                return label;
+                            }
+                        }
                     }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        grid: {
+                            color: isDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.8)',
+                            drawBorder: false,
+                            lineWidth: 2
+                        },
+                        ticks: {
+                            color: isDarkMode ? '#9ca3af' : '#6b7280',
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            },
+                            padding: 10,
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            color: isDarkMode ? '#9ca3af' : '#6b7280',
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            },
+                            padding: 10
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: isDarkMode ? '#9ca3af' : '#6b7280',
+                            font: {
+                                size: 11,
+                                weight: '600'
+                            },
+                            padding: 8,
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 10
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
                 }
+            }
+        });
+
+        // Update chart when dark mode changes
+        window.addEventListener('darkModeToggled', function() {
+            const newIsDarkMode = document.documentElement.classList.contains('dark');
+
+            // Update tooltip colors
+            salesChart.options.plugins.tooltip.backgroundColor = newIsDarkMode
+                ? 'rgba(31, 41, 55, 0.95)'
+                : 'rgba(255, 255, 255, 0.95)';
+            salesChart.options.plugins.tooltip.titleColor = newIsDarkMode ? '#f9fafb' : '#111827';
+            salesChart.options.plugins.tooltip.bodyColor = newIsDarkMode ? '#f9fafb' : '#111827';
+            salesChart.options.plugins.tooltip.borderColor = newIsDarkMode ? '#374151' : '#e5e7eb';
+
+            // Update axis colors
+            salesChart.options.scales.y.grid.color = newIsDarkMode
+                ? 'rgba(55, 65, 81, 0.5)'
+                : 'rgba(243, 244, 246, 0.8)';
+            salesChart.options.scales.y.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
+            salesChart.options.scales.y1.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
+            salesChart.options.scales.x.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
+
+            salesChart.update();
+        });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + R to refresh
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+            e.preventDefault();
+            window.location.reload();
+        }
+
+        // Ctrl/Cmd + F to focus filters
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            const filterSelect = document.querySelector('.custom-select');
+            if (filterSelect) {
+                filterSelect.focus();
             }
         }
     });
 
-    // Actualizar gráfico cuando cambia el modo oscuro
-    window.addEventListener('darkModeToggled', function() {
-        const newIsDarkMode = document.documentElement.classList.contains('dark');
-
-        // Actualizar colores del tooltip
-        salesChart.options.plugins.tooltip.backgroundColor = newIsDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)';
-        salesChart.options.plugins.tooltip.titleColor = newIsDarkMode ? '#f9fafb' : '#111827';
-        salesChart.options.plugins.tooltip.bodyColor = newIsDarkMode ? '#f9fafb' : '#111827';
-        salesChart.options.plugins.tooltip.borderColor = newIsDarkMode ? '#374151' : '#e5e7eb';
-
-        // Actualizar colores de los ejes
-        salesChart.options.scales.y.grid.color = newIsDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.8)';
-        salesChart.options.scales.y.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
-        salesChart.options.scales.y1.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
-        salesChart.options.scales.x.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
-
-        salesChart.update();
-    });
-
-    // Animación de entrada para las métricas
-    document.addEventListener('DOMContentLoaded', function() {
-        const metricCards = document.querySelectorAll('.metric-card');
-
-        const observer = new IntersectionObserver((entries) => {
+    // Performance optimization
+    window.addEventListener('load', () => {
+        // Lazy load non-critical images
+        const lazyImages = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.remove('lazy');
+                    imageObserver.unobserve(img);
                 }
             });
-        }, {
-            threshold: 0.1
         });
 
-        metricCards.forEach(card => {
-            observer.observe(card);
-        });
+        lazyImages.forEach(img => imageObserver.observe(img));
+    });
+
+    // Error handling
+    window.addEventListener('error', (e) => {
+        console.error('Dashboard error:', e.error);
+
+        // Show user-friendly error message
+        if (e.target.tagName === 'IMG') {
+            e.target.style.display = 'none';
+        }
+    });
+
+    // Export dashboard data
+    function exportDashboardData() {
+        const data = {
+            metrics: {
+                revenue: {{ revenue_current|default(0) }},
+                orders: {{ orders_current|default(0) }},
+                profit: {{ gross_profit_current|default(0) }},
+                customers: {{ active_customers|default(0) }}
+            },
+            timestamp: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `luxera-dashboard-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showNotification('Datos exportados exitosamente', 'success');
+    }
+
+    // Add export button functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        const exportBtn = document.createElement('button');
+        exportBtn.className = 'refresh-btn ml-2';
+        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Exportar';
+        exportBtn.onclick = exportDashboardData;
+
+        const headerActions = document.querySelector('.header-content .flex.items-center.gap-4');
+        if (headerActions) {
+            headerActions.appendChild(exportBtn);
+        }
     });
 </script>
 {% endblock %}
