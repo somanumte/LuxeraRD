@@ -435,7 +435,7 @@ let itemCounter = 0;
 const laptops = {{ laptops|tojson }};
 
 // Crear un array de clientes convertidos a objetos simples
-const allCustomers = [
+let allCustomers = [
     {% for customer in customers %}
     {
         id: {{ customer.id }},
@@ -450,7 +450,7 @@ const allCustomers = [
 ];
 
 // Obtener los últimos 10 clientes creados (ordenados por id descendente)
-const recentCustomers = [...allCustomers]
+let recentCustomers = [...allCustomers]
     .sort((a, b) => b.id - a.id)
     .slice(0, 10);
 
@@ -589,6 +589,73 @@ function showNotification(message, type) {
     }, 3000);
 }
 
+// Función para recargar la lista de clientes
+function reloadCustomersList() {
+    // Realizar una solicitud para obtener la lista actualizada de clientes
+    // Nota: Necesitarás crear un endpoint en tu backend que devuelva la lista de clientes en JSON
+    // Por ahora, vamos a intentar obtenerla de la página de clientes
+    fetch('/customers/list-data', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Error al cargar clientes');
+    })
+    .then(data => {
+        if (data && data.customers) {
+            // Actualizar la lista de clientes
+            allCustomers = data.customers.map(customer => ({
+                id: customer.id,
+                full_name: customer.full_name,
+                id_number: customer.id_number,
+                email: customer.email || '',
+                phone_primary: customer.phone_primary || '',
+                address: customer.address || '',
+                created_at: customer.created_at || ''
+            }));
+
+            // Actualizar la lista de clientes recientes
+            recentCustomers = [...allCustomers]
+                .sort((a, b) => b.id - a.id)
+                .slice(0, 10);
+        }
+    })
+    .catch(error => {
+        console.error('Error al recargar clientes:', error);
+        // Si falla, intentamos una alternativa
+        fetch('/customers/json', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && Array.isArray(data)) {
+                allCustomers = data.map(customer => ({
+                    id: customer.id,
+                    full_name: customer.full_name,
+                    id_number: customer.id_number,
+                    email: customer.email || '',
+                    phone_primary: customer.phone_primary || '',
+                    address: customer.address || '',
+                    created_at: customer.created_at || ''
+                }));
+
+                recentCustomers = [...allCustomers]
+                    .sort((a, b) => b.id - a.id)
+                    .slice(0, 10);
+            }
+        })
+        .catch(err => {
+            console.error('Error en alternativa:', err);
+        });
+    });
+}
+
 // Funciones para el modal de creación de cliente
 function loadCustomerFormForInvoice() {
     const modalContent = document.getElementById('modal-content-invoice');
@@ -636,6 +703,13 @@ function initializeCustomerFormForInvoice() {
         const submitBtn = form.querySelector('[type="submit"]');
         const originalText = submitBtn.textContent;
 
+        // Obtener datos importantes del formulario antes de enviar
+        const idNumber = document.getElementById('id_number')?.value;
+        const fullName = document.getElementById('full_name')?.value;
+        const email = document.getElementById('email')?.value;
+        const phonePrimary = document.getElementById('phone_primary')?.value;
+        const address = document.getElementById('address')?.value;
+
         // Mostrar loading
         submitBtn.disabled = true;
         submitBtn.innerHTML = `
@@ -658,40 +732,62 @@ function initializeCustomerFormForInvoice() {
                 // Mostrar mensaje de éxito
                 showNotification(data.message || 'Cliente creado exitosamente', 'success');
 
-                // Si hay datos del cliente en la respuesta, seleccionarlo automáticamente
+                // Si la respuesta incluye el cliente, agregarlo a la lista y seleccionarlo
                 if (data.customer) {
                     // Agregar el nuevo cliente a la lista local
                     allCustomers.push(data.customer);
 
-                    // Seleccionar automáticamente el cliente recién creado
+                    // Actualizar la lista de recientes
+                    recentCustomers = [...allCustomers]
+                        .sort((a, b) => b.id - a.id)
+                        .slice(0, 10);
+
+                    // Seleccionar el cliente recién creado
                     setTimeout(() => {
                         selectCustomer(data.customer);
 
-                        // Cerrar el modal después de 1 segundo
-                        setTimeout(() => {
-                            const modal = document.getElementById('customer-modal-invoice');
-                            modal.classList.remove('active');
-                        }, 1000);
+                        // Cerrar el modal
+                        const modal = document.getElementById('customer-modal-invoice');
+                        modal.classList.remove('active');
                     }, 500);
                 } else {
-                    // Si no hay datos del cliente, intentar obtenerlo por el ID
-                    const idNumber = document.getElementById('id_number')?.value;
-                    if (idNumber) {
-                        // Buscar el cliente por el número de identificación
-                        const searchTerm = idNumber.replace(/\D/g, '');
-                        const filtered = filterCustomers(searchTerm);
-                        if (filtered.length > 0) {
-                            setTimeout(() => {
-                                selectCustomer(filtered[0]);
+                    // Si no viene el cliente en la respuesta, intentar recargar la lista
+                    reloadCustomersList();
 
-                                // Cerrar el modal después de 1 segundo
-                                setTimeout(() => {
-                                    const modal = document.getElementById('customer-modal-invoice');
-                                    modal.classList.remove('active');
-                                }, 1000);
-                            }, 500);
-                        }
-                    }
+                    // Crear un objeto cliente temporal con los datos del formulario
+                    const tempCustomer = {
+                        id: data.customer_id || Date.now(), // Usar ID de respuesta o temporal
+                        full_name: fullName || '',
+                        id_number: idNumber || '',
+                        email: email || '',
+                        phone_primary: phonePrimary || '',
+                        address: address || '',
+                        created_at: new Date().toISOString()
+                    };
+
+                    // Agregar el cliente temporal a la lista (será reemplazado cuando se recargue)
+                    allCustomers.push(tempCustomer);
+
+                    // Seleccionar el cliente temporal
+                    setTimeout(() => {
+                        selectCustomer(tempCustomer);
+
+                        // Cerrar el modal
+                        const modal = document.getElementById('customer-modal-invoice');
+                        modal.classList.remove('active');
+
+                        // Intentar una búsqueda real para encontrar el cliente
+                        setTimeout(() => {
+                            if (idNumber) {
+                                document.getElementById('customer_search').value = idNumber;
+                                const results = filterCustomers(idNumber);
+                                if (results.length > 0) {
+                                    // Si encontramos resultados (después de recargar), seleccionar el primero
+                                    selectCustomer(results[0]);
+                                }
+                            }
+                        }, 1000);
+                    }, 500);
                 }
             } else {
                 // Mostrar errores
@@ -811,7 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const results = document.getElementById('customer_results');
             const search = document.getElementById('customer_search');
 
-            if (!search.contains(e.target) && !results.contains(e.target)) {
+            if (results && search && !search.contains(e.target) && !results.contains(e.target)) {
                 results.classList.add('hidden');
             }
         });
