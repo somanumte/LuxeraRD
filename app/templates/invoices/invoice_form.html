@@ -303,7 +303,7 @@
                             <!-- Los items se agregarán aquí dinámicamente -->
                         </div>
 
-                        <div id="empty_items_msg" class="{% if invoice and invoice.items and invoice.items|length > 0 %}hidden{% else %}text-center py-8 text-gray-500 dark:text-gray-400 text-sm{% endif %}">
+                        <div id="empty_items_msg" class="{% if invoice and invoice.items and invoice.items.count() > 0 %}hidden{% else %}text-center py-8 text-gray-500 dark:text-gray-400 text-sm{% endif %}">
                             No hay items agregados. Comienza agregando una laptop o un servicio.
                         </div>
                     </div>
@@ -320,8 +320,7 @@
                                 </label>
                                 <input type="date"
                                        name="invoice_date"
-                                       id="invoice_date"
-                                       value="{% if invoice and invoice.invoice_date %}{% if invoice.invoice_date is string %}{{ invoice.invoice_date }}{% else %}{{ invoice.invoice_date.strftime('%Y-%m-%d') }}{% endif %}{% else %}{{ today if today is defined else '' }}{% endif %}"
+                                       value="{% if invoice and invoice.invoice_date %}{{ invoice.invoice_date.strftime('%Y-%m-%d') if invoice.invoice_date is string else invoice.invoice_date }}{% else %}{{ today }}{% endif %}"
                                        required
                                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                             </div>
@@ -394,7 +393,7 @@
                                 <textarea name="terms"
                                           rows="4"
                                           placeholder="Términos y condiciones de la factura..."
-                                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none">{% if invoice and invoice.terms %}{{ invoice.terms }}{% else %}{{ settings.default_terms if settings and settings.default_terms else '' }}{% endif %}</textarea>
+                                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none">{% if invoice and invoice.terms %}{{ invoice.terms }}{% else %}{{ settings.default_terms }}{% endif %}</textarea>
                             </div>
                         </div>
                     </div>
@@ -433,7 +432,7 @@
 
 <script>
 let itemCounter = 0;
-const laptops = {{ laptops|tojson|safe }};
+const laptops = {{ laptops|tojson }};
 const isEdit = {% if is_edit %}true{% else %}false{% endif %};
 
 // Crear un array de clientes convertidos a objetos simples
@@ -463,18 +462,6 @@ const recentLaptops = [...laptops]
 
 let customerSearchTimeout = null;
 let laptopSearchTimeouts = {};
-
-// Función para establecer la fecha actual si el campo está vacío
-function setCurrentDateIfEmpty() {
-    if (!isEdit) {
-        const dateField = document.getElementById('invoice_date');
-        if (dateField && !dateField.value) {
-            const today = new Date();
-            const formattedToday = today.toISOString().split('T')[0];
-            dateField.value = formattedToday;
-        }
-    }
-}
 
 // Funciones para el buscador de clientes
 function focusCustomerSearch() {
@@ -992,12 +979,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Establecer la fecha actual si estamos creando una nueva factura
-    setCurrentDateIfEmpty();
-
     // Si estamos editando, cargar los items existentes
     {% if invoice and invoice.items %}
-    {% for item in invoice.items %}
+    {% for item in invoice.items.all() %}
     {% if item.item_type == 'laptop' %}
     addLaptopItem({{ item.laptop_id if item.laptop_id else 'null' }}, `{{ item.description|replace("'", "\\'")|safe }}`, {{ item.quantity }}, {{ item.unit_price }});
     {% else %}
