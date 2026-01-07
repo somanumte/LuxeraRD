@@ -433,6 +433,7 @@
 <script>
 let itemCounter = 0;
 const laptops = {{ laptops|tojson }};
+const isEdit = {% if is_edit %}true{% else %}false{% endif %};
 
 // Crear un array de clientes convertidos a objetos simples
 let allCustomers = [
@@ -836,6 +837,55 @@ function initializeCustomerFormForInvoice() {
     }
 }
 
+// Función para cargar laptops seleccionadas desde localStorage
+function loadSelectedLaptops() {
+    // Solo cargar si estamos creando una nueva factura (no editando)
+    if (isEdit) {
+        return;
+    }
+
+    const selectedLaptopsStr = localStorage.getItem('selectedLaptopsForInvoice');
+
+    if (selectedLaptopsStr) {
+        try {
+            const selectedLaptops = JSON.parse(selectedLaptopsStr);
+
+            // Para cada laptop seleccionada, agregarla como item
+            selectedLaptops.forEach(laptop => {
+                // Buscar si la laptop ya existe en nuestra lista local
+                const existingLaptop = laptops.find(l => l.id == laptop.id);
+
+                if (existingLaptop) {
+                    // Usar la laptop del array local para más detalles
+                    addLaptopItem(
+                        existingLaptop.id,
+                        laptop.name + ' - ' + laptop.description,
+                        1,
+                        existingLaptop.sale_price
+                    );
+                } else {
+                    // Si no encontramos en el array local, usar los datos básicos
+                    addLaptopItem(
+                        laptop.id,
+                        laptop.name + ' - ' + laptop.description,
+                        1,
+                        laptop.price
+                    );
+                }
+            });
+
+            // Limpiar localStorage después de cargar
+            localStorage.removeItem('selectedLaptopsForInvoice');
+
+            // Mostrar notificación
+            showNotification(`Se agregaron ${selectedLaptops.length} laptops seleccionadas`, 'success');
+
+        } catch (error) {
+            console.error('Error al cargar laptops seleccionadas:', error);
+        }
+    }
+}
+
 // Manejo del modal de cliente desde la factura
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('customer-modal-invoice');
@@ -952,6 +1002,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('customer_empty_state').classList.remove('hidden');
     }
     {% endif %}
+
+    // Cargar laptops seleccionadas desde localStorage (solo para nuevas facturas)
+    loadSelectedLaptops();
 
     calculateTotals();
 });

@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.1.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/customers/customer_form_modal.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/customers/customer_form_modal.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/inventory/laptops_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/invoices/invoice_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/invoices/invoice_form.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -202,7 +203,7 @@
       <workItem from="1767546883254" duration="35523000" />
       <workItem from="1767610866218" duration="341000" />
       <workItem from="1767695231665" duration="3024000" />
-      <workItem from="1767735652043" duration="10085000" />
+      <workItem from="1767735652043" duration="13919000" />
     </task>
     <task id="LOCAL-00001" summary="Proyecto Luxera, V.01">
       <option name="closed" value="true" />
@@ -548,7 +549,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767744721745</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767747466315</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1767747466315</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -564,7 +573,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1767466106955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1767747383369" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1767753541275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1766812318026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$config.coverage" NAME="config Coverage Results" MODIFIED="1767096506857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1766791114868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
