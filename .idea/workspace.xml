@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.1.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/invoices/invoice_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/invoices/invoice_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tree_simple.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tree_simple.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/invoices/invoice_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/invoices/invoice_detail.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,15 +204,7 @@
       <workItem from="1767695231665" duration="3024000" />
       <workItem from="1767735652043" duration="15190000" />
       <workItem from="1767780939694" duration="1091000" />
-      <workItem from="1767782617011" duration="4170000" />
-    </task>
-    <task id="LOCAL-00001" summary="Proyecto Luxera, V.01">
-      <option name="closed" value="true" />
-      <created>1766835488189</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1766835488189</updated>
+      <workItem from="1767782617011" duration="5576000" />
     </task>
     <task id="LOCAL-00002" summary="Proyecto Luxera, V.05">
       <option name="closed" value="true" />
@@ -599,7 +590,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767786123121</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="Proyecto Luxera, V.1.0">
+      <option name="closed" value="true" />
+      <created>1767786868990</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1767786868991</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -626,7 +625,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1767466106955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1767786833005" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1767787812547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__run_py_.coverage" NAME="Flask (run.py) Coverage Results" MODIFIED="1766812318026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/Luxera$config.coverage" NAME="config Coverage Results" MODIFIED="1767096506857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Luxera$Flask__app_py_.coverage" NAME="Flask (app.py) Coverage Results" MODIFIED="1766791114868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
