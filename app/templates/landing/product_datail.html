@@ -1,0 +1,2193 @@
+{% extends "landing/base_landing.html" %}
+
+{% block title %}{{ laptop.display_name }} | {{ laptop.brand.name }} en LuxeraRD{% endblock %}
+
+{% block meta_description %}{{ laptop.short_description or laptop.display_name }}. Compra ahora con garantía oficial, envío gratis y soporte técnico especializado en República Dominicana.{% endblock %}
+
+{% block og_title %}{{ laptop.display_name }} | LuxeraRD{% endblock %}
+{% block og_description %}{{ laptop.short_description or 'La mejor laptop para tus necesidades' }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el visor mejorado inspirado en Amazon */
+    .image-viewer-container {
+        position: relative;
+        user-select: none;
+    }
+    
+    .main-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 1.5rem;
+        cursor: zoom-in;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .main-product-image {
+        max-width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+        transition: opacity 0.3s ease;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+    
+    .zoom-panel {
+        position: absolute;
+        right: -420px;
+        top: 0;
+        width: 400px;
+        height: 100%;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(20px);
+        transition: all 0.3s ease;
+        z-index: 50;
+    }
+    
+    .zoom-panel.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+    }
+    
+    .zoom-viewport {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .zoom-image {
+        position: absolute;
+        transform-origin: 0 0;
+        will-change: transform;
+    }
+    
+    .thumbnail-carousel {
+        display: flex;
+        gap: 12px;
+        padding: 16px 0;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    
+    .thumbnail-carousel::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .thumbnail-carousel::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 2px;
+    }
+    
+    .thumbnail-carousel::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 2px;
+    }
+    
+    .thumbnail-item {
+        flex: 0 0 auto;
+        width: 80px;
+        height: 80px;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        background: white;
+    }
+    
+    .thumbnail-item.active {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+    
+    .thumbnail-item:hover:not(.active) {
+        border-color: #93c5fd;
+        transform: translateY(-2px);
+    }
+    
+    .thumbnail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .carousel-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .carousel-nav:hover {
+        background: #f8fafc;
+        transform: translateY(-50%) scale(1.05);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .carousel-nav.prev {
+        left: -20px;
+    }
+    
+    .carousel-nav.next {
+        right: -20px;
+    }
+    
+    .carousel-nav.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        transform: translateY(-50%) scale(1);
+    }
+    
+    .image-counter {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        backdrop-filter: blur(8px);
+        z-index: 10;
+    }
+    
+    .view-fullscreen-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        z-index: 10;
+        backdrop-filter: blur(8px);
+    }
+    
+    .view-fullscreen-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: scale(1.05);
+    }
+    
+    .zoom-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        padding: 8px;
+        display: flex;
+        gap: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .zoom-control-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        color: #4b5563;
+    }
+    
+    .zoom-control-btn:hover {
+        background: #f8fafc;
+        border-color: #d1d5db;
+        transform: translateY(-1px);
+    }
+    
+    .zoom-control-btn:active {
+        transform: translateY(0);
+    }
+    
+    .zoom-level-display {
+        min-width: 60px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #111827;
+    }
+    
+    .lightbox-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(20px);
+    }
+    
+    .lightbox-overlay.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .lightbox-container {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        width: auto;
+        height: auto;
+    }
+    
+    .lightbox-image {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
+    }
+    
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .lightbox-nav:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .lightbox-nav.prev {
+        left: -80px;
+    }
+    
+    .lightbox-nav.next {
+        right: -80px;
+    }
+    
+    .lightbox-close {
+        position: absolute;
+        top: -60px;
+        right: 0;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        color: white;
+        font-size: 1.25rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .lightbox-close:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.1);
+    }
+    
+    .lightbox-counter {
+        position: absolute;
+        bottom: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 20px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 1280px) {
+        .zoom-panel {
+            display: none;
+        }
+        
+        .main-image-wrapper {
+            cursor: pointer;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .main-image-wrapper {
+            min-height: 400px;
+        }
+        
+        .main-product-image {
+            max-height: 400px;
+        }
+        
+        .thumbnail-item {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .carousel-nav {
+            width: 36px;
+            height: 36px;
+            font-size: 0.875rem;
+        }
+        
+        .carousel-nav.prev {
+            left: -10px;
+        }
+        
+        .carousel-nav.next {
+            right: -10px;
+        }
+        
+        .lightbox-nav {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+        }
+        
+        .lightbox-nav.prev {
+            left: 20px;
+        }
+        
+        .lightbox-nav.next {
+            right: 20px;
+        }
+        
+        .lightbox-close {
+            top: 20px;
+            right: 20px;
+        }
+        
+        .lightbox-counter {
+            bottom: 20px;
+        }
+    }
+    
+    /* Estados de carga */
+    .image-loading {
+        opacity: 0.5;
+        filter: blur(4px);
+        transition: opacity 0.3s ease, filter 0.3s ease;
+    }
+    
+    /* Transición suave entre imágenes */
+    .image-transition {
+        animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Efecto de brillo al hacer hover en thumbnails */
+    .thumbnail-item::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .thumbnail-item:hover::before {
+        opacity: 1;
+        animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    /* Estilos para los badges */
+    .product-badge {
+        animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Mejoras de accesibilidad */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+    
+    /* Focus styles para accesibilidad */
+    button:focus-visible,
+    [data-index]:focus-visible {
+        outline: 3px solid #3b82f6;
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================
+     BREADCRUMB Y NAVEGACIÓN
+     ============================================ -->
+<nav class="bg-white border-b border-gray-100 py-4">
+    <div class="container-custom">
+        <div class="flex items-center text-sm text-gray-600">
+            <a href="{{ url_for('public.landing') }}" class="hover:text-apple-blue transition-colors">
+                <i class="fas fa-home mr-2"></i>Inicio
+            </a>
+            <i class="fas fa-chevron-right mx-3 text-gray-400"></i>
+            <a href="{{ url_for('public.catalog') }}" class="hover:text-apple-blue transition-colors">
+                Catálogo
+            </a>
+            <i class="fas fa-chevron-right mx-3 text-gray-400"></i>
+            <a href="{{ url_for('public.catalog', category=laptop.category) }}" class="hover:text-apple-blue transition-colors">
+                {{ laptop.category|capitalize if laptop.category else 'Laptops' }}
+            </a>
+            <i class="fas fa-chevron-right mx-3 text-gray-400"></i>
+            <span class="text-apple-gray font-medium truncate">{{ laptop.display_name[:50] }}{% if laptop.display_name|length > 50 %}...{% endif %}</span>
+        </div>
+    </div>
+</nav>
+
+<!-- ============================================
+     GALERÍA DE IMÁGENES MEJORADA
+     ============================================ -->
+<section class="bg-white py-8 md:py-12">
+    <div class="container-custom">
+        <div class="grid lg:grid-cols-2 gap-8 md:gap-16">
+            <!-- Visor de imágenes inspirado en Amazon -->
+            <div class="image-viewer-container">
+                <!-- Contenedor de imagen principal con zoom -->
+                <div class="main-image-wrapper group" id="main-image-container">
+                    {% set main_image = cover_image if cover_image else (images[0] if images and images|length > 0 else none) %}
+                    {% if main_image %}
+                    <img
+                        src="{{ url_for('static', filename=main_image.image_path) }}"
+                        alt="{{ main_image.alt_text or laptop.display_name }}"
+                        id="main-product-image"
+                        class="main-product-image"
+                        data-high-res="{{ url_for('static', filename=main_image.image_path) }}"
+                        draggable="false"
+                    >
+                    {% else %}
+                    <div class="flex flex-col items-center justify-center p-12">
+                        <i class="fas fa-laptop text-gray-300 text-8xl mb-4"></i>
+                        <p class="text-gray-400">Imagen no disponible</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Panel de zoom (solo desktop) -->
+                    <div class="zoom-panel" id="zoom-panel">
+                        <div class="zoom-viewport" id="zoom-viewport">
+                            <img
+                                id="zoom-image"
+                                class="zoom-image"
+                                src=""
+                                alt=""
+                                draggable="false"
+                            >
+                        </div>
+                        <div class="zoom-level-display" id="zoom-level">2.0x</div>
+                    </div>
+                    
+                    <!-- Contador de imágenes -->
+                    <div class="image-counter" id="image-counter">
+                        <span id="current-image">1</span> / <span id="total-images">{{ images|length if images|length > 0 else 1 }}</span>
+                    </div>
+                    
+                    <!-- Botón de pantalla completa -->
+                    <button class="view-fullscreen-btn" id="fullscreen-btn" aria-label="Ver en pantalla completa">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    
+                    <!-- Controles de zoom (solo desktop) -->
+                    <div class="zoom-controls hidden lg:flex" id="zoom-controls">
+                        <button class="zoom-control-btn" id="zoom-out-btn" aria-label="Reducir zoom">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button class="zoom-control-btn" id="zoom-reset-btn" aria-label="Restablecer zoom a 2x">
+                            2x
+                        </button>
+                        <button class="zoom-control-btn" id="zoom-in-btn" aria-label="Aumentar zoom">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Badges del producto -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
+                        <span class="product-badge inline-block bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                            -{{ (((laptop.sale_price - laptop.discount_price) / laptop.sale_price) * 100)|int }}% OFF
+                        </span>
+                        {% endif %}
+
+                        {% if laptop.is_featured %}
+                        <span class="product-badge inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                            <i class="fas fa-star mr-1"></i> Destacado
+                        </span>
+                        {% endif %}
+
+                        {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
+                        <span class="product-badge inline-block bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                            ¡Solo {{ laptop.quantity }} disponibles!
+                        </span>
+                        {% elif laptop.quantity == 0 %}
+                        <span class="product-badge inline-block bg-gradient-to-r from-gray-600 to-gray-700 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                            Agotado temporalmente
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Navegación entre imágenes (solo móvil) -->
+                    <button class="carousel-nav prev lg:hidden" id="mobile-prev-btn" aria-label="Imagen anterior">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-nav next lg:hidden" id="mobile-next-btn" aria-label="Siguiente imagen">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Carrusel de miniaturas -->
+                {% if images and images|length > 1 %}
+                <div class="relative mt-4 md:mt-6">
+                    <button class="carousel-nav prev hidden lg:flex" id="thumb-prev-btn" aria-label="Miniaturas anteriores">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <div class="thumbnail-carousel" id="thumbnail-carousel">
+                        {% for image in images %}
+                        <button
+                            class="thumbnail-item {% if loop.first %}active{% endif %}"
+                            data-index="{{ loop.index0 }}"
+                            data-image="{{ url_for('static', filename=image.image_path) }}"
+                            data-high-res="{{ url_for('static', filename=image.image_path) }}"
+                            data-alt="{{ image.alt_text or laptop.display_name }}"
+                            aria-label="Ver imagen {{ loop.index }} de {{ laptop.display_name }}"
+                            {% if loop.first %}aria-current="true"{% endif %}
+                        >
+                            <img
+                                src="{{ url_for('static', filename=image.image_path) }}"
+                                alt="{{ image.alt_text or laptop.display_name }} - miniatura"
+                                class="thumbnail-image"
+                                loading="lazy"
+                            >
+                        </button>
+                        {% endfor %}
+                    </div>
+                    
+                    <button class="carousel-nav next hidden lg:flex" id="thumb-next-btn" aria-label="Siguientes miniaturas">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                {% endif %}
+                
+                <!-- Texto informativo sobre zoom -->
+                <div class="mt-4 text-center text-sm text-gray-500 hidden lg:block">
+                    <i class="fas fa-mouse-pointer mr-1"></i>
+                    Pasa el cursor sobre la imagen para hacer zoom
+                </div>
+            </div>
+
+            <!-- ============================================
+                 INFORMACIÓN DEL PRODUCTO
+                 ============================================ -->
+            <div>
+                <!-- Marca y Nombre -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        {% if laptop.brand %}
+                        <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">
+                            {{ laptop.brand.name }}
+                        </span>
+                        {% endif %}
+                        <span class="px-4 py-2 bg-blue-50 text-apple-blue rounded-full text-sm font-semibold">
+                            {{ laptop.condition|capitalize if laptop.condition else 'Nuevo' }}
+                        </span>
+                    </div>
+
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-apple-gray mb-4 leading-tight">
+                        {{ laptop.display_name }}
+                    </h1>
+
+                    <p class="text-lg md:text-xl text-gray-600 mb-6">
+                        {{ laptop.short_description or 'Diseño elegante y rendimiento excepcional' }}
+                    </p>
+                </div>
+
+                <!-- Precios -->
+                <div class="mb-8">
+                    <div class="flex items-baseline gap-4 mb-2">
+                        {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
+                        <span class="text-4xl md:text-5xl font-bold text-apple-gray">
+                            ${{ "{:,.2f}".format(laptop.discount_price) }}
+                        </span>
+                        <span class="text-xl md:text-2xl text-gray-400 line-through">
+                            ${{ "{:,.2f}".format(laptop.sale_price) }}
+                        </span>
+                        <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm font-bold">
+                            Ahorras ${{ "{:,.2f}".format(laptop.sale_price - laptop.discount_price) }}
+                        </span>
+                        {% else %}
+                        <span class="text-4xl md:text-5xl font-bold text-apple-gray">
+                            ${{ "{:,.2f}".format(laptop.sale_price) }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Precio final: <span class="font-semibold">${{ "{:,.2f}".format(laptop.price_with_tax) }}</span> (IVA incluido)</span>
+                    </div>
+                </div>
+
+                <!-- Especificaciones Principales -->
+                <div class="bg-gray-50 rounded-2xl p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-apple-gray mb-4">
+                        <i class="fas fa-microchip mr-2"></i>Especificaciones clave
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        {% if laptop.processor %}
+                        <div>
+                            <p class="text-sm text-gray-600">Procesador</p>
+                            <p class="font-medium text-apple-gray">{{ laptop.processor.name }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.ram %}
+                        <div>
+                            <p class="text-sm text-gray-600">Memoria RAM</p>
+                            <p class="font-medium text-apple-gray">{{ laptop.ram.name }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.storage %}
+                        <div>
+                            <p class="text-sm text-gray-600">Almacenamiento</p>
+                            <p class="font-medium text-apple-gray">{{ laptop.storage.name }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.screen %}
+                        <div>
+                            <p class="text-sm text-gray-600">Pantalla</p>
+                            <p class="font-medium text-apple-gray">{{ laptop.screen.name }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.graphics_card %}
+                        <div>
+                            <p class="text-sm text-gray-600">Tarjeta Gráfica</p>
+                            <p class="font-medium text-apple-gray">{{ laptop.graphics_card.name }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.operating_system %}
+                        <div>
+                            <p class="text-sm text-gray-600">Sistema Operativo</p>
+                            <p class="font-medium text-apple-gray">{{ laptop.operating_system.name }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="space-y-4 mb-8">
+                    {% if laptop.quantity > 0 %}
+                    <button
+                        onclick="addToCart({{ laptop.id }}, '{{ laptop.display_name }}', {{ laptop.discount_price or laptop.sale_price }}, 1)"
+                        class="w-full bg-gradient-to-r from-apple-blue to-apple-blue-light text-white text-lg font-semibold py-4 rounded-xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3 group"
+                    >
+                        <i class="fas fa-shopping-cart"></i>
+                        Agregar al Carrito
+                        <i class="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                    </button>
+
+                    <a href="{{ url_for('public.product_detail', id=laptop.id) }}"
+                        class="w-full border-2 border-apple-blue text-apple-blue text-lg font-semibold py-4 rounded-xl hover:bg-apple-blue hover:text-white transition-all duration-300 flex items-center justify-center gap-3"
+                    >
+                        <i class="fas fa-credit-card"></i>
+                        Comprar Ahora
+                    </a>
+                    {% else %}
+                    <div class="bg-gray-100 rounded-xl p-6 text-center">
+                        <i class="fas fa-clock text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Producto agotado</p>
+                        <p class="text-gray-600 mb-4">Regístrate para recibir notificación cuando esté disponible</p>
+                        <button
+                            onclick="notifyWhenAvailable({{ laptop.id }})"
+                            class="px-6 py-3 bg-apple-blue text-white rounded-lg hover:bg-apple-blue-dark transition-colors"
+                        >
+                            Notificarme
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex gap-4">
+                        <button
+                            onclick="addToWishlist({{ laptop.id }})"
+                            class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <i class="fas fa-heart"></i>
+                            Favoritos
+                        </button>
+                        <button
+                            onclick="shareProduct()"
+                            class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <i class="fas fa-share-alt"></i>
+                            Compartir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Información de Envío y Garantía -->
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="p-4 bg-blue-50 rounded-xl">
+                        <i class="fas fa-shipping-fast text-2xl text-apple-blue mb-2"></i>
+                        <p class="text-sm font-medium">Envío Gratis</p>
+                        <p class="text-xs text-gray-600">2-3 días</p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-xl">
+                        <i class="fas fa-shield-alt text-2xl text-green-600 mb-2"></i>
+                        <p class="text-sm font-medium">1 Año</p>
+                        <p class="text-xs text-gray-600">Garantía</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-xl">
+                        <i class="fas fa-sync-alt text-2xl text-purple-600 mb-2"></i>
+                        <p class="text-sm font-medium">30 Días</p>
+                        <p class="text-xs text-gray-600">Devoluciones</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     TABS DE INFORMACIÓN DETALLADA
+     ============================================ -->
+<section class="bg-gray-50 py-12 md:py-16">
+    <div class="container-custom">
+        <!-- Tabs Navigation -->
+        <div class="flex flex-wrap border-b border-gray-200 mb-8">
+            <button
+                onclick="switchTab('specs')"
+                id="tab-specs"
+                class="tab-btn active px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-semibold text-apple-gray border-b-2 border-apple-blue"
+            >
+                <i class="fas fa-list mr-2"></i>Especificaciones
+            </button>
+            <button
+                onclick="switchTab('description')"
+                id="tab-description"
+                class="tab-btn px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-semibold text-gray-500 hover:text-apple-gray transition-colors"
+            >
+                <i class="fas fa-align-left mr-2"></i>Descripción
+            </button>
+            <button
+                onclick="switchTab('reviews')"
+                id="tab-reviews"
+                class="tab-btn px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-semibold text-gray-500 hover:text-apple-gray transition-colors"
+            >
+                <i class="fas fa-star mr-2"></i>Reseñas
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content-specs" class="tab-content active">
+            <!-- Especificaciones Detalladas -->
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                <!-- Columna 1 -->
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-xl font-semibold text-apple-gray mb-4">
+                            <i class="fas fa-laptop mr-2"></i>Información General
+                        </h4>
+                        <div class="space-y-3">
+                            {% if laptop.model %}
+                            <div class="flex justify-between py-3 border-b border-gray-200">
+                                <span class="text-gray-600">Modelo</span>
+                                <span class="font-medium text-apple-gray">{{ laptop.model.name }}</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="flex justify-between py-3 border-b border-gray-200">
+                                <span class="text-gray-600">Categoría</span>
+                                <span class="font-medium text-apple-gray">{{ laptop.category|capitalize if laptop.category else 'Laptop' }}</span>
+                            </div>
+
+                            <div class="flex justify-between py-3 border-b border-gray-200">
+                                <span class="text-gray-600">Condición</span>
+                                <span class="font-medium text-apple-gray">{{ laptop.condition|capitalize if laptop.condition else 'Nuevo' }}</span>
+                            </div>
+
+                            {% if laptop.keyboard_layout %}
+                            <div class="flex justify-between py-3 border-b border-gray-200">
+                                <span class="text-gray-600">Distribución de Teclado</span>
+                                <span class="font-medium text-apple-gray">{{ laptop.keyboard_layout }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Puertos y Conectividad -->
+                    {% if laptop.connectivity_ports %}
+                    <div>
+                        <h4 class="text-xl font-semibold text-apple-gray mb-4">
+                            <i class="fas fa-plug mr-2"></i>Conectividad
+                        </h4>
+                        <div class="flex flex-wrap gap-3">
+                            {% if laptop.connectivity_ports is mapping %}
+                                {% for port, count in laptop.connectivity_ports.items() %}
+                                <span class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                                    {{ port }} {% if count > 1 %}×{{ count }}{% endif %}
+                                </span>
+                                {% endfor %}
+                            {% elif laptop.connectivity_ports is string %}
+                                <span class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                                    {{ laptop.connectivity_ports }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Columna 2 -->
+                <div class="space-y-6">
+                    <!-- Características Especiales -->
+                    <div>
+                        <h4 class="text-xl font-semibold text-apple-gray mb-4">
+                            <i class="fas fa-bolt mr-2"></i>Características
+                        </h4>
+                        <div class="space-y-4">
+                            {% if laptop.npu %}
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-brain text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-apple-gray">Procesador de IA (NPU)</p>
+                                    <p class="text-sm text-gray-600">Aceleración para inteligencia artificial</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if laptop.storage_upgradeable %}
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-hdd text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-apple-gray">Almacenamiento Ampliable</p>
+                                    <p class="text-sm text-gray-600">Puedes aumentar la capacidad de almacenamiento</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if laptop.ram_upgradeable %}
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-memory text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-apple-gray">RAM Ampliable</p>
+                                    <p class="text-sm text-gray-600">Puedes aumentar la memoria RAM</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div>
+                        <h4 class="text-xl font-semibold text-apple-gray mb-4">
+                            <i class="fas fa-store mr-2"></i>Disponibilidad
+                        </h4>
+                        <div class="bg-white rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-map-marker-alt text-apple-blue"></i>
+                                <p class="font-medium">
+                                    {% if laptop.store %}{{ laptop.store.name }}{% else %}Tienda Principal{% endif %}
+                                </p>
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                {% if laptop.quantity > 0 %}
+                                <span class="text-green-600 font-medium">{{ laptop.quantity }} unidades disponibles</span>
+                                {% else %}
+                                <span class="text-gray-500">Disponible próximamente</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Descripción -->
+        <div id="tab-content-description" class="tab-content hidden">
+            <div class="prose max-w-none">
+                {% if laptop.long_description_html %}
+                    {{ laptop.long_description_html|safe }}
+                {% elif laptop.long_description %}
+                    <p>{{ laptop.long_description|safe }}</p>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-align-left text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600">Descripción detallada no disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab: Reseñas -->
+        <div id="tab-content-reviews" class="tab-content hidden">
+            <div class="max-w-3xl mx-auto">
+                <!-- Rating Summary -->
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-lg mb-8">
+                    <div class="grid md:grid-cols-3 gap-6 md:gap-8">
+                        <div class="text-center">
+                            <div class="text-4xl md:text-5xl font-bold text-apple-gray mb-2">4.8</div>
+                            <div class="flex justify-center mb-2">
+                                {% for i in range(5) %}
+                                <i class="fas fa-star text-yellow-400"></i>
+                                {% endfor %}
+                            </div>
+                            <p class="text-gray-600">Basado en 128 reseñas</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            {% for i in range(5, 0, -1) %}
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-sm text-gray-600 w-8">{{ i }}★</span>
+                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-yellow-400 h-2 rounded-full" style="width: {{ [100, 85, 70, 25, 10][5-i] }}%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600 w-12">{{ [128, 109, 90, 32, 13][5-i] }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Placeholder -->
+                <div class="text-center py-12">
+                    <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-apple-gray mb-2">Sé el primero en opinar</h3>
+                    <p class="text-gray-600 mb-6">Comparte tu experiencia con este producto</p>
+                    <button
+                        onclick="openReviewModal()"
+                        class="px-6 py-3 bg-apple-blue text-white rounded-lg hover:bg-apple-blue-dark transition-colors"
+                    >
+                        <i class="fas fa-pen mr-2"></i>Escribir Reseña
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     PRODUCTOS SIMILARES
+     ============================================ -->
+{% if similar_laptops %}
+<section class="py-12 md:py-16 bg-white">
+    <div class="container-custom">
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-apple-gray mb-4">
+                Productos Relacionados
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Otros productos que podrían interesarte
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {% for similar in similar_laptops[:4] %}
+            <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
+                <a href="{{ url_for('inventory.laptop_detail', id=similar.id) }}" class="block aspect-[4/3] overflow-hidden bg-white relative">
+                    {% if similar.images and similar.images|length > 0 %}
+                        <img
+                            src="{{ url_for('static', filename=similar.images[0].image_path) }}"
+                            alt="{{ similar.display_name }}"
+                            class="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fas fa-laptop text-gray-300 text-6xl"></i>
+                        </div>
+                    {% endif %}
+
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if similar.quantity <= 5 and similar.quantity > 0 %}
+                        <span class="bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            ¡Solo {{ similar.quantity }} unidades!
+                        </span>
+                        {% endif %}
+                    </div>
+                </a>
+
+                <div class="p-6">
+                    <p class="text-sm text-gray-600 mb-2 font-medium">
+                        {{ similar.brand.name if similar.brand else 'Marca' }}
+                    </p>
+
+                    <h3 class="text-lg font-semibold text-apple-gray mb-3 line-clamp-2 group-hover:text-apple-blue transition-colors">
+                        <a href="{{ url_for('inventory.laptop_detail', id=similar.id) }}">
+                            {{ similar.display_name }}
+                        </a>
+                    </h3>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <p class="text-2xl font-bold text-apple-gray">
+                            ${{ "{:,.2f}".format(similar.sale_price) }}
+                        </p>
+
+                        <a href="{{ url_for('inventory.laptop_detail', id=similar.id) }}"
+                           class="p-3 bg-apple-blue text-white rounded-full hover:bg-apple-blue-dark transition-colors"
+                           aria-label="Ver detalles de {{ similar.display_name }}">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ============================================
+     CTA FINAL
+     ============================================ -->
+<section class="bg-gradient-to-br from-gray-900 to-apple-gray text-white py-12 md:py-16">
+    <div class="container-custom text-center">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-6">
+            ¿Necesitas ayuda para elegir?
+        </h2>
+        <p class="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Nuestros expertos están listos para asesorarte y encontrar la laptop perfecta para tus necesidades.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.contact') }}" class="px-6 py-3 bg-white text-apple-blue rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                <i class="fas fa-comments mr-2"></i>Chatear con un experto
+            </a>
+            <a href="tel:+18095550123" class="px-6 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors">
+                <i class="fas fa-phone mr-2"></i>Llamar ahora
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Lightbox para imágenes (inspirado en Amazon) -->
+<div class="lightbox-overlay" id="lightbox-overlay">
+    <div class="lightbox-container">
+        <img
+            id="lightbox-image"
+            class="lightbox-image"
+            src=""
+            alt=""
+        >
+        
+        <button class="lightbox-nav prev" id="lightbox-prev" aria-label="Imagen anterior">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <button class="lightbox-nav next" id="lightbox-next" aria-label="Siguiente imagen">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar visor">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="lightbox-counter" id="lightbox-counter">
+            <span id="lightbox-current">1</span> / <span id="lightbox-total">1</span>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================
+// VISOR DE IMÁGENES MEJORADO (INSPIRADO EN AMAZON)
+// ============================================
+
+class ImageViewer {
+    constructor() {
+        this.currentIndex = 0;
+        this.images = [];
+        this.zoomLevel = 2.0;
+        this.minZoom = 1.0;
+        this.maxZoom = 5.0;
+        this.isZoomActive = false;
+        this.isLightboxOpen = false;
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.isMobile = window.innerWidth < 1024;
+        
+        this.init();
+    }
+    
+    init() {
+        // Recopilar todas las imágenes disponibles
+        this.loadImages();
+        
+        // Inicializar elementos del DOM
+        this.initElements();
+        
+        // Configurar eventos
+        this.initEvents();
+        
+        // Inicializar zoom sincronizado (solo desktop)
+        if (!this.isMobile) {
+            this.initSyncZoom();
+        }
+        
+        // Actualizar estado inicial
+        this.updateView();
+    }
+    
+    loadImages() {
+        const thumbnails = document.querySelectorAll('.thumbnail-item');
+        this.images = Array.from(thumbnails).map(thumb => ({
+            standard: thumb.getAttribute('data-image'),
+            highRes: thumb.getAttribute('data-high-res') || thumb.getAttribute('data-image'),
+            alt: thumb.getAttribute('data-alt') || 'Imagen del producto'
+        }));
+        
+        // Si no hay miniaturas, usar la imagen principal
+        if (this.images.length === 0) {
+            const mainImage = document.getElementById('main-product-image');
+            if (mainImage) {
+                this.images = [{
+                    standard: mainImage.src,
+                    highRes: mainImage.getAttribute('data-high-res') || mainImage.src,
+                    alt: mainImage.alt
+                }];
+            }
+        }
+    }
+    
+    initElements() {
+        // Elementos principales
+        this.mainImage = document.getElementById('main-product-image');
+        this.zoomPanel = document.getElementById('zoom-panel');
+        this.zoomViewport = document.getElementById('zoom-viewport');
+        this.zoomImage = document.getElementById('zoom-image');
+        this.zoomLevelDisplay = document.getElementById('zoom-level');
+        
+        // Controles de navegación
+        this.navPrev = document.getElementById('mobile-prev-btn');
+        this.navNext = document.getElementById('mobile-next-btn');
+        this.thumbPrev = document.getElementById('thumb-prev-btn');
+        this.thumbNext = document.getElementById('thumb-next-btn');
+        
+        // Controles de zoom
+        this.zoomInBtn = document.getElementById('zoom-in-btn');
+        this.zoomOutBtn = document.getElementById('zoom-out-btn');
+        this.zoomResetBtn = document.getElementById('zoom-reset-btn');
+        this.zoomControls = document.getElementById('zoom-controls');
+        
+        // Pantalla completa
+        this.fullscreenBtn = document.getElementById('fullscreen-btn');
+        
+        // Contadores
+        this.currentImageSpan = document.getElementById('current-image');
+        this.totalImagesSpan = document.getElementById('total-images');
+        this.imageCounter = document.getElementById('image-counter');
+        
+        // Lightbox
+        this.lightbox = document.getElementById('lightbox-overlay');
+        this.lightboxImage = document.getElementById('lightbox-image');
+        this.lightboxPrev = document.getElementById('lightbox-prev');
+        this.lightboxNext = document.getElementById('lightbox-next');
+        this.lightboxClose = document.getElementById('lightbox-close');
+        this.lightboxCurrent = document.getElementById('lightbox-current');
+        this.lightboxTotal = document.getElementById('lightbox-total');
+        this.lightboxCounter = document.getElementById('lightbox-counter');
+        
+        // Carrusel de miniaturas
+        this.thumbnailCarousel = document.getElementById('thumbnail-carousel');
+    }
+    
+    initEvents() {
+        // Navegación por miniaturas
+        document.querySelectorAll('.thumbnail-item').forEach((thumb, index) => {
+            thumb.addEventListener('click', () => this.switchToImage(index));
+            thumb.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.switchToImage(index);
+                }
+            });
+        });
+        
+        // Navegación móvil
+        if (this.navPrev) {
+            this.navPrev.addEventListener('click', () => this.navigate(-1));
+        }
+        if (this.navNext) {
+            this.navNext.addEventListener('click', () => this.navigate(1));
+        }
+        
+        // Navegación del carrusel de miniaturas
+        if (this.thumbPrev) {
+            this.thumbPrev.addEventListener('click', () => this.scrollThumbs(-1));
+        }
+        if (this.thumbNext) {
+            this.thumbNext.addEventListener('click', () => this.scrollThumbs(1));
+        }
+        
+        // Controles de zoom
+        if (this.zoomInBtn) {
+            this.zoomInBtn.addEventListener('click', () => this.adjustZoom(0.5));
+        }
+        if (this.zoomOutBtn) {
+            this.zoomOutBtn.addEventListener('click', () => this.adjustZoom(-0.5));
+        }
+        if (this.zoomResetBtn) {
+            this.zoomResetBtn.addEventListener('click', () => this.resetZoom());
+        }
+        
+        // Pantalla completa
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+        
+        // Lightbox
+        if (this.mainImage) {
+            this.mainImage.addEventListener('click', () => this.openLightbox());
+        }
+        if (this.lightboxPrev) {
+            this.lightboxPrev.addEventListener('click', () => this.navigateLightbox(-1));
+        }
+        if (this.lightboxNext) {
+            this.lightboxNext.addEventListener('click', () => this.navigateLightbox(1));
+        }
+        if (this.lightboxClose) {
+            this.lightboxClose.addEventListener('click', () => this.closeLightbox());
+        }
+        
+        // Eventos táctiles
+        if (this.mainImage) {
+            this.mainImage.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+            this.mainImage.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+        }
+        
+        // Eventos de teclado
+        document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+        
+        // Redimensionamiento de ventana
+        window.addEventListener('resize', () => this.handleResize());
+        
+        // Eventos de pantalla completa
+        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
+        
+        // Cerrar lightbox al hacer click fuera de la imagen
+        if (this.lightbox) {
+            this.lightbox.addEventListener('click', (e) => {
+                if (e.target === this.lightbox) {
+                    this.closeLightbox();
+                }
+            });
+        }
+    }
+    
+    initSyncZoom() {
+        if (!this.mainImage || !this.zoomPanel || this.isMobile) return;
+        
+        let isMouseOverZoomPanel = false;
+        let zoomTimeout;
+        
+        // Mostrar panel de zoom al entrar en la imagen principal
+        this.mainImage.parentElement.addEventListener('mouseenter', () => {
+            clearTimeout(zoomTimeout);
+            this.showZoomPanel();
+            this.isZoomActive = true;
+        });
+        
+        // Ocultar panel de zoom al salir (con retardo)
+        this.mainImage.parentElement.addEventListener('mouseleave', () => {
+            if (!isMouseOverZoomPanel) {
+                zoomTimeout = setTimeout(() => {
+                    this.hideZoomPanel();
+                    this.isZoomActive = false;
+                }, 300);
+            }
+        });
+        
+        // Controlar cuando el cursor entra/sale del panel de zoom
+        this.zoomPanel.addEventListener('mouseenter', () => {
+            isMouseOverZoomPanel = true;
+            clearTimeout(zoomTimeout);
+        });
+        
+        this.zoomPanel.addEventListener('mouseleave', () => {
+            isMouseOverZoomPanel = false;
+            zoomTimeout = setTimeout(() => {
+                this.hideZoomPanel();
+                this.isZoomActive = false;
+            }, 300);
+        });
+        
+        // Sincronizar movimiento del cursor con el zoom
+        this.mainImage.addEventListener('mousemove', (e) => {
+            if (!this.isZoomActive || !this.zoomImage.src) return;
+            
+            const rect = this.mainImage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Calcular porcentajes (0-100%)
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+            
+            // Calcular desplazamiento para la imagen de zoom
+            const zoomWidth = this.zoomImage.naturalWidth * this.zoomLevel;
+            const zoomHeight = this.zoomImage.naturalHeight * this.zoomLevel;
+            const viewportWidth = this.zoomViewport.clientWidth;
+            const viewportHeight = this.zoomViewport.clientHeight;
+            
+            // Asegurar que el desplazamiento mantenga la imagen dentro del viewport
+            const maxX = Math.max(0, zoomWidth - viewportWidth);
+            const maxY = Math.max(0, zoomHeight - viewportHeight);
+            
+            // Calcular desplazamiento basado en la posición del cursor
+            const xOffset = Math.min(maxX, (zoomWidth * xPercent / 100) - (viewportWidth / 2));
+            const yOffset = Math.min(maxY, (zoomHeight * yPercent / 100) - (viewportHeight / 2));
+            
+            // Aplicar transformación
+            this.zoomImage.style.transform = `scale(${this.zoomLevel}) translate(-${xOffset}px, -${yOffset}px)`;
+        });
+    }
+    
+    showZoomPanel() {
+        if (this.zoomPanel && !this.isMobile) {
+            this.zoomPanel.classList.add('active');
+            this.updateZoomImage();
+        }
+    }
+    
+    hideZoomPanel() {
+        if (this.zoomPanel) {
+            this.zoomPanel.classList.remove('active');
+        }
+    }
+    
+    switchToImage(index) {
+        if (index < 0 || index >= this.images.length || index === this.currentIndex) return;
+        
+        this.currentIndex = index;
+        this.updateView();
+        
+        // Asegurar que la miniatura activa sea visible
+        this.scrollActiveThumbIntoView();
+    }
+    
+    navigate(direction) {
+        const newIndex = (this.currentIndex + direction + this.images.length) % this.images.length;
+        this.switchToImage(newIndex);
+    }
+    
+    navigateLightbox(direction) {
+        if (!this.isLightboxOpen) return;
+        
+        const newIndex = (this.currentIndex + direction + this.images.length) % this.images.length;
+        this.currentIndex = newIndex;
+        this.updateLightbox();
+    }
+    
+    updateView() {
+        const imageData = this.images[this.currentIndex];
+        
+        // Actualizar imagen principal
+        if (this.mainImage) {
+            // Efecto de transición
+            this.mainImage.classList.add('image-loading');
+            
+            // Precargar imagen
+            const img = new Image();
+            img.onload = () => {
+                this.mainImage.src = imageData.standard;
+                this.mainImage.alt = imageData.alt;
+                this.mainImage.setAttribute('data-high-res', imageData.highRes);
+                this.mainImage.classList.remove('image-loading');
+                this.mainImage.classList.add('image-transition');
+                
+                setTimeout(() => {
+                    this.mainImage.classList.remove('image-transition');
+                }, 400);
+            };
+            img.src = imageData.standard;
+        }
+        
+        // Actualizar panel de zoom si está activo
+        if (this.isZoomActive) {
+            this.updateZoomImage();
+        }
+        
+        // Actualizar miniaturas activas
+        this.updateActiveThumbnail();
+        
+        // Actualizar contadores
+        this.updateCounters();
+        
+        // Actualizar controles de navegación
+        this.updateNavControls();
+    }
+    
+    updateZoomImage() {
+        if (!this.zoomImage || !this.mainImage) return;
+        
+        const highResUrl = this.mainImage.getAttribute('data-high-res');
+        if (highResUrl && highResUrl !== this.zoomImage.src) {
+            this.zoomImage.src = highResUrl;
+            this.zoomImage.alt = `Zoom: ${this.mainImage.alt}`;
+            
+            // Resetear transformación
+            setTimeout(() => {
+                if (this.zoomImage) {
+                    this.zoomImage.style.transform = `scale(${this.zoomLevel})`;
+                    this.updateZoomLevelDisplay();
+                }
+            }, 100);
+        }
+    }
+    
+    updateLightbox() {
+        if (!this.isLightboxOpen || !this.lightboxImage) return;
+        
+        const imageData = this.images[this.currentIndex];
+        
+        // Efecto de transición
+        this.lightboxImage.style.opacity = '0';
+        
+        setTimeout(() => {
+            this.lightboxImage.src = imageData.highRes;
+            this.lightboxImage.alt = imageData.alt;
+            
+            // Actualizar contador del lightbox
+            if (this.lightboxCurrent) {
+                this.lightboxCurrent.textContent = this.currentIndex + 1;
+            }
+            
+            // Restaurar opacidad
+            setTimeout(() => {
+                this.lightboxImage.style.opacity = '1';
+            }, 50);
+        }, 200);
+    }
+    
+    adjustZoom(amount) {
+        this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + amount));
+        
+        if (this.zoomImage && this.isZoomActive) {
+            // Mantener la posición actual del zoom
+            const currentTransform = this.zoomImage.style.transform;
+            const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
+            
+            if (translateMatch) {
+                const translate = translateMatch[1];
+                this.zoomImage.style.transform = `scale(${this.zoomLevel}) translate(${translate})`;
+            } else {
+                this.zoomImage.style.transform = `scale(${this.zoomLevel})`;
+            }
+            
+            this.updateZoomLevelDisplay();
+        }
+    }
+    
+    resetZoom() {
+        this.zoomLevel = 2.0;
+        
+        if (this.zoomImage && this.isZoomActive) {
+            this.zoomImage.style.transform = `scale(${this.zoomLevel})`;
+            this.updateZoomLevelDisplay();
+        }
+    }
+    
+    updateZoomLevelDisplay() {
+        if (this.zoomLevelDisplay) {
+            this.zoomLevelDisplay.textContent = `${this.zoomLevel.toFixed(1)}x`;
+        }
+    }
+    
+    updateActiveThumbnail() {
+        document.querySelectorAll('.thumbnail-item').forEach((thumb, index) => {
+            if (index === this.currentIndex) {
+                thumb.classList.add('active');
+                thumb.setAttribute('aria-current', 'true');
+            } else {
+                thumb.classList.remove('active');
+                thumb.removeAttribute('aria-current');
+            }
+        });
+    }
+    
+    updateCounters() {
+        if (this.currentImageSpan) {
+            this.currentImageSpan.textContent = this.currentIndex + 1;
+        }
+        if (this.totalImagesSpan) {
+            this.totalImagesSpan.textContent = this.images.length;
+        }
+        if (this.lightboxCurrent && this.isLightboxOpen) {
+            this.lightboxCurrent.textContent = this.currentIndex + 1;
+        }
+        if (this.lightboxTotal) {
+            this.lightboxTotal.textContent = this.images.length;
+        }
+    }
+    
+    updateNavControls() {
+        // Deshabilitar botones de navegación en los extremos
+        if (this.navPrev) {
+            this.navPrev.disabled = this.currentIndex === 0;
+            this.navPrev.classList.toggle('disabled', this.currentIndex === 0);
+        }
+        if (this.navNext) {
+            this.navNext.disabled = this.currentIndex === this.images.length - 1;
+            this.navNext.classList.toggle('disabled', this.currentIndex === this.images.length - 1);
+        }
+        if (this.thumbPrev) {
+            this.thumbPrev.classList.toggle('disabled', this.thumbnailCarousel.scrollLeft === 0);
+        }
+        if (this.thumbNext) {
+            const maxScroll = this.thumbnailCarousel.scrollWidth - this.thumbnailCarousel.clientWidth;
+            this.thumbNext.classList.toggle('disabled', this.thumbnailCarousel.scrollLeft >= maxScroll - 10);
+        }
+        if (this.lightboxPrev) {
+            this.lightboxPrev.disabled = this.currentIndex === 0;
+        }
+        if (this.lightboxNext) {
+            this.lightboxNext.disabled = this.currentIndex === this.images.length - 1;
+        }
+    }
+    
+    scrollThumbs(direction) {
+        if (!this.thumbnailCarousel) return;
+        
+        const scrollAmount = 250; // píxeles a desplazar
+        const currentScroll = this.thumbnailCarousel.scrollLeft;
+        const newScroll = currentScroll + (scrollAmount * direction);
+        
+        this.thumbnailCarousel.scrollTo({
+            left: newScroll,
+            behavior: 'smooth'
+        });
+        
+        // Actualizar estado de los botones después de la animación
+        setTimeout(() => this.updateNavControls(), 300);
+    }
+    
+    scrollActiveThumbIntoView() {
+        const activeThumb = document.querySelector('.thumbnail-item.active');
+        if (!activeThumb || !this.thumbnailCarousel) return;
+        
+        const thumbRect = activeThumb.getBoundingClientRect();
+        const carouselRect = this.thumbnailCarousel.getBoundingClientRect();
+        
+        // Verificar si la miniatura activa no es completamente visible
+        if (thumbRect.left < carouselRect.left || thumbRect.right > carouselRect.right) {
+            activeThumb.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest'
+            });
+        }
+    }
+    
+    toggleFullscreen() {
+        const container = document.getElementById('main-image-container');
+        
+        if (!document.fullscreenElement) {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+            this.fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+            this.fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+        }
+    }
+    
+    handleFullscreenChange() {
+        if (!document.fullscreenElement) {
+            this.fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+        }
+    }
+    
+    openLightbox() {
+        if (this.isLightboxOpen || this.images.length === 0) return;
+        
+        this.isLightboxOpen = true;
+        this.lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Actualizar lightbox con la imagen actual
+        this.updateLightbox();
+        this.updateCounters();
+        
+        // Enfocar el botón de cerrar para accesibilidad
+        setTimeout(() => {
+            if (this.lightboxClose) {
+                this.lightboxClose.focus();
+            }
+        }, 100);
+    }
+    
+    closeLightbox() {
+        if (!this.isLightboxOpen) return;
+        
+        this.isLightboxOpen = false;
+        this.lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Devolver foco al elemento que abrió el lightbox
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.focus();
+        }
+    }
+    
+    handleTouchStart(e) {
+        this.touchStartX = e.touches[0].clientX;
+        this.touchStartY = e.touches[0].clientY;
+    }
+    
+    handleTouchEnd(e) {
+        if (!this.touchStartX) return;
+        
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        
+        const diffX = this.touchStartX - touchEndX;
+        const diffY = this.touchStartY - touchEndY;
+        
+        // Solo considerar swipe horizontal si el movimiento vertical es pequeño
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                // Swipe izquierda: siguiente imagen
+                this.navigate(1);
+            } else {
+                // Swipe derecha: imagen anterior
+                this.navigate(-1);
+            }
+        }
+        
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+    }
+    
+    handleKeyboard(e) {
+        // No hacer nada si estamos en un campo de entrada
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+            return;
+        }
+        
+        switch(e.key) {
+            case 'ArrowLeft':
+                if (this.isLightboxOpen) {
+                    e.preventDefault();
+                    this.navigateLightbox(-1);
+                } else if (!this.isMobile) {
+                    e.preventDefault();
+                    this.navigate(-1);
+                }
+                break;
+                
+            case 'ArrowRight':
+                if (this.isLightboxOpen) {
+                    e.preventDefault();
+                    this.navigateLightbox(1);
+                } else if (!this.isMobile) {
+                    e.preventDefault();
+                    this.navigate(1);
+                }
+                break;
+                
+            case '+':
+            case '=':
+                if ((e.ctrlKey || e.metaKey) && !this.isMobile) {
+                    e.preventDefault();
+                    this.adjustZoom(0.5);
+                }
+                break;
+                
+            case '-':
+                if ((e.ctrlKey || e.metaKey) && !this.isMobile) {
+                    e.preventDefault();
+                    this.adjustZoom(-0.5);
+                }
+                break;
+                
+            case '0':
+                if ((e.ctrlKey || e.metaKey) && !this.isMobile) {
+                    e.preventDefault();
+                    this.resetZoom();
+                }
+                break;
+                
+            case 'Escape':
+                if (this.isLightboxOpen) {
+                    e.preventDefault();
+                    this.closeLightbox();
+                }
+                break;
+                
+            case 'f':
+            case 'F':
+                if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                    e.preventDefault();
+                    this.toggleFullscreen();
+                }
+                break;
+                
+            case ' ':
+            case 'Spacebar':
+                if (this.isLightboxOpen) {
+                    e.preventDefault();
+                    // En lightbox, espacio para siguiente imagen
+                    this.navigateLightbox(1);
+                }
+                break;
+        }
+    }
+    
+    handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth < 1024;
+        
+        // Si cambiamos de desktop a móvil o viceversa
+        if (wasMobile !== this.isMobile) {
+            if (this.isMobile) {
+                // Ocultar controles de zoom en móvil
+                this.hideZoomPanel();
+                if (this.zoomControls) {
+                    this.zoomControls.style.display = 'none';
+                }
+            } else {
+                // Mostrar controles de zoom en desktop
+                if (this.zoomControls) {
+                    this.zoomControls.style.display = 'flex';
+                }
+            }
+        }
+        
+        // Actualizar navegación de miniaturas
+        this.updateNavControls();
+    }
+}
+
+// ============================================
+// FUNCIONALIDADES EXISTENTES DEL SITIO
+// ============================================
+
+// Galería de imágenes mejorada
+function changeMainImage(thumb) {
+    const mainImage = document.getElementById('main-product-image');
+    const index = parseInt(thumb.getAttribute('data-index'));
+    
+    if (window.imageViewer) {
+        window.imageViewer.switchToImage(index);
+    } else {
+        // Fallback para compatibilidad
+        const imageUrl = thumb.getAttribute('data-image');
+        const altText = thumb.getAttribute('data-alt');
+        
+        if (mainImage) {
+            mainImage.style.opacity = '0';
+            
+            setTimeout(() => {
+                mainImage.src = imageUrl;
+                mainImage.alt = altText;
+                
+                setTimeout(() => {
+                    mainImage.style.opacity = '1';
+                    updateImageControls();
+                    updateThumbnails();
+                }, 150);
+            }, 150);
+        }
+    }
+}
+
+// Tabs functionality
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+        tab.classList.add('hidden');
+    });
+
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'border-apple-blue', 'text-apple-gray');
+        btn.classList.add('text-gray-500');
+    });
+
+    // Show selected tab
+    const selectedTab = document.getElementById(`tab-content-${tabName}`);
+    if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+        selectedTab.classList.add('active');
+    }
+
+    // Activate button
+    const selectedButton = document.getElementById(`tab-${tabName}`);
+    if (selectedButton) {
+        selectedButton.classList.remove('text-gray-500');
+        selectedButton.classList.add('active', 'border-apple-blue', 'text-apple-gray');
+    }
+}
+
+// Carrito de compras
+function addToCart(productId, productName, price, quantity) {
+    // Obtener carrito actual
+    let cart = JSON.parse(localStorage.getItem('luxerard_cart') || '[]');
+
+    // Verificar si el producto ya está en el carrito
+    const existingItem = cart.find(item => item.id === productId);
+
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        const mainImage = document.getElementById('main-product-image');
+        cart.push({
+            id: productId,
+            name: productName,
+            price: price,
+            quantity: quantity,
+            image: mainImage ? mainImage.src : ''
+        });
+    }
+
+    // Guardar en localStorage
+    localStorage.setItem('luxerard_cart', JSON.stringify(cart));
+
+    // Actualizar contador
+    updateCartCount();
+
+    // Mostrar notificación
+    showToast(
+        '¡Producto agregado!',
+        `${productName} se ha agregado a tu carrito`,
+        'success'
+    );
+}
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('luxerard_cart') || '[]');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+        cartCountElement.textContent = totalItems;
+    }
+}
+
+// Lista de deseos
+function addToWishlist(productId) {
+    let wishlist = JSON.parse(localStorage.getItem('luxerard_wishlist') || '[]');
+
+    if (!wishlist.includes(productId)) {
+        wishlist.push(productId);
+        localStorage.setItem('luxerard_wishlist', JSON.stringify(wishlist));
+
+        showToast(
+            '¡Agregado a favoritos!',
+            'El producto se ha guardado en tu lista de deseos',
+            'success'
+        );
+    } else {
+        showToast(
+            'Ya está en favoritos',
+            'Este producto ya está en tu lista de deseos',
+            'info'
+        );
+    }
+}
+
+// Compartir producto
+function shareProduct() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            text: '¡Mira esta increíble laptop que encontré en LuxeraRD!',
+            url: window.location.href,
+        })
+        .then(() => console.log('Successful share'))
+        .catch((error) => console.log('Error sharing:', error));
+    } else {
+        // Fallback: copiar enlace al portapapeles
+        navigator.clipboard.writeText(window.location.href);
+        showToast(
+            '¡Enlace copiado!',
+            'El enlace se ha copiado al portapapeles',
+            'success'
+        );
+    }
+}
+
+// Notificación cuando esté disponible
+function notifyWhenAvailable(productId) {
+    let notifications = JSON.parse(localStorage.getItem('product_notifications') || '[]');
+
+    if (!notifications.includes(productId)) {
+        notifications.push(productId);
+        localStorage.setItem('product_notifications', JSON.stringify(notifications));
+
+        showToast(
+            '¡Te notificaremos!',
+            'Te enviaremos un correo cuando este producto esté disponible',
+            'success'
+        );
+    } else {
+        showToast(
+            'Ya estás suscrito',
+            'Ya recibirás notificaciones sobre este producto',
+            'info'
+        );
+    }
+}
+
+// Modal para reseñas
+function openReviewModal() {
+    showToast(
+        'Próximamente',
+        'La funcionalidad de reseñas estará disponible pronto',
+        'info'
+    );
+}
+
+// Función de notificación
+function showToast(title, message, type) {
+    // Crear elemento de toast si no existe
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'fixed top-4 right-4 z-50 space-y-4';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Colores según tipo
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+    };
+
+    // Crear toast
+    const toastId = 'toast-' + Date.now();
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `${colors[type] || 'bg-gray-800'} text-white px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+    toast.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-1">
+                <p class="font-semibold">${title}</p>
+                <p class="text-sm opacity-90">${message}</p>
+            </div>
+            <button onclick="document.getElementById('${toastId}').remove()" class="ml-4 text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // Animación de entrada
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+        toast.classList.add('translate-x-0');
+    }, 10);
+
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (document.getElementById(toastId)) {
+            toast.classList.remove('translate-x-0');
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (document.getElementById(toastId)) {
+                    document.getElementById(toastId).remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+}
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el visor de imágenes mejorado
+    window.imageViewer = new ImageViewer();
+    
+    // Actualizar contador del carrito
+    updateCartCount();
+    
+    // Smooth scroll para anclas
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Mejorar accesibilidad del teclado
+    document.addEventListener('keydown', (e) => {
+        // Atajo para abrir lightbox con 'L'
+        if (e.key === 'l' || e.key === 'L') {
+            if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                if (window.imageViewer) {
+                    window.imageViewer.openLightbox();
+                }
+            }
+        }
+    });
+    
+    // Precargar imágenes para mejor rendimiento
+    if (window.imageViewer && window.imageViewer.images.length > 1) {
+        window.imageViewer.images.forEach((image, index) => {
+            if (index > 0) { // La primera ya está cargada
+                const img = new Image();
+                img.src = image.highRes;
+            }
+        });
+    }
+    
+    // Observador de intersección para lazy loading de miniaturas
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, { rootMargin: '100px' });
+        
+        document.querySelectorAll('.thumbnail-image[data-src]').forEach(img => {
+            observer.observe(img);
+        });
+    }
+});
+
+// Funciones de compatibilidad (para código existente que pueda llamarlas)
+function updateImageControls() {
+    if (window.imageViewer) {
+        window.imageViewer.updateCounters();
+        window.imageViewer.updateNavControls();
+    }
+}
+
+function updateThumbnails() {
+    if (window.imageViewer) {
+        window.imageViewer.updateActiveThumbnail();
+    }
+}
+
+// Exportar funciones globales para compatibilidad
+window.changeMainImage = changeMainImage;
+window.switchTab = switchTab;
+window.addToCart = addToCart;
+window.addToWishlist = addToWishlist;
+window.shareProduct = shareProduct;
+window.notifyWhenAvailable = notifyWhenAvailable;
+window.openReviewModal = openReviewModal;
+window.showToast = showToast;
+</script>
+{% endblock %}
