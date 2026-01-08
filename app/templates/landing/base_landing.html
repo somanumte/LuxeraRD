@@ -35,9 +35,12 @@
                     colors: {
                         'apple': {
                             'blue': '#0071e3',
-                            'blue-dark': '#0077ed',
+                            'blue-light': '#2997ff',
+                            'blue-dark': '#0056b3',
                             'gray': '#1d1d1f',
                             'gray-light': '#f5f5f7',
+                            'gray-dark': '#86868b',
+                            'surface': '#fbfbfd',
                             'text': '#1d1d1f',
                             'text-secondary': '#6e6e73',
                         }
@@ -51,491 +54,1110 @@
                     maxWidth: {
                         '8xl': '88rem',
                         '9xl': '96rem',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                        'pulse-subtle': 'pulseSubtle 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
                     }
                 }
             }
         }
     </script>
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         /* ========================================
-           APPLE-INSPIRED BASE STYLES
+           DESIGN SYSTEM - APPLE INSPIRED WITH UX ENHANCEMENTS
            ======================================== */
-        
+
+        :root {
+            --primary-blue: #0071e3;
+            --primary-blue-dark: #0056b3;
+            --primary-blue-light: #2997ff;
+            --surface-primary: #ffffff;
+            --surface-secondary: #f5f5f7;
+            --surface-tertiary: #fbfbfd;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --border-light: rgba(0, 0, 0, 0.1);
+            --border-medium: rgba(0, 0, 0, 0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --radius-full: 980px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: #1d1d1f;
-            background: #ffffff;
+            color: var(--text-primary);
+            background: var(--surface-primary);
             overflow-x: hidden;
+            line-height: 1.5;
         }
-        
+
+        /* Accessibility - Skip to main content */
+        .skip-to-content {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary-blue);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            z-index: 9999;
+            transition: top var(--transition-fast);
+        }
+
+        .skip-to-content:focus {
+            top: 10px;
+            outline: 3px solid var(--primary-blue-light);
+            outline-offset: 2px;
+        }
+
         /* Smooth scrolling with offset for fixed header */
         html {
-            scroll-padding-top: 64px;
+            scroll-padding-top: 72px;
+            scroll-behavior: smooth;
         }
-        
-        /* Typography - Apple style */
+
+        /* Typography - Enhanced Apple style */
         .hero-title {
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
-            font-weight: 700;
-            line-height: 1.08;
-            letter-spacing: -0.02em;
+            font-size: clamp(2.75rem, 5.5vw, 5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.022em;
+            margin-bottom: 1.5rem;
         }
-        
+
         .section-title {
-            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-size: clamp(2.25rem, 4.5vw, 3.75rem);
             font-weight: 700;
             line-height: 1.1;
-            letter-spacing: -0.015em;
+            letter-spacing: -0.018em;
+            margin-bottom: 1rem;
         }
-        
+
+        .subsection-title {
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.012em;
+        }
+
         .subtitle {
-            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            font-size: clamp(1.125rem, 2.25vw, 1.75rem);
             font-weight: 400;
             line-height: 1.4;
-            color: #6e6e73;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
         }
-        
-        /* Header - Fixed and minimal */
+
+        .body-large {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Header - Enhanced fixed navigation */
         .header-landing {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.8);
+            height: 72px;
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid var(--border-light);
             z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-base);
+            will-change: transform, background-color;
         }
-        
+
         .header-landing.scrolled {
             background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-sm);
+            height: 64px;
         }
-        
-        /* Navigation */
+
+        .header-landing.hidden {
+            transform: translateY(-100%);
+        }
+
+        /* Navigation - Enhanced UX */
+        .nav-container {
+            position: relative;
+        }
+
         .nav-link {
+            position: relative;
             font-size: 0.875rem;
             font-weight: 500;
-            color: #1d1d1f;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
+            color: var(--text-primary);
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        
+
         .nav-link:hover {
-            background: #f5f5f7;
-            color: #0071e3;
+            background: var(--surface-secondary);
+            color: var(--primary-blue);
         }
-        
-        /* Buttons - Apple style */
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(0, 113, 227, 0.08);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+        }
+
+        /* Buttons - Enhanced Apple style */
         .btn-primary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.875rem 1.75rem;
-            background: #0071e3;
+            gap: 8px;
+            padding: 0.875rem 2rem;
+            background: var(--primary-blue);
             color: white;
             font-size: 1rem;
-            font-weight: 500;
-            border-radius: 980px;
+            font-weight: 600;
+            border-radius: var(--radius-full);
             border: none;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-base);
             text-decoration: none;
+            position: relative;
+            overflow: hidden;
         }
-        
+
         .btn-primary:hover {
-            background: #0077ed;
-            transform: scale(1.02);
+            background: var(--primary-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
-        
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn-primary:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
         .btn-secondary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.875rem 1.75rem;
+            gap: 8px;
+            padding: 0.875rem 2rem;
             background: transparent;
-            color: #0071e3;
+            color: var(--primary-blue);
             font-size: 1rem;
-            font-weight: 500;
-            border-radius: 980px;
-            border: 2px solid #0071e3;
+            font-weight: 600;
+            border-radius: var(--radius-full);
+            border: 2px solid var(--primary-blue);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-base);
             text-decoration: none;
         }
-        
+
         .btn-secondary:hover {
-            background: #0071e3;
+            background: var(--primary-blue);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
-        
-        /* Product Cards - Clean and minimal */
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* Product Cards - Enhanced interactions */
         .product-card {
-            background: #fbfbfd;
-            border-radius: 1.5rem;
+            background: var(--surface-tertiary);
+            border-radius: var(--radius-xl);
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-base);
             cursor: pointer;
+            border: 1px solid var(--border-light);
+            position: relative;
         }
-        
+
         .product-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
         }
-        
+
         .product-card:hover .product-image {
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
-        
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
         .product-image {
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        
-        /* Feature Icons - Minimal style */
+
+        /* Feature Icons - Enhanced design */
         .feature-icon {
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
-            border-radius: 1rem;
+            background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--surface-primary) 100%);
+            border-radius: var(--radius-lg);
             margin: 0 auto 1.5rem;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
+            border: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .feature-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-blue-light), var(--primary-blue));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
         .feature-card:hover .feature-icon {
-            transform: scale(1.1) rotate(-5deg);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: var(--shadow-md);
         }
-        
-        /* Animations */
+
+        .feature-card:hover .feature-icon::before {
+            opacity: 0.1;
+        }
+
+        .feature-icon i {
+            position: relative;
+            z-index: 1;
+            transition: color var(--transition-base);
+        }
+
+        .feature-card:hover .feature-icon i {
+            color: var(--primary-blue);
+        }
+
+        /* Animations - Enhanced set */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 1;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
         .fade-in-up {
-            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
             opacity: 0;
         }
-        
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-        
-        /* Spacing - Apple generous spacing */
-        .section-spacing {
-            padding: 5rem 1.5rem;
+
+        .staggered > * {
+            opacity: 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
-        
+
+        .staggered > *:nth-child(1) { animation-delay: 0.1s; }
+        .staggered > *:nth-child(2) { animation-delay: 0.2s; }
+        .staggered > *:nth-child(3) { animation-delay: 0.3s; }
+        .staggered > *:nth-child(4) { animation-delay: 0.4s; }
+        .staggered > *:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Spacing - Systematic approach */
+        .section-spacing {
+            padding: 6rem 1.5rem;
+        }
+
         @media (min-width: 768px) {
             .section-spacing {
-                padding: 7rem 2rem;
+                padding: 8rem 2rem;
             }
         }
-        
+
         @media (min-width: 1024px) {
             .section-spacing {
-                padding: 8rem 3rem;
+                padding: 10rem 3rem;
             }
         }
-        
+
         /* Container */
         .container-custom {
             max-width: 1440px;
             margin: 0 auto;
             padding: 0 1.5rem;
+            width: 100%;
         }
-        
+
         @media (min-width: 768px) {
             .container-custom {
                 padding: 0 2rem;
             }
         }
-        
-        /* Grid - Responsive */
-        .products-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-        
-        @media (min-width: 640px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
+
+        @media (min-width: 1280px) {
+            .container-custom {
+                padding: 0 4rem;
             }
         }
-        
+
+        /* Grid - Responsive and flexible */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
         @media (min-width: 1024px) {
             .products-grid {
-                grid-template-columns: repeat(3, 1fr);
                 gap: 2.5rem;
             }
         }
-        
-        /* Utility - Text gradient */
+
+        /* Utility classes */
         .text-gradient {
-            background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        /* Loading skeleton */
+
+        .bg-gradient {
+            background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+        }
+
+        /* Loading states - Enhanced */
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
             animation: loading 1.5s ease-in-out infinite;
+            border-radius: var(--radius-md);
         }
-        
+
+        .skeleton-circle {
+            border-radius: 50%;
+        }
+
         @keyframes loading {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
-        
-        /* Focus states for accessibility */
-        a:focus-visible, button:focus-visible {
-            outline: 2px solid #0071e3;
-            outline-offset: 4px;
-            border-radius: 4px;
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text-primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all var(--transition-base);
+            z-index: 9999;
+            max-width: 350px;
         }
-        
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Focus states for accessibility */
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid var(--primary-blue-light);
+            outline-offset: 3px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Progress indicator */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all var(--transition-base);
+            z-index: 999;
+            box-shadow: var(--shadow-md);
+            border: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-5px);
+        }
+
+        /* Mobile menu enhancements */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+            z-index: 999;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
         /* Print styles */
         @media print {
-            .header-landing, footer, .btn-primary, .btn-secondary {
-                display: none;
+            .header-landing,
+            footer,
+            .btn-primary,
+            .btn-secondary,
+            .back-to-top {
+                display: none !important;
+            }
+
+            body {
+                font-size: 12pt;
+                line-height: 1.4;
             }
         }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-to-content">Saltar al contenido principal</a>
+
+    <!-- Scroll progress indicator -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
     <!-- Fixed Header -->
     <header class="header-landing" id="header">
         <nav class="container-custom h-full">
             <div class="flex items-center justify-between h-full">
                 <!-- Logo -->
-                <a href="{{ url_for('public.landing') }}" class="flex items-center gap-2 group">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform">
+                <a href="{{ url_for('public.landing') }}" class="flex items-center gap-3 group" aria-label="LuxeraRD - Página de inicio">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
                         <i class="fas fa-laptop text-white text-lg"></i>
                     </div>
-                    <span class="text-xl font-bold text-apple-gray hidden sm:block">Luxera<span class="text-gradient">RD</span></span>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold text-apple-gray leading-tight">Luxera<span class="text-gradient">RD</span></span>
+                        <span class="text-xs text-apple-gray-dark hidden sm:block">Tecnología Premium</span>
+                    </div>
                 </a>
-                
+
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center gap-2">
-                    <a href="{{ url_for('public.landing') }}" class="nav-link">Inicio</a>
-                    <a href="{{ url_for('public.catalog') }}" class="nav-link">Productos</a>
-                    <a href="#features" class="nav-link">Características</a>
-                    <a href="#contact" class="nav-link">Contacto</a>
-                </div>
-                
-                <!-- Right Actions -->
-                <div class="flex items-center gap-4">
-                    <!-- Cart Icon -->
-                    <button class="relative p-2 hover:bg-apple-gray-light rounded-full transition-colors" aria-label="Carrito">
-                        <i class="fas fa-shopping-cart text-apple-gray text-lg"></i>
-                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">0</span>
-                    </button>
-                    
-                    <!-- Login Button -->
-                    <a href="{{ url_for('auth.login') }}" class="hidden sm:inline-flex btn-secondary py-2 px-4 text-sm">
-                        <i class="fas fa-user mr-2"></i>Iniciar Sesión
+                <div class="hidden md:flex items-center gap-1 nav-container">
+                    <a href="{{ url_for('public.landing') }}" class="nav-link active" data-nav="home">
+                        <i class="fas fa-home text-xs"></i>
+                        <span>Inicio</span>
                     </a>
-                    
+                    <a href="{{ url_for('public.catalog') }}" class="nav-link" data-nav="catalog">
+                        <i class="fas fa-laptop text-xs"></i>
+                        <span>Productos</span>
+                    </a>
+                    <a href="#features" class="nav-link" data-nav="features">
+                        <i class="fas fa-star text-xs"></i>
+                        <span>Características</span>
+                    </a>
+                    <a href="#contact" class="nav-link" data-nav="contact">
+                        <i class="fas fa-phone text-xs"></i>
+                        <span>Contacto</span>
+                    </a>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-3">
+                    <!-- Search Button -->
+                    <button class="hidden md:flex items-center justify-center w-10 h-10 hover:bg-apple-gray-light rounded-full transition-colors" aria-label="Buscar productos">
+                        <i class="fas fa-search text-apple-gray text-lg"></i>
+                    </button>
+
+                    <!-- User Menu -->
+                    <div class="relative group">
+                        <button class="flex items-center justify-center w-10 h-10 hover:bg-apple-gray-light rounded-full transition-colors" aria-label="Mi cuenta">
+                            <i class="fas fa-user text-apple-gray text-lg"></i>
+                        </button>
+                        <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50 border border-gray-100">
+                            <a href="{{ url_for('auth.login') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Iniciar Sesión</a>
+                            <a href="{{ url_for('auth.register') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Crear Cuenta</a>
+                            <div class="border-t my-2"></div>
+                            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-50">Mis Pedidos</a>
+                            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-50">Lista de Deseos</a>
+                        </div>
+                    </div>
+
+                    <!-- Cart with improved indicator -->
+                    <button class="relative p-2 hover:bg-apple-gray-light rounded-full transition-colors group" aria-label="Carrito de compras">
+                        <i class="fas fa-shopping-cart text-apple-gray text-lg"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold animate-pulse-subtle" id="cart-count">0</span>
+                        <div class="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50 border border-gray-100">
+                            <p class="text-sm font-medium text-gray-900">Tu carrito está vacío</p>
+                            <p class="text-xs text-gray-500 mt-1">Agrega productos para continuar</p>
+                            <a href="{{ url_for('public.catalog') }}" class="mt-3 btn-primary w-full text-center py-2 text-sm">Ver productos</a>
+                        </div>
+                    </button>
+
                     <!-- Mobile Menu Button -->
-                    <button id="mobile-menu-btn" class="md:hidden p-2 hover:bg-apple-gray-light rounded-lg transition-colors" aria-label="Menú">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center hover:bg-apple-gray-light rounded-lg transition-colors" aria-label="Menú de navegación" aria-expanded="false">
+                        <svg class="w-6 h-6 transition-transform duration-300" id="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
                 </div>
             </div>
         </nav>
-        
+
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
-            <div class="container-custom py-4 space-y-2">
-                <a href="{{ url_for('public.landing') }}" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Inicio</a>
-                <a href="{{ url_for('public.catalog') }}" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Productos</a>
-                <a href="#features" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Características</a>
-                <a href="#contact" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Contacto</a>
-                <a href="{{ url_for('auth.login') }}" class="block py-3 px-4 rounded-lg bg-apple-blue text-white text-center font-medium">
-                    <i class="fas fa-user mr-2"></i>Iniciar Sesión
+        <div class="mobile-menu-overlay" id="mobile-overlay"></div>
+        <div id="mobile-menu" class="absolute top-full left-0 right-0 bg-white border-t border-gray-100 transform -translate-y-2 opacity-0 invisible transition-all duration-300 md:hidden shadow-lg">
+            <div class="container-custom py-4 space-y-1">
+                <a href="{{ url_for('public.landing') }}" class="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors group">
+                    <i class="fas fa-home text-apple-gray-dark w-5"></i>
+                    <span class="font-medium">Inicio</span>
+                    <i class="fas fa-chevron-right text-gray-400 ml-auto text-sm"></i>
+                </a>
+                <a href="{{ url_for('public.catalog') }}" class="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors group">
+                    <i class="fas fa-laptop text-apple-gray-dark w-5"></i>
+                    <span class="font-medium">Productos</span>
+                    <i class="fas fa-chevron-right text-gray-400 ml-auto text-sm"></i>
+                </a>
+                <a href="#features" class="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors group">
+                    <i class="fas fa-star text-apple-gray-dark w-5"></i>
+                    <span class="font-medium">Características</span>
+                    <i class="fas fa-chevron-right text-gray-400 ml-auto text-sm"></i>
+                </a>
+                <a href="#contact" class="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors group">
+                    <i class="fas fa-phone text-apple-gray-dark w-5"></i>
+                    <span class="font-medium">Contacto</span>
+                    <i class="fas fa-chevron-right text-gray-400 ml-auto text-sm"></i>
+                </a>
+                <div class="border-t my-3"></div>
+                <a href="{{ url_for('auth.login') }}" class="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-apple-blue text-white font-medium hover:bg-apple-blue-dark transition-colors">
+                    <i class="fas fa-user"></i>
+                    <span>Iniciar Sesión</span>
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 border-apple-blue text-apple-blue font-medium hover:bg-apple-gray-light transition-colors">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Crear Cuenta</span>
                 </a>
             </div>
         </div>
     </header>
-    
+
     <!-- Main Content -->
-    <main class="pt-16">
+    <main class="pt-20" id="main-content">
         {% block content %}{% endblock %}
     </main>
-    
+
     <!-- Footer -->
     <footer class="bg-apple-gray text-white">
         <div class="container-custom section-spacing">
             <!-- Footer Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 staggered">
                 <!-- Company Info -->
-                <div class="md:col-span-2">
-                    <div class="flex items-center gap-2 mb-4">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
                         <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-laptop text-white text-xl"></i>
                         </div>
-                        <span class="text-2xl font-bold">Luxera<span class="text-blue-400">RD</span></span>
+                        <div>
+                            <span class="text-2xl font-bold block">Luxera<span class="text-blue-400">RD</span></span>
+                            <p class="text-gray-400 text-sm">Tecnología Premium</p>
+                        </div>
                     </div>
-                    <p class="text-gray-400 mb-6 max-w-md">
-                        Tu destino para la mejor tecnología. Ofrecemos laptops y equipos de computación de las marcas más prestigiosas con garantía y soporte técnico especializado.
+                    <p class="text-gray-400 mb-6 max-w-lg body-large">
+                        Tu destino para la mejor tecnología. Ofrecemos laptops y equipos de computación de las marcas más prestigiosas con garantía y soporte técnico especializado en República Dominicana.
                     </p>
+                    <!-- Newsletter Signup -->
+                    <div class="mb-8">
+                        <p class="text-white font-medium mb-3">Suscríbete a nuestro boletín</p>
+                        <form class="flex gap-2 max-w-md">
+                            <input type="email" placeholder="Tu correo electrónico" class="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                            <button type="submit" class="px-4 py-2 bg-apple-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
                     <!-- Social Media -->
-                    <div class="flex gap-4">
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors" aria-label="Facebook">
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:scale-110" aria-label="Facebook">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors" aria-label="Twitter">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-400 transition-all hover:scale-110" aria-label="Twitter">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors" aria-label="Instagram">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-all hover:scale-110" aria-label="Instagram">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-500 transition-colors" aria-label="WhatsApp">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-500 transition-all hover:scale-110" aria-label="WhatsApp">
                             <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-red-600 transition-all hover:scale-110" aria-label="YouTube">
+                            <i class="fab fa-youtube"></i>
                         </a>
                     </div>
                 </div>
-                
+
                 <!-- Quick Links -->
                 <div>
-                    <h3 class="font-semibold text-lg mb-4">Enlaces Rápidos</h3>
+                    <h3 class="font-semibold text-lg mb-6 text-white">Enlaces Rápidos</h3>
                     <ul class="space-y-3">
-                        <li><a href="{{ url_for('public.catalog') }}" class="text-gray-400 hover:text-white transition-colors">Catálogo</a></li>
-                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Características</a></li>
-                        <li><a href="{{ url_for('main.about') }}" class="text-gray-400 hover:text-white transition-colors">Acerca de</a></li>
-                        <li><a href="{{ url_for('main.contact') }}" class="text-gray-400 hover:text-white transition-colors">Contacto</a></li>
+                        <li><a href="{{ url_for('public.catalog') }}" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                            <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            Catálogo
+                        </a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                            <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            Características
+                        </a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                            <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            Acerca de
+                        </a></li>
+                        <li><a href="{{ url_for('main.contact') }}" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                            <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            Contacto
+                        </a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                            <i class="fas fa-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            Blog Tecnológico
+                        </a></li>
                     </ul>
                 </div>
-                
+
                 <!-- Contact Info -->
                 <div>
-                    <h3 class="font-semibold text-lg mb-4">Contacto</h3>
-                    <ul class="space-y-3 text-gray-400">
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-phone mt-1"></i>
+                    <h3 class="font-semibold text-lg mb-6 text-white">Contacto</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3 group">
+                            <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
                             <div>
-                                <p class="text-white">+1 (809) 555-0123</p>
-                                <p class="text-sm">Lun - Vie: 9AM - 6PM</p>
+                                <p class="text-white font-medium">+1 (809) 555-0123</p>
+                                <p class="text-gray-400 text-sm">Lun - Vie: 9AM - 6PM</p>
+                                <p class="text-gray-400 text-sm">Sáb: 9AM - 2PM</p>
                             </div>
                         </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-envelope mt-1"></i>
+                        <li class="flex items-start gap-3 group">
+                            <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
                             <div>
-                                <p class="text-white">info@luxerard.com</p>
-                                <p class="text-sm">Soporte 24/7</p>
+                                <p class="text-white font-medium">info@luxerard.com</p>
+                                <p class="text-gray-400 text-sm">Soporte 24/7</p>
+                                <p class="text-gray-400 text-sm">Ventas: ventas@luxerard.com</p>
                             </div>
                         </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fas fa-map-marker-alt mt-1"></i>
-                            <p>Santo Domingo<br>República Dominicana</p>
+                        <li class="flex items-start gap-3 group">
+                            <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium">Santo Domingo</p>
+                                <p class="text-gray-400 text-sm">República Dominicana</p>
+                                <p class="text-gray-400 text-sm">Centro comercial XYZ, 2do nivel</p>
+                            </div>
                         </li>
                     </ul>
                 </div>
             </div>
-            
+
             <!-- Copyright Bar -->
             <div class="pt-8 border-t border-gray-800">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                     <p class="text-gray-400 text-sm">
                         © 2025 LuxeraRD. Todos los derechos reservados.
                     </p>
-                    <div class="flex gap-6 text-sm">
+                    <div class="flex flex-wrap gap-4 text-sm">
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">Términos de Servicio</a>
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">Política de Privacidad</a>
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Garantías</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Soporte Técnico</a>
                     </div>
+                </div>
+                <div class="mt-4 text-center md:text-left">
+                    <p class="text-gray-500 text-xs">Las imágenes son de carácter ilustrativo. Precios sujetos a cambio sin previo aviso.</p>
                 </div>
             </div>
         </div>
     </footer>
-    
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Volver arriba">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="flex items-start">
+            <i class="fas fa-check-circle text-green-400 mt-0.5 mr-3"></i>
+            <div>
+                <p class="font-medium" id="toast-title">Producto agregado</p>
+                <p class="text-sm text-gray-300 mt-1" id="toast-message">El producto se ha agregado a tu carrito</p>
+            </div>
+            <button class="ml-auto text-gray-400 hover:text-white" id="toast-close" aria-label="Cerrar notificación">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script>
-        // Header scroll effect
-        const header = document.getElementById('header');
-        let lastScroll = 0;
-        
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+        // Design system configuration
+        const designSystem = {
+            breakpoints: {
+                sm: 640,
+                md: 768,
+                lg: 1024,
+                xl: 1280
+            },
+            transitions: {
+                fast: 150,
+                base: 250,
+                slow: 400
             }
-            
-            lastScroll = currentScroll;
-        });
-        
-        // Mobile menu toggle
+        };
+
+        // UI State Manager
+        const uiState = {
+            lastScroll: 0,
+            scrollDirection: 'down',
+            isMobileMenuOpen: false,
+            cartItems: 0,
+            currentSection: 'home'
+        };
+
+        // DOM Elements
+        const header = document.getElementById('header');
+        const scrollProgress = document.getElementById('scrollProgress');
+        const backToTop = document.getElementById('backToTop');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
-                mobileMenu.classList.add('hidden');
-            }
-        });
-        
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                    // Close mobile menu if open
-                    mobileMenu.classList.add('hidden');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const menuIcon = document.getElementById('menu-icon');
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toast-title');
+        const toastMessage = document.getElementById('toast-message');
+        const toastClose = document.getElementById('toast-close');
+        const cartCount = document.getElementById('cart-count');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        // Header scroll effect with direction detection
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            // Update scroll direction
+            uiState.scrollDirection = currentScroll > uiState.lastScroll ? 'down' : 'up';
+            uiState.lastScroll = currentScroll;
+
+            // Header effects
+            if (currentScroll > 100) {
+                header.classList.add('scrolled');
+                if (uiState.scrollDirection === 'down' && currentScroll > 200) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
                 }
+            } else {
+                header.classList.remove('scrolled', 'hidden');
+            }
+
+            // Scroll progress
+            const scrollPercent = (currentScroll / (documentHeight - windowHeight)) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+
+            // Back to top button
+            if (currentScroll > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+
+            // Update active nav based on scroll position
+            updateActiveNav();
+
+            // Clear timeout and reset
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                header.classList.remove('hidden');
+            }, 100);
+        }, { passive: true });
+
+        // Mobile menu toggle with enhanced UX
+        function toggleMobileMenu() {
+            uiState.isMobileMenuOpen = !uiState.isMobileMenuOpen;
+
+            if (uiState.isMobileMenuOpen) {
+                mobileMenu.classList.remove('invisible', 'opacity-0', '-translate-y-2');
+                mobileMenu.classList.add('translate-y-0', 'opacity-100');
+                mobileOverlay.classList.add('active');
+                menuIcon.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+                document.body.style.overflow = 'hidden';
+                mobileMenuBtn.setAttribute('aria-expanded', 'true');
+            } else {
+                mobileMenu.classList.add('-translate-y-2', 'opacity-0', 'invisible');
+                mobileMenu.classList.remove('translate-y-0', 'opacity-100');
+                mobileOverlay.classList.remove('active');
+                menuIcon.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+                document.body.style.overflow = '';
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+        // Close mobile menu when clicking links
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', toggleMobileMenu);
+        });
+
+        // Back to top functionality
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         });
-        
+
+        // Toast notification system
+        function showToast(title, message, type = 'success') {
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            // Set icon based on type
+            const icon = toast.querySelector('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle text-green-400 mt-0.5 mr-3' :
+                            type === 'error' ? 'fas fa-exclamation-circle text-red-400 mt-0.5 mr-3' :
+                            'fas fa-info-circle text-blue-400 mt-0.5 mr-3';
+
+            toast.classList.add('show');
+
+            // Auto hide after 4 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        toastClose.addEventListener('click', () => {
+            toast.classList.remove('show');
+        });
+
+        // Update active navigation based on scroll position
+        function updateActiveNav() {
+            const sections = {
+                home: 0,
+                features: document.getElementById('features')?.offsetTop || 500,
+                contact: document.getElementById('contact')?.offsetTop || 1500
+            };
+
+            const currentScroll = window.pageYOffset + 100;
+
+            // Determine current section
+            let current = 'home';
+            if (currentScroll >= sections.contact) {
+                current = 'contact';
+            } else if (currentScroll >= sections.features) {
+                current = 'features';
+            }
+
+            if (uiState.currentSection !== current) {
+                uiState.currentSection = current;
+
+                // Update nav links
+                navLinks.forEach(link => {
+                    const nav = link.dataset.nav;
+                    if (nav === current) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        // Cart simulation
+        function addToCart() {
+            uiState.cartItems++;
+            cartCount.textContent = uiState.cartItems;
+            cartCount.classList.add('animate-pulse');
+
+            // Show toast
+            showToast('Producto agregado', 'El producto se ha agregado a tu carrito', 'success');
+
+            // Remove animation after delay
+            setTimeout(() => {
+                cartCount.classList.remove('animate-pulse');
+            }, 1000);
+        }
+
+        // Initialize cart from localStorage
+        function initCart() {
+            const savedCart = localStorage.getItem('luxerard_cart');
+            if (savedCart) {
+                uiState.cartItems = parseInt(savedCart);
+                cartCount.textContent = uiState.cartItems;
+            }
+        }
+
+        // Save cart to localStorage
+        function saveCart() {
+            localStorage.setItem('luxerard_cart', uiState.cartItems.toString());
+        }
+
         // Intersection Observer for animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -100px 0px'
         };
-        
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -544,28 +1166,120 @@
                 }
             });
         }, observerOptions);
-        
+
         // Observe all elements with data-animate attribute
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize
+            initCart();
+            updateActiveNav();
+
+            // Observe animations
             document.querySelectorAll('[data-animate]').forEach(el => {
                 observer.observe(el);
             });
+
+            // Add event listeners for demo purposes
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 300);
+
+                    // Simulate adding to cart
+                    setTimeout(addToCart, 500);
+                });
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                // Close mobile menu with Escape
+                if (e.key === 'Escape' && uiState.isMobileMenuOpen) {
+                    toggleMobileMenu();
+                }
+
+                // Focus trap for mobile menu
+                if (e.key === 'Tab' && uiState.isMobileMenuOpen) {
+                    const focusableElements = mobileMenu.querySelectorAll('a, button, input, select, textarea');
+                    const firstElement = focusableElements[0];
+                    const lastElement = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            });
+
+            // Save cart before unload
+            window.addEventListener('beforeunload', saveCart);
+
+            // Demo: Simulate page load complete
+            setTimeout(() => {
+                if (window.pageYOffset === 0) {
+                    showToast('Bienvenido a LuxeraRD', 'Descubre nuestra tecnología premium', 'info');
+                }
+            }, 1000);
         });
-        
-        // Lazy loading for images
+
+        // Enhanced smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    const headerHeight = header.offsetHeight;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    // Update URL without scrolling
+                    history.pushState(null, null, href);
+                }
+            });
+        });
+
+        // Responsive image handling
         if ('loading' in HTMLImageElement.prototype) {
             const images = document.querySelectorAll('img[loading="lazy"]');
             images.forEach(img => {
-                img.src = img.dataset.src || img.src;
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                }
             });
         } else {
             // Fallback for browsers that don't support lazy loading
             const script = document.createElement('script');
             script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+            script.async = true;
             document.body.appendChild(script);
         }
+
+        // Performance monitoring
+        const perfObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                if (entry.name === 'first-contentful-paint') {
+                    console.log(`FCP: ${entry.startTime.toFixed(2)}ms`);
+                }
+            }
+        });
+
+        perfObserver.observe({ entryTypes: ['paint'] });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

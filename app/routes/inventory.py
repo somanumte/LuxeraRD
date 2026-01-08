@@ -596,11 +596,12 @@ def laptop_detail(id):
         Laptop.is_published == True
     ).limit(5).all()
 
-    # Obtener imagenes de la laptop
-    images = laptop.images.order_by(LaptopImage.ordering).all()
+    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()
+    # ¡laptop.images es una lista, no un objeto Query!
+    images = sorted(laptop.images, key=lambda img: img.ordering)
 
     # Imagen de portada
-    cover_image = laptop.images.filter_by(is_cover=True).first()
+    cover_image = next((img for img in laptop.images if img.is_cover), None)
 
     return render_template(
         'inventory/laptop_detail.html',
@@ -628,9 +629,9 @@ def laptop_by_slug(slug):
         Laptop.is_published == True
     ).limit(5).all()
 
-    # Obtener imagenes
-    images = laptop.images.order_by(LaptopImage.ordering).all()
-    cover_image = laptop.images.filter_by(is_cover=True).first()
+    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()
+    images = sorted(laptop.images, key=lambda img: img.ordering)
+    cover_image = next((img for img in laptop.images if img.is_cover), None)
 
     return render_template(
         'inventory/laptop_public.html',
@@ -761,8 +762,8 @@ def laptop_edit(id):
             for error in errors:
                 flash(f'Error en {field}: {error}', 'error')
 
-    # IMPORTANTE: Crear diccionario de imágenes por posición para el template
-    images_list = laptop.images.order_by(LaptopImage.ordering).all()
+    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()
+    images_list = sorted(laptop.images, key=lambda img: img.ordering)
     images_by_position = {img.position: img for img in images_list}
 
     return render_template('inventory/laptop_form.html', form=form, mode='edit', laptop=laptop,

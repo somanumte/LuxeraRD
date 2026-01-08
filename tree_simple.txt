@@ -1,4 +1,4 @@
-Directorio: C:\Users\felix\PycharmProjects\Luxera
+Directorio: C:\Users\felix\PycharmProjects\Luxera_RD
 ==================================================
 
 .
@@ -27,11 +27,13 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │   ├── expenses.py
 │   │   ├── inventory.py
 │   │   ├── invoices.py
-│   │   └── main.py
+│   │   ├── main.py
+│   │   └── public.py
 │   ├── services/
 │   │   ├── __init__.py
 │   │   ├── ai_service.py
 │   │   ├── catalog_service.py
+│   │   ├── dgii_service.py
 │   │   ├── financial_service.py
 │   │   ├── inventory_service.py
 │   │   ├── invoice_inventory_service.py
@@ -50,7 +52,8 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │   │   ├── laptop_form.js
 │   │   │   ├── laptop_form_submit.js
 │   │   │   ├── laptop_gallery.js
-│   │   │   └── theme.js
+│   │   │   ├── theme.js
+│   │   │   └── zoho-expenses.js
 │   │   └── uploads/
 │   │       └── laptops/
 │   │           ├── 31/
@@ -64,6 +67,12 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │           │   ├── LX-20260102-0043_3_20260102_103409.webp
 │   │           │   ├── LX-20260102-0043_4_20260102_103409.webp
 │   │           │   └── LX-20260102-0043_5_20260102_103409.webp
+│   │           ├── 44/
+│   │           │   ├── LX-20260108-0044_1_20260108_063616.jpg
+│   │           │   ├── LX-20260108-0044_2_20260108_063616.webp
+│   │           │   ├── LX-20260108-0044_3_20260108_063616.webp
+│   │           │   ├── LX-20260108-0044_4_20260108_063616.webp
+│   │           │   └── LX-20260108-0044_5_20260108_063616.webp
 │   │           ├── 45/
 │   │           ├── 51/
 │   │           │   ├── LX-20251231-0051_1_20260101_092055_1082155881.jpg
@@ -119,9 +128,16 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │   │   ├── invoice_form.html
 │   │   │   ├── invoices_list.html
 │   │   │   └── settings.html
+│   │   ├── landing/
+│   │   │   ├── base_landing.html
+│   │   │   ├── catalog.html
+│   │   │   ├── home.html
+│   │   │   └── product_datail.html
 │   │   ├── about.html
 │   │   ├── base.html
 │   │   ├── contact.html
+│   │   ├── dashboard.html
+│   │   ├── expenses_list.html
 │   │   └── index.html
 │   ├── utils/
 │   │   ├── __init__.py

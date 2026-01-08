@@ -4,11 +4,11 @@
 # Blueprint para la landing page y catálogo público
 # sin requerir autenticación
 
-from flask import Blueprint, render_template, request, jsonify
-from sqlalchemy import or_, and_, case
+from flask import Blueprint, render_template, request, jsonify, abort
 from sqlalchemy.orm import joinedload
+from sqlalchemy import and_, or_, case
 from app import db
-from app.models.laptop import Laptop, Brand, LaptopModel, Processor, Ram, Storage
+from app.models.laptop import Laptop, Brand, LaptopImage
 
 # ============================================
 # CREAR BLUEPRINT PÚBLICO
@@ -46,9 +46,9 @@ def landing():
     featured_laptops = Laptop.query.options(
         joinedload(Laptop.images)  # Esto carga las imágenes en la misma consulta
     ).filter(
-        Laptop.is_published == True,  # ⭐ CORREGIDO
+        Laptop.is_published == True,
         Laptop.is_featured == True,
-        Laptop.quantity > 0  # ⭐ CORREGIDO
+        Laptop.quantity > 0
     ).order_by(
         Laptop.created_at.desc()
     ).limit(6).all()
@@ -58,8 +58,8 @@ def landing():
         featured_laptops = Laptop.query.options(
             joinedload(Laptop.images)
         ).filter(
-            Laptop.is_published == True,  # ⭐ CORREGIDO
-            Laptop.quantity > 0  # ⭐ CORREGIDO
+            Laptop.is_published == True,
+            Laptop.quantity > 0
         ).order_by(
             Laptop.created_at.desc()
         ).limit(6).all()
@@ -114,8 +114,8 @@ def catalog():
     query = Laptop.query.options(
         joinedload(Laptop.images)
     ).filter(
-        Laptop.is_published == True,  # ⭐ CORREGIDO
-        Laptop.quantity > 0  # ⭐ CORREGIDO
+        Laptop.is_published == True,
+        Laptop.quantity > 0
     )
 
     # ===== APLICAR FILTROS =====
@@ -192,7 +192,7 @@ def catalog():
 
     # ===== DATOS PARA FILTROS =====
 
-    # Todas las marcas activas (CatalogMixin tiene is_active)
+    # Todas las marcas activas
     from app.models.laptop import Brand as BrandModel
     brands = BrandModel.query.filter_by(is_active=True).order_by(BrandModel.name).all()
 
@@ -238,37 +238,81 @@ def catalog():
 
 
 # ============================================
-# RUTA: DETALLE DE PRODUCTO (PÚBLICO)
+# RUTA: DETALLE DE PRODUCTO (PÚBLICO) - ¡CORREGIDO!
 # ============================================
 
 @public_bp.route('/product/<int:id>')
+@public_bp.route('/laptop/<int:id>')
 def product_detail(id):
     """
-    Detalle público de un producto
+    Detalle público de un producto por ID
 
     URL: /product/<id>
+    URL: /laptop/<id>
 
     Permite ver detalles de un producto sin autenticación.
-    Si el usuario quiere comprar, se le redirige al login.
-
-    Args:
-        id: ID del laptop
-
-    Returns:
-        Template landing/product_detail.html o redirige a inventory.laptop_detail
     """
-
-    laptop = Laptop.query.get_or_404(id)
+    # Obtener la laptop con todas las relaciones necesarias
+    laptop = Laptop.query.options(
+        joinedload(Laptop.brand),
+        joinedload(Laptop.processor),
+        joinedload(Laptop.ram),
+        joinedload(Laptop.storage),
+        joinedload(Laptop.screen),
+        joinedload(Laptop.graphics_card),
+        joinedload(Laptop.operating_system),
+        joinedload(Laptop.model),
+        joinedload(Laptop.images)
+    ).get_or_404(id)
 
     # Verificar que esté publicado
     if not laptop.is_published:
-        from flask import abort
         abort(404)
 
-    # Por ahora, redirigir al detalle de inventario
-    # (puedes crear un template específico después)
-    from flask import redirect, url_for
-    return redirect(url_for('inventory.laptop_detail', id=id))
+    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()
+    # ¡laptop.images es una lista, no un objeto Query!
+    images = sorted(laptop.images, key=lambda img: img.ordering if img.ordering else 0)
+
+    # CORRECCIÓN: Para la imagen de portada, buscar en la lista
+    cover_image = next((img for img in laptop.images if img.is_cover), None)
+
+    # Obtener laptops similares (misma categoría y marca)
+    similar_laptops = Laptop.query.filter(
+        and_(
+            Laptop.category == laptop.category,
+            Laptop.brand_id == laptop.brand_id,
+            Laptop.id != laptop.id,
+            Laptop.is_published == True,
+            Laptop.quantity > 0
+        )
+    ).limit(4).all()
+
+    return render_template(
+        'landing/product_datail.html',
+        laptop=laptop,
+        similar_laptops=similar_laptops,
+        images=images,
+        cover_image=cover_image
+    )
+
+
+@public_bp.route('/product/<slug>')
+@public_bp.route('/laptop/<slug>')
+def product_by_slug(slug):
+    """
+    Detalle público de un producto por slug
+
+    URL: /product/<slug>
+    URL: /laptop/<slug>
+    """
+    # Buscar laptop por slug
+    laptop = Laptop.query.filter_by(
+        slug=slug,
+        is_published=True
+    ).first_or_404()
+
+    # Usar la misma función pero con el ID
+    return product_detail(laptop.id)
 
 
 # ============================================
@@ -302,17 +346,23 @@ def api_search():
     ).limit(5).all()
 
     # Formatear resultados
-    suggestions = [
-        {
+    suggestions = []
+    for laptop in results:
+        # CORRECCIÓN: Buscar imagen de portada en la lista
+        cover_image = next((img for img in laptop.images if img.is_cover), None)
+        image_url = None
+        if cover_image:
+            from flask import url_for
+            image_url = url_for('static', filename=cover_image.image_path)
+
+        suggestions.append({
             'id': laptop.id,
             'name': laptop.display_name,
             'brand': laptop.brand.name if laptop.brand else '',
             'price': float(laptop.discount_price or laptop.sale_price),
-            'image': laptop.get_cover_image_url() if hasattr(laptop, 'get_cover_image_url') else None,
+            'image': image_url,
             'url': f'/product/{laptop.id}'
-        }
-        for laptop in results
-    ]
+        })
 
     return jsonify(suggestions)
 
