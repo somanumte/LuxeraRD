@@ -46,6 +46,7 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │   ├── js/
 │   │   │   ├── inventory/
 │   │   │   │   └── price-slider.js
+│   │   │   ├── expenses-api.js
 │   │   │   ├── laptop_form.js
 │   │   │   ├── laptop_form_submit.js
 │   │   │   ├── laptop_gallery.js
@@ -74,7 +75,11 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │           │   ├── LX-20251231-0051_3_20260101_094540_s-l1600_1.webp
 │   │           │   ├── LX-20251231-0051_4_20260101_094540_s-l1600_2.webp
 │   │           │   ├── LX-20251231-0051_5_20260101_094541_s-l1600.webp
-│   │           │   └── LX-20260103-0051_1_20260102_220249.jpg
+│   │           │   ├── LX-20260103-0051_1_20260102_220249.jpg
+│   │           │   ├── LX-20260107-0001_1_20260107_103349.webp
+│   │           │   ├── LX-20260107-0001_2_20260107_103349.webp
+│   │           │   ├── LX-20260107-0001_3_20260107_103349.webp
+│   │           │   └── LX-20260107-0001_4_20260107_103349.webp
 │   │           ├── 55/
 │   │           │   ├── LX-20260101-0001_3_20260101_232546_s-l1600_1.webp
 │   │           │   ├── LX-20260101-0001_4_20260101_232546_s-l1600_2.webp
@@ -103,6 +108,8 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │   │   ├── 403.html
 │   │   │   ├── 404.html
 │   │   │   └── 500.html
+│   │   ├── Expenses/
+│   │   │   └── expenses_list.html
 │   │   ├── inventory/
 │   │   │   ├── laptop_detail.html
 │   │   │   ├── laptop_form.html
@@ -115,7 +122,6 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 │   │   ├── about.html
 │   │   ├── base.html
 │   │   ├── contact.html
-│   │   ├── expenses_list.html
 │   │   └── index.html
 │   ├── utils/
 │   │   ├── __init__.py
@@ -136,4 +142,5 @@ Directorio: C:\Users\felix\PycharmProjects\Luxera
 ├── generate_tree.bat
 ├── generate_tree.py
 ├── requirements.txt
-└── run.py
+├── run.py
+└── tree_simple.txt

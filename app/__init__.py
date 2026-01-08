@@ -13,6 +13,8 @@ import click
 from datetime import date, timedelta
 import random
 import re
+from flask_cors import CORS
+
 
 # Inicializar extensiones
 db = SQLAlchemy()
@@ -63,6 +65,15 @@ def create_app(config_name='development'):
     app.register_blueprint(inventory_bp)
     app.register_blueprint(catalog_api_bp)
     app.register_blueprint(invoices_bp)  # ← NUEVA LÍNEA
+
+    # Configuración de CORS para APIs
+    CORS(app, resources={
+        r"/expenses/api/*": {
+            "origins": ["http://localhost:5000", "http://tudominio.com"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    })
 
     # Registrar manejadores de errores
     from app.routes.main import register_error_handlers
@@ -115,6 +126,7 @@ def register_cli_commands(app):
         Store, Location, Supplier
     )
     from app.services.sku_service import SKUService
+    from app.models.expense import ExpenseCategory  # ← NUEVA IMPORTACIÓN
 
     # ===== COMANDO: reset-db =====
     @app.cli.command('reset-db')
@@ -182,6 +194,7 @@ def register_cli_commands(app):
         click.echo("\n📊 Paso 5/5: Verificando datos...")
         laptops_count = Laptop.query.count()
         brands_count = Brand.query.count()
+        expense_categories_count = ExpenseCategory.query.count()  # ← NUEVA LÍNEA
 
         click.echo("\n" + "=" * 60)
         click.echo("✅ CONFIGURACIÓN COMPLETADA")
@@ -190,6 +203,7 @@ def register_cli_commands(app):
         click.echo(f"   🔑 Password: 1234")
         click.echo(f"   💻 Laptops: {laptops_count}")
         click.echo(f"   🏭 Marcas: {brands_count}")
+        click.echo(f"   📁 Categorías de gastos: {expense_categories_count}")  # ← NUEVA LÍNEA
         click.echo("=" * 60 + "\n")
 
     # ===== COMANDO: init-db =====
@@ -454,6 +468,22 @@ def register_cli_commands(app):
                     name=name, contact_name=contact, email=email, phone=phone, is_active=True
                 ))
 
+        # === CATEGORÍAS DE GASTOS (NUEVO) ===
+        expense_categories = [
+            {'name': 'Alquiler', 'color': 'bg-red-100 text-red-800'},
+            {'name': 'Servicios', 'color': 'bg-blue-100 text-blue-800'},
+            {'name': 'Salarios', 'color': 'bg-green-100 text-green-800'},
+            {'name': 'Marketing', 'color': 'bg-purple-100 text-purple-800'},
+            {'name': 'Suministros', 'color': 'bg-yellow-100 text-yellow-800'},
+            {'name': 'Mantenimiento', 'color': 'bg-indigo-100 text-indigo-800'},
+            {'name': 'Impuestos', 'color': 'bg-pink-100 text-pink-800'},
+            {'name': 'Transporte', 'color': 'bg-gray-100 text-gray-800'},
+        ]
+        for cat_data in expense_categories:
+            if not ExpenseCategory.query.filter_by(name=cat_data['name']).first():
+                category = ExpenseCategory(name=cat_data['name'], color=cat_data['color'])
+                db.session.add(category)
+
         db.session.commit()
 
     def _create_sample_laptops(admin_id):
@@ -504,7 +534,7 @@ def register_cli_commands(app):
             {'brand': 'HP', 'model': 'HP Spectre x360 14', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 1150, 'price': 1599},
             {'brand': 'HP', 'model': 'HP Victus 15-fa0xxx', 'processor': 'Intel Core i5-12450H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 580, 'price': 779},
             {'brand': 'HP', 'model': 'HP Victus 16-r0xxx', 'processor': 'Intel Core i5-13500H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '16" FHD+ IPS (1920x1200)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 750, 'price': 999},
-            {'brand': 'HP', 'model': 'HP OMEN 16-wf0xxx', 'processor': 'Intel Core i7-13700HX', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '16" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1050, 'price': 1399},
+            {'brand': 'HP', 'model': 'HP OMEN 16-wf0xxx', 'processor': 'Intel Core i713700HX', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '16" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1050, 'price': 1399},
             {'brand': 'HP', 'model': 'HP OMEN 17-ck2xxx', 'processor': 'Intel Core i9-13900HX', 'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080', 'screen': '17.3" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1900, 'price': 2499},
             # ASUS (10)
             {'brand': 'ASUS', 'model': 'ASUS Vivobook 15 X1502ZA', 'processor': 'Intel Core i3-1215U', 'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 340, 'price': 449},

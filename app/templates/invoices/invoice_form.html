@@ -374,9 +374,13 @@
                     </div>
 
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información Adicional</h2>
-
-                        <div class="space-y-4">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 cursor-pointer flex items-center justify-between" onclick="toggleAdditionalInfo()">
+                            <span>Información Adicional</span>
+                            <svg id="additionalInfoIcon" class="w-5 h-5 transform rotate-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </h2>
+                        <div id="additionalInfoContent" class="space-y-4 hidden">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Notas Internas
@@ -463,6 +467,15 @@ const recentLaptops = [...laptops]
 
 let customerSearchTimeout = null;
 let laptopSearchTimeouts = {};
+
+// Función para alternar la visibilidad de Información Adicional
+function toggleAdditionalInfo() {
+    const content = document.getElementById('additionalInfoContent');
+    const icon = document.getElementById('additionalInfoIcon');
+    content.classList.toggle('hidden');
+    icon.classList.toggle('rotate-0');
+    icon.classList.toggle('rotate-180');
+}
 
 // Funciones para el buscador de clientes
 function focusCustomerSearch() {
