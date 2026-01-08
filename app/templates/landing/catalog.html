@@ -1,0 +1,364 @@
+{% extends "landing/base_landing.html" %}
+
+{% block title %}Catálogo de Productos | LuxeraRD{% endblock %}
+
+{% block meta_description %}Explora nuestro catálogo completo de laptops y equipos de computación. Encuentra la laptop perfecta para ti con filtros avanzados y los mejores precios.{% endblock %}
+
+{% block content %}
+
+<!-- ============================================
+     CATÁLOGO HEADER
+     ============================================ -->
+<section class="bg-gradient-to-br from-gray-50 to-white pt-32 pb-16">
+    <div class="container-custom">
+        <div class="text-center max-w-3xl mx-auto">
+            <h1 class="section-title text-apple-gray mb-4">
+                Catálogo de Productos
+            </h1>
+            <p class="subtitle">
+                Explora nuestra colección completa de {{ total_products }} laptops disponibles
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     FILTROS Y BÚSQUEDA
+     ============================================ -->
+<section class="bg-white border-y border-gray-200 sticky top-16 z-40">
+    <div class="container-custom py-6">
+        <form method="GET" action="{{ url_for('public.catalog') }}" class="space-y-4">
+            <!-- Búsqueda y Ordenamiento -->
+            <div class="flex flex-col md:flex-row gap-4">
+                <!-- Búsqueda -->
+                <div class="flex-1 relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ search_query }}"
+                        placeholder="Buscar laptops, marcas, especificaciones..."
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                    >
+                </div>
+                
+                <!-- Ordenar por -->
+                <div class="md:w-64">
+                    <select 
+                        name="sort" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent appearance-none bg-white cursor-pointer"
+                        onchange="this.form.submit()"
+                    >
+                        <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Más Recientes</option>
+                        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                        <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Más Populares</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Filtros Avanzados (Collapsible en móvil) -->
+            <div id="filters-container">
+                <button 
+                    type="button" 
+                    id="toggle-filters" 
+                    class="md:hidden w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl text-apple-gray font-medium"
+                >
+                    <span><i class="fas fa-filter mr-2"></i>Filtros</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                
+                <div id="filters-content" class="hidden md:flex flex-col md:flex-row gap-4 mt-4 md:mt-0">
+                    <!-- Filtro por Marca -->
+                    <div class="flex-1">
+                        <select 
+                            name="brand" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent appearance-none bg-white cursor-pointer"
+                            onchange="this.form.submit()"
+                        >
+                            <option value="">Todas las Marcas</option>
+                            {% for brand in brands %}
+                            <option value="{{ brand.id }}" {% if selected_brand == brand.id %}selected{% endif %}>
+                                {{ brand.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Filtro de Precio -->
+                    <div class="flex-1">
+                        <div class="flex gap-2">
+                            <input 
+                                type="number" 
+                                name="min_price" 
+                                value="{{ min_price if min_price else '' }}"
+                                placeholder="Precio Mín."
+                                min="{{ min_price_available }}"
+                                max="{{ max_price_available }}"
+                                class="w-1/2 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                            >
+                            <input 
+                                type="number" 
+                                name="max_price" 
+                                value="{{ max_price if max_price else '' }}"
+                                placeholder="Precio Máx."
+                                min="{{ min_price_available }}"
+                                max="{{ max_price_available }}"
+                                class="w-1/2 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-transparent"
+                            >
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de Acción -->
+                    <div class="flex gap-2">
+                        <button 
+                            type="submit" 
+                            class="px-6 py-3 bg-apple-blue text-white rounded-xl font-medium hover:bg-apple-blue-dark transition-colors whitespace-nowrap"
+                        >
+                            <i class="fas fa-search mr-2"></i>Buscar
+                        </button>
+                        <a 
+                            href="{{ url_for('public.catalog') }}" 
+                            class="px-6 py-3 bg-gray-200 text-apple-gray rounded-xl font-medium hover:bg-gray-300 transition-colors whitespace-nowrap"
+                        >
+                            <i class="fas fa-times mr-2"></i>Limpiar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ============================================
+     RESULTADOS
+     ============================================ -->
+<section class="section-spacing bg-apple-gray-light">
+    <div class="container-custom">
+        <!-- Contador de Resultados -->
+        <div class="flex items-center justify-between mb-8">
+            <p class="text-apple-text-secondary">
+                Mostrando <span class="font-semibold text-apple-gray">{{ laptops|length }}</span> de <span class="font-semibold text-apple-gray">{{ total_products }}</span> productos
+            </p>
+            
+            {% if search_query or selected_brand or min_price or max_price %}
+            <a href="{{ url_for('public.catalog') }}" class="text-apple-blue hover:underline text-sm font-medium">
+                <i class="fas fa-times mr-1"></i>Limpiar filtros
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if laptops %}
+        <!-- Grid de Productos -->
+        <div class="products-grid">
+            {% for laptop in laptops %}
+            <article class="product-card group">
+                <!-- Imagen del Producto -->
+                <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="block aspect-[4/3] overflow-hidden bg-white relative">
+                    {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
+                        {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
+                        <img
+                            src="{{ url_for('static', filename=cover.image_path) }}"
+                            alt="{{ laptop.display_name }}"
+                            class="product-image w-full h-full object-contain p-6"
+                            loading="lazy"
+                        >
+                    {% elif laptop.images and laptop.images|length > 0 %}
+                        <img
+                            src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
+                            alt="{{ laptop.display_name }}"
+                            class="product-image w-full h-full object-contain p-6"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <img
+                            src="{{ url_for('static', filename='images/laptop-placeholder.png') }}"
+                            alt="{{ laptop.display_name }}"
+                            class="product-image w-full h-full object-contain p-6"
+                            loading="lazy"
+                        >
+                    {% endif %}
+
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
+                        <span class="bg-red-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            -{{ (((laptop.sale_price - laptop.discount_price) / laptop.sale_price) * 100)|int }}%
+                        </span>
+                        {% endif %}
+
+                        {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
+                        <span class="bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            ¡Solo {{ laptop.quantity }} unidades!
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Overlay on Hover -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                        <span class="w-full btn-primary text-center">
+                            Ver Detalles
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Info del Producto -->
+                <div class="p-6">
+                    <!-- Marca -->
+                    <p class="text-sm text-apple-text-secondary mb-2 font-medium">
+                        {{ laptop.brand.name if laptop.brand else 'Marca' }}
+                    </p>
+
+                    <!-- Nombre -->
+                    <h3 class="text-lg font-semibold text-apple-gray mb-3 line-clamp-2 group-hover:text-apple-blue transition-colors">
+                        <a href="{{ url_for('public.product_detail', id=laptop.id) }}">
+                            {{ laptop.display_name }}
+                        </a>
+                    </h3>
+
+                    <!-- Especificaciones Clave -->
+                    <div class="space-y-2 mb-4 text-sm text-apple-text-secondary">
+                        {% if laptop.processor %}
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-microchip w-4 text-gray-400"></i>
+                            <span class="truncate">{{ laptop.processor.name[:35] }}{% if laptop.processor.name|length > 35 %}...{% endif %}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="flex items-center gap-4">
+                            {% if laptop.ram %}
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-memory w-4 text-gray-400"></i>
+                                <span>{{ laptop.ram.name }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if laptop.storage %}
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-hdd w-4 text-gray-400"></i>
+                                <span>{{ laptop.storage.name }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Precio y Acción -->
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <div>
+                            {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
+                            <p class="text-sm text-gray-400 line-through">
+                                ${{ "{:,.2f}".format(laptop.sale_price) }}
+                            </p>
+                            <p class="text-2xl font-bold text-apple-gray">
+                                ${{ "{:,.2f}".format(laptop.discount_price) }}
+                            </p>
+                            {% else %}
+                            <p class="text-2xl font-bold text-apple-gray">
+                                ${{ "{:,.2f}".format(laptop.sale_price) }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <a href="{{ url_for('public.product_detail', id=laptop.id) }}"
+                           class="p-3 bg-apple-blue text-white rounded-full hover:bg-apple-blue-dark transition-colors"
+                           aria-label="Ver detalles de {{ laptop.display_name }}">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        <!-- ============================================
+             PAGINACIÓN
+             ============================================ -->
+        {% if pagination.pages > 1 %}
+        <div class="flex justify-center mt-16">
+            <nav class="flex items-center gap-2">
+                <!-- Primera página -->
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('public.catalog', page=1, q=search_query, brand=selected_brand, min_price=min_price, max_price=max_price, sort=sort_by) }}"
+                   class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="{{ url_for('public.catalog', page=pagination.prev_num, q=search_query, brand=selected_brand, min_price=min_price, max_price=max_price, sort=sort_by) }}"
+                   class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+                {% endif %}
+
+                <!-- Páginas -->
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <a href="{{ url_for('public.catalog', page=page_num, q=search_query, brand=selected_brand, min_price=min_price, max_price=max_price, sort=sort_by) }}"
+                           class="px-4 py-2 rounded-lg {% if page_num == pagination.page %}bg-apple-blue text-white{% else %}border border-gray-300 hover:bg-gray-50{% endif %} transition-colors">
+                            {{ page_num }}
+                        </a>
+                    {% else %}
+                        <span class="px-2">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Última página -->
+                {% if pagination.has_next %}
+                <a href="{{ url_for('public.catalog', page=pagination.next_num, q=search_query, brand=selected_brand, min_price=min_price, max_price=max_price, sort=sort_by) }}"
+                   class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="{{ url_for('public.catalog', page=pagination.pages, q=search_query, brand=selected_brand, min_price=min_price, max_price=max_price, sort=sort_by) }}"
+                   class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Sin Resultados -->
+        <div class="text-center py-16">
+            <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-4xl text-gray-400"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-apple-gray mb-4">
+                No se encontraron productos
+            </h3>
+            <p class="text-apple-text-secondary mb-8">
+                Intenta ajustar tus filtros o realiza una nueva búsqueda
+            </p>
+            <a href="{{ url_for('public.catalog') }}" class="btn-primary inline-flex">
+                <i class="fas fa-redo mr-2"></i>
+                Ver Todos los Productos
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle filtros en móvil
+    document.getElementById('toggle-filters').addEventListener('click', function() {
+        const content = document.getElementById('filters-content');
+        const icon = this.querySelector('.fa-chevron-down');
+
+        content.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+    });
+
+    // Auto-submit al cambiar filtros (opcional)
+    document.querySelectorAll('select[name="brand"], select[name="sort"]').forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+
+    // Smooth scroll al aplicar filtros
+    if (window.location.search) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

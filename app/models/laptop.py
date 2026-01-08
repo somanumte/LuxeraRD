@@ -8,12 +8,12 @@ from app.models.mixins import TimestampMixin, CatalogMixin
 from datetime import datetime, date
 
 
-# ===== MODELOS DE CATÃLOGO (usan CatalogMixin) =====
+# ===== MODELOS DE CATÁLOGO (usan CatalogMixin) =====
 
 class Brand(CatalogMixin, db.Model):
     """
     Marcas de laptops (Dell, HP, Lenovo, etc.)
-    Usa CatalogMixin: id, name, is_active, timestamps, mÃ©todos get_active() y get_or_create()
+    Usa CatalogMixin: id, name, is_active, timestamps, métodos get_active() y get_or_create()
     """
     __tablename__ = 'brands'
 
@@ -66,7 +66,7 @@ class Screen(CatalogMixin, db.Model):
 
 class GraphicsCard(CatalogMixin, db.Model):
     """
-    Tarjetas GrÃ¡ficas (NVIDIA RTX 4060, Intel Iris Xe, etc.)
+    Tarjetas Gráficas (NVIDIA RTX 4060, Intel Iris Xe, etc.)
     """
     __tablename__ = 'graphics_cards'
 
@@ -100,7 +100,7 @@ class Store(CatalogMixin, db.Model):
     """
     __tablename__ = 'stores'
 
-    # Campos adicionales especÃ­ficos de tiendas
+    # Campos adicionales específicos de tiendas
     address = db.Column(db.String(300))
     phone = db.Column(db.String(20))
 
@@ -115,7 +115,7 @@ class Location(CatalogMixin, db.Model):
     """
     __tablename__ = 'locations'
 
-    # RelaciÃ³n con tienda (opcional)
+    # Relación con tienda (opcional)
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=True)
 
     # Relaciones
@@ -128,7 +128,7 @@ class Supplier(CatalogMixin, db.Model):
     """
     __tablename__ = 'suppliers'
 
-    # Campos adicionales especÃ­ficos de proveedores
+    # Campos adicionales específicos de proveedores
     contact_name = db.Column(db.String(100))
     email = db.Column(db.String(120))
     phone = db.Column(db.String(20))
@@ -147,7 +147,7 @@ class Laptop(TimestampMixin, db.Model):
     Modelo principal de inventario de laptops
 
     Responsabilidad: SOLO almacenar datos
-    LÃ³gica de negocio: en Services (SKUService, FinancialService, etc.)
+    Lógica de negocio: en Services (SKUService, FinancialService, etc.)
     """
     __tablename__ = 'laptops'
 
@@ -165,7 +165,7 @@ class Laptop(TimestampMixin, db.Model):
     seo_title = db.Column(db.String(70), nullable=True)
     seo_description = db.Column(db.String(160), nullable=True)
 
-    # ===== 3. RELACIONES CON CATÃLOGOS =====
+    # ===== 3. RELACIONES CON CATÁLOGOS =====
     brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=False, index=True)
     model_id = db.Column(db.Integer, db.ForeignKey('laptop_models.id'), nullable=False, index=True)
     processor_id = db.Column(db.Integer, db.ForeignKey('processors.id'), nullable=False)
@@ -175,20 +175,20 @@ class Laptop(TimestampMixin, db.Model):
     storage_id = db.Column(db.Integer, db.ForeignKey('storage.id'), nullable=False)
     ram_id = db.Column(db.Integer, db.ForeignKey('ram.id'), nullable=False)
 
-    # LogÃ­stica
+    # Logística
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=True)
     created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
-    # ===== 4. DETALLES TÃ‰CNICOS ESPECÃFICOS =====
+    # ===== 4. DETALLES TÉCNICOS ESPECÍFICOS =====
     npu = db.Column(db.Boolean, default=False, nullable=False)  # Tiene NPU (AI)
     storage_upgradeable = db.Column(db.Boolean, default=False, nullable=False)
     ram_upgradeable = db.Column(db.Boolean, default=False, nullable=False)
     keyboard_layout = db.Column(db.String(20), default='US', nullable=False)
-    connectivity_ports = db.Column(db.JSON, default=dict, nullable=True)  # MÃºltiples valores
+    connectivity_ports = db.Column(db.JSON, default=dict, nullable=True)  # Múltiples valores
 
-    # ===== 5. ESTADO Y CATEGORÃA =====
+    # ===== 5. ESTADO Y CATEGORÍA =====
     # Valores de category: 'laptop', 'workstation', 'gaming'
     category = db.Column(db.String(20), nullable=False, default='laptop', index=True)
     # Valores de condition: 'new', 'used', 'refurbished'
@@ -211,7 +211,7 @@ class Laptop(TimestampMixin, db.Model):
     internal_notes = db.Column(db.Text, nullable=True)
     # created_at y updated_at vienen de TimestampMixin
 
-    # ===== RELACIÃ“N CON USUARIO CREADOR =====
+    # ===== RELACIÓN CON USUARIO CREADOR =====
     created_by = db.relationship('User', backref='laptops_created', foreign_keys=[created_by_id])
 
     # ===== PROPIEDADES CALCULADAS =====
@@ -247,17 +247,17 @@ class Laptop(TimestampMixin, db.Model):
 
     @property
     def is_low_stock(self):
-        """Indica si el stock estÃ¡ bajo el mÃ­nimo de alerta"""
+        """Indica si el stock está bajo el mínimo de alerta"""
         return self.available_quantity <= self.min_alert
 
-    # ===== MÃ‰TODOS DE SERIALIZACIÃ“N =====
+    # ===== MÉTODOS DE SERIALIZACIÓN =====
 
     def to_dict(self, include_relationships=True):
         """
         Serializa el objeto a diccionario (para JSON)
 
         Args:
-            include_relationships: Si incluir datos de relaciones (mÃ¡s pesado)
+            include_relationships: Si incluir datos de relaciones (más pesado)
 
         Returns:
             dict con todos los datos del laptop
@@ -277,14 +277,14 @@ class Laptop(TimestampMixin, db.Model):
             'seo_title': self.seo_title,
             'seo_description': self.seo_description,
 
-            # Detalles tÃ©cnicos
+            # Detalles técnicos
             'npu': self.npu,
             'storage_upgradeable': self.storage_upgradeable,
             'ram_upgradeable': self.ram_upgradeable,
             'keyboard_layout': self.keyboard_layout,
             'connectivity_ports': self.connectivity_ports,
 
-            # Estado y categorÃ­a
+            # Estado y categoría
             'category': self.category,
             'condition': self.condition,
 
@@ -347,10 +347,10 @@ class Laptop(TimestampMixin, db.Model):
         return data
 
     def __repr__(self):
-        """RepresentaciÃ³n en string del objeto"""
+        """Representación en string del objeto"""
         return f'<Laptop {self.sku} - {self.display_name}>'
 
-    # ===== ÃNDICES COMPUESTOS (para optimizaciÃ³n de queries) =====
+    # ===== ÍNDICES COMPUESTOS (para optimización de queries) =====
     __table_args__ = (
         db.Index('idx_laptop_brand_category', 'brand_id', 'category'),
         db.Index('idx_laptop_published_featured', 'is_published', 'is_featured'),
@@ -359,11 +359,11 @@ class Laptop(TimestampMixin, db.Model):
     )
 
 
-# ===== MODELO DE IMÃGENES =====
+# ===== MODELO DE IMÁGENES =====
 
 class LaptopImage(TimestampMixin, db.Model):
     """
-    GalerÃ­a de imÃ¡genes vinculada a una Laptop especÃ­fica.
+    Galería de imágenes vinculada a una Laptop específica.
     """
     __tablename__ = 'laptop_images'
 
@@ -375,8 +375,8 @@ class LaptopImage(TimestampMixin, db.Model):
     is_cover = db.Column(db.Boolean, default=False, nullable=False)  # Es portada
     ordering = db.Column(db.Integer, default=0, nullable=False)
 
-    # RelaciÃ³n
-    laptop = db.relationship('Laptop', backref=db.backref('images', lazy='dynamic', cascade='all, delete-orphan'))
+    # Relación - CAMBIADO: de lazy='dynamic' a lazy='select' para permitir eager loading
+    laptop = db.relationship('Laptop', backref=db.backref('images', lazy='select', cascade='all, delete-orphan'))
 
     def to_dict(self):
         """Serializa la imagen a diccionario"""
@@ -393,9 +393,6 @@ class LaptopImage(TimestampMixin, db.Model):
 
     def __repr__(self):
         return f'<LaptopImage {self.id} - Laptop {self.laptop_id}>'
-
-    class Meta:
-        ordering = ['ordering']
 
     __table_args__ = (
         db.Index('idx_laptop_image_laptop_cover', 'laptop_id', 'is_cover'),

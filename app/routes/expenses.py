@@ -120,8 +120,66 @@ def expense_create():
 
 
 # ============================================
-# NUEVAS APIS RESTFUL (EXISTING CODE - KEEP AS IS)
+# NUEVAS APIS RESTFUL PARA EL FRONTEND
 # ============================================
+
+@bp.route('/api/expenses')
+@login_required
+def expense_get_all():
+    """API para obtener todos los gastos del usuario"""
+    try:
+        # Obtener parámetros de filtrado
+        status = request.args.get('status', '')
+        category_id = request.args.get('category_id', '')
+        search = request.args.get('search', '')
+
+        # Construir query base
+        query = Expense.query.filter_by(created_by=current_user.id)
+
+        # Aplicar filtros
+        if status == 'pending':
+            query = query.filter_by(is_paid=False).filter(Expense.due_date >= date.today())
+        elif status == 'overdue':
+            query = query.filter_by(is_paid=False).filter(Expense.due_date < date.today())
+        elif status == 'paid':
+            query = query.filter_by(is_paid=True)
+
+        if category_id and category_id.isdigit():
+            query = query.filter_by(category_id=int(category_id))
+
+        if search:
+            query = query.filter(
+                or_(
+                    Expense.description.ilike(f'%{search}%'),
+                    Expense.notes.ilike(f'%{search}%')
+                )
+            )
+
+        # Obtener gastos
+        expenses = query.order_by(Expense.due_date.desc()).all()
+
+        # Retornar como JSON
+        expenses_data = [expense.to_dict() for expense in expenses]
+
+        # Calcular estadísticas totales
+        total_amount = sum(float(expense.amount) for expense in expenses)
+        total_count = len(expenses)
+        pending_count = sum(1 for expense in expenses if not expense.is_paid)
+        overdue_count = sum(1 for expense in expenses if expense.is_overdue)
+
+        return jsonify({
+            'expenses': expenses_data,
+            'summary': {
+                'total_amount': float(total_amount),
+                'total_count': total_count,
+                'pending_count': pending_count,
+                'overdue_count': overdue_count
+            }
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @bp.route('/api/expenses/<int:expense_id>')
 @login_required
@@ -134,6 +192,133 @@ def expense_get(expense_id):
         return jsonify({'error': 'No tienes permiso'}), 403
 
     return jsonify(expense.to_dict())
+
+
+@bp.route('/api/expenses/<int:expense_id>', methods=['PUT'])
+@login_required
+def expense_update(expense_id):
+    """API para actualizar un gasto"""
+    expense = Expense.query.get_or_404(expense_id)
+
+    # Verificar permisos
+    if expense.created_by != current_user.id and not current_user.is_admin:
+        return jsonify({'error': 'No tienes permiso'}), 403
+
+    try:
+        data = request.get_json()
+
+        # Actualizar campos
+        if 'description' in data:
+            expense.description = data['description']
+        if 'amount' in data:
+            expense.amount = float(data['amount'])
+        if 'category_id' in data:
+            expense.category_id = int(data['category_id'])
+        if 'due_date' in data:
+            expense.due_date = datetime.strptime(data['due_date'], '%Y-%m-%d').date()
+        if 'is_paid' in data:
+            expense.is_paid = bool(data['is_paid'])
+            if expense.is_paid and not expense.paid_date:
+                expense.paid_date = date.today()
+            elif not expense.is_paid:
+                expense.paid_date = None
+        if 'is_recurring' in data:
+            expense.is_recurring = bool(data['is_recurring'])
+        if 'frequency' in data:
+            expense.frequency = data['frequency']
+        if 'advance_days' in data:
+            expense.advance_days = int(data['advance_days'])
+        if 'auto_renew' in data:
+            expense.auto_renew = bool(data['auto_renew'])
+        if 'notes' in data:
+            expense.notes = data['notes']
+
+        expense.updated_at = datetime.utcnow()
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Gasto actualizado exitosamente',
+            'expense': expense.to_dict()
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/expenses/<int:expense_id>', methods=['DELETE'])
+@login_required
+def expense_delete(expense_id):
+    """Eliminar un gasto"""
+    expense = Expense.query.get_or_404(expense_id)
+
+    # Verificar permisos
+    if expense.created_by != current_user.id and not current_user.is_admin:
+        return jsonify({'error': 'No tienes permiso'}), 403
+
+    try:
+        db.session.delete(expense)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Gasto eliminado exitosamente'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/expenses/<int:expense_id>/paid', methods=['POST'])
+@login_required
+def expense_mark_paid(expense_id):
+    """Marcar un gasto como pagado"""
+    expense = Expense.query.get_or_404(expense_id)
+
+    # Verificar permisos
+    if expense.created_by != current_user.id and not current_user.is_admin:
+        return jsonify({'error': 'No tienes permiso'}), 403
+
+    try:
+        expense.is_paid = True
+        expense.paid_date = date.today()
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Gasto marcado como pagado',
+            'expense': expense.to_dict()
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/expenses/<int:expense_id>/pending', methods=['POST'])
+@login_required
+def expense_mark_pending(expense_id):
+    """Marcar un gasto como pendiente"""
+    expense = Expense.query.get_or_404(expense_id)
+
+    # Verificar permisos
+    if expense.created_by != current_user.id and not current_user.is_admin:
+        return jsonify({'error': 'No tienes permiso'}), 403
+
+    try:
+        expense.is_paid = False
+        expense.paid_date = None
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Gasto marcado como pendiente',
+            'expense': expense.to_dict()
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 
 @bp.route('/api/expenses/bulk', methods=['POST'])
@@ -194,6 +379,61 @@ def expense_bulk_action():
             'success': True,
             'message': f'{len(expenses)} gastos procesados',
             'processed': len(expenses)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/categories')
+@login_required
+def categories_get_all():
+    """API para obtener todas las categorías"""
+    try:
+        categories = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+        return jsonify([category.to_dict() for category in categories])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/api/categories/<int:category_id>')
+@login_required
+def category_get(category_id):
+    """API para obtener una categoría específica"""
+    category = ExpenseCategory.query.get_or_404(category_id)
+    return jsonify(category.to_dict())
+
+
+@bp.route('/api/categories', methods=['POST'])
+@login_required
+def category_create_api():
+    """API para crear una nueva categoría"""
+    try:
+        data = request.get_json()
+
+        if not data.get('name'):
+            return jsonify({'error': 'El nombre es requerido'}), 400
+
+        # Verificar si ya existe
+        existing = ExpenseCategory.query.filter_by(name=data['name']).first()
+        if existing:
+            return jsonify({'error': 'Ya existe una categoría con ese nombre'}), 400
+
+        # Crear categoría
+        category = ExpenseCategory(
+            name=data['name'],
+            color=data.get('color'),
+            description=data.get('description')
+        )
+
+        db.session.add(category)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Categoría creada exitosamente',
+            'category': category.to_dict()
         })
 
     except Exception as e:

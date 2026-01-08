@@ -54,17 +54,19 @@ def create_app(config_name='development'):
     from app.routes.inventory import inventory_bp
     from app.routes.api.catalog_api import catalog_api_bp
     from app.routes.api.customers import customers_bp
-    from app.routes.invoices import invoices_bp  # ← NUEVA LÍNEA
+    from app.routes.invoices import invoices_bp
     from app.routes.expenses import bp as expenses_bp
+    from app.routes.public import public_bp
 
 
+    app.register_blueprint(public_bp)
     app.register_blueprint(expenses_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(inventory_bp)
     app.register_blueprint(catalog_api_bp)
-    app.register_blueprint(invoices_bp)  # ← NUEVA LÍNEA
+    app.register_blueprint(invoices_bp)
 
     # Configuración de CORS para APIs
     CORS(app, resources={
@@ -534,9 +536,7 @@ def register_cli_commands(app):
             {'brand': 'HP', 'model': 'HP Spectre x360 14', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 1150, 'price': 1599},
             {'brand': 'HP', 'model': 'HP Victus 15-fa0xxx', 'processor': 'Intel Core i5-12450H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 580, 'price': 779},
             {'brand': 'HP', 'model': 'HP Victus 16-r0xxx', 'processor': 'Intel Core i5-13500H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '16" FHD+ IPS (1920x1200)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 750, 'price': 999},
-            {'brand': 'HP', 'model': 'HP OMEN 16-wf0xxx', 'processor': 'Intel Core i713700HX', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '16" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1050, 'price': 1399},
-            {'brand': 'HP', 'model': 'HP OMEN 17-ck2xxx', 'processor': 'Intel Core i9-13900HX', 'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080', 'screen': '17.3" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1900, 'price': 2499},
-            # ASUS (10)
+           # ASUS (10)
             {'brand': 'ASUS', 'model': 'ASUS Vivobook 15 X1502ZA', 'processor': 'Intel Core i3-1215U', 'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 340, 'price': 449},
             {'brand': 'ASUS', 'model': 'ASUS Vivobook 15 X1504VA', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 480, 'price': 649},
             {'brand': 'ASUS', 'model': 'ASUS Zenbook 14 UX3402VA', 'processor': 'Intel Core i5-1340P', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 800, 'price': 1099},

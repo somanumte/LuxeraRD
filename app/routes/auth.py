@@ -262,4 +262,4 @@ def logout():
     username = current_user.username
     logout_user()
     flash(f'¡Hasta pronto, {username}!', 'success')
-    return redirect(url_for('main.index'))
+    return redirect(url_for('public.landing'))

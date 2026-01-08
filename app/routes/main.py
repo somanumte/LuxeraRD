@@ -119,9 +119,9 @@ def get_time_ago(dt):
 # RUTA PRINCIPAL DEL DASHBOARD
 # ============================================
 
-@main_bp.route('/')
+@main_bp.route('/dashboard')
 @login_required
-def index():
+def dashboard():
     """
     Dashboard principal mejorado estilo Shopify
     Adaptado a tus modelos específicos
@@ -546,7 +546,7 @@ def index():
             'title': 'Ventas descendentes',
             'message': f'Las ventas han bajado {abs(revenue_change):.1f}%',
             'action': 'Analizar tendencia',
-            'link': 'main.index'
+            'link': 'main.dashboard'
         })
 
     if gross_margin_current < 20:
@@ -608,7 +608,7 @@ def index():
     # ===== RENDERIZAR =====
 
     return render_template(
-        'index.html',
+        'dashboard.html',
         # Config
         current_period=period,
         start_date=start_date,

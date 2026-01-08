@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}LuxeraRD - Tienda premium de tecnología. Las mejores laptops y equipos de computación en República Dominicana.{% endblock %}">
+    <meta name="keywords" content="laptops, computadoras, tecnología, República Dominicana, LuxeraRD, gaming, profesional">
+    <meta name="author" content="LuxeraRD">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}LuxeraRD - Tecnología Premium{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Las mejores laptops y equipos de computación{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg') }}">
+    
+    <title>{% block title %}LuxeraRD | Tecnología Premium{% endblock %}</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Fonts - SF Pro Display style (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple': {
+                            'blue': '#0071e3',
+                            'blue-dark': '#0077ed',
+                            'gray': '#1d1d1f',
+                            'gray-light': '#f5f5f7',
+                            'text': '#1d1d1f',
+                            'text-secondary': '#6e6e73',
+                        }
+                    },
+                    spacing: {
+                        '18': '4.5rem',
+                        '88': '22rem',
+                        '100': '25rem',
+                        '128': '32rem',
+                    },
+                    maxWidth: {
+                        '8xl': '88rem',
+                        '9xl': '96rem',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ========================================
+           APPLE-INSPIRED BASE STYLES
+           ======================================== */
+        
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #1d1d1f;
+            background: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        /* Smooth scrolling with offset for fixed header */
+        html {
+            scroll-padding-top: 64px;
+        }
+        
+        /* Typography - Apple style */
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+        }
+        
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.015em;
+        }
+        
+        .subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            font-weight: 400;
+            line-height: 1.4;
+            color: #6e6e73;
+        }
+        
+        /* Header - Fixed and minimal */
+        .header-landing {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .header-landing.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Navigation */
+        .nav-link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1d1d1f;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background: #f5f5f7;
+            color: #0071e3;
+        }
+        
+        /* Buttons - Apple style */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.75rem;
+            background: #0071e3;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 980px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary:hover {
+            background: #0077ed;
+            transform: scale(1.02);
+        }
+        
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.75rem;
+            background: transparent;
+            color: #0071e3;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 980px;
+            border: 2px solid #0071e3;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .btn-secondary:hover {
+            background: #0071e3;
+            color: white;
+        }
+        
+        /* Product Cards - Clean and minimal */
+        .product-card {
+            background: #fbfbfd;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+        
+        .product-image {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Feature Icons - Minimal style */
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+            border-radius: 1rem;
+            margin: 0 auto 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        
+        /* Spacing - Apple generous spacing */
+        .section-spacing {
+            padding: 5rem 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .section-spacing {
+                padding: 7rem 2rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .section-spacing {
+                padding: 8rem 3rem;
+            }
+        }
+        
+        /* Container */
+        .container-custom {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .container-custom {
+                padding: 0 2rem;
+            }
+        }
+        
+        /* Grid - Responsive */
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        @media (min-width: 640px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 2.5rem;
+            }
+        }
+        
+        /* Utility - Text gradient */
+        .text-gradient {
+            background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Focus states for accessibility */
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid #0071e3;
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+        
+        /* Print styles */
+        @media print {
+            .header-landing, footer, .btn-primary, .btn-secondary {
+                display: none;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Fixed Header -->
+    <header class="header-landing" id="header">
+        <nav class="container-custom h-full">
+            <div class="flex items-center justify-between h-full">
+                <!-- Logo -->
+                <a href="{{ url_for('public.landing') }}" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform">
+                        <i class="fas fa-laptop text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold text-apple-gray hidden sm:block">Luxera<span class="text-gradient">RD</span></span>
+                </a>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center gap-2">
+                    <a href="{{ url_for('public.landing') }}" class="nav-link">Inicio</a>
+                    <a href="{{ url_for('public.catalog') }}" class="nav-link">Productos</a>
+                    <a href="#features" class="nav-link">Características</a>
+                    <a href="#contact" class="nav-link">Contacto</a>
+                </div>
+                
+                <!-- Right Actions -->
+                <div class="flex items-center gap-4">
+                    <!-- Cart Icon -->
+                    <button class="relative p-2 hover:bg-apple-gray-light rounded-full transition-colors" aria-label="Carrito">
+                        <i class="fas fa-shopping-cart text-apple-gray text-lg"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">0</span>
+                    </button>
+                    
+                    <!-- Login Button -->
+                    <a href="{{ url_for('auth.login') }}" class="hidden sm:inline-flex btn-secondary py-2 px-4 text-sm">
+                        <i class="fas fa-user mr-2"></i>Iniciar Sesión
+                    </a>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 hover:bg-apple-gray-light rounded-lg transition-colors" aria-label="Menú">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <div class="container-custom py-4 space-y-2">
+                <a href="{{ url_for('public.landing') }}" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Inicio</a>
+                <a href="{{ url_for('public.catalog') }}" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Productos</a>
+                <a href="#features" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Características</a>
+                <a href="#contact" class="block py-3 px-4 rounded-lg hover:bg-apple-gray-light transition-colors">Contacto</a>
+                <a href="{{ url_for('auth.login') }}" class="block py-3 px-4 rounded-lg bg-apple-blue text-white text-center font-medium">
+                    <i class="fas fa-user mr-2"></i>Iniciar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="pt-16">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-apple-gray text-white">
+        <div class="container-custom section-spacing">
+            <!-- Footer Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <!-- Company Info -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-laptop text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold">Luxera<span class="text-blue-400">RD</span></span>
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Tu destino para la mejor tecnología. Ofrecemos laptops y equipos de computación de las marcas más prestigiosas con garantía y soporte técnico especializado.
+                    </p>
+                    <!-- Social Media -->
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-500 transition-colors" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Enlaces Rápidos</h3>
+                    <ul class="space-y-3">
+                        <li><a href="{{ url_for('public.catalog') }}" class="text-gray-400 hover:text-white transition-colors">Catálogo</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Características</a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="text-gray-400 hover:text-white transition-colors">Acerca de</a></li>
+                        <li><a href="{{ url_for('main.contact') }}" class="text-gray-400 hover:text-white transition-colors">Contacto</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Contacto</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-phone mt-1"></i>
+                            <div>
+                                <p class="text-white">+1 (809) 555-0123</p>
+                                <p class="text-sm">Lun - Vie: 9AM - 6PM</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-envelope mt-1"></i>
+                            <div>
+                                <p class="text-white">info@luxerard.com</p>
+                                <p class="text-sm">Soporte 24/7</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-map-marker-alt mt-1"></i>
+                            <p>Santo Domingo<br>República Dominicana</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Copyright Bar -->
+            <div class="pt-8 border-t border-gray-800">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p class="text-gray-400 text-sm">
+                        © 2025 LuxeraRD. Todos los derechos reservados.
+                    </p>
+                    <div class="flex gap-6 text-sm">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Términos de Servicio</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Política de Privacidad</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script>
+        // Header scroll effect
+        const header = document.getElementById('header');
+        let lastScroll = 0;
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            lastScroll = currentScroll;
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all elements with data-animate attribute
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-animate]').forEach(el => {
+                observer.observe(el);
+            });
+        });
+        
+        // Lazy loading for images
+        if ('loading' in HTMLImageElement.prototype) {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            images.forEach(img => {
+                img.src = img.dataset.src || img.src;
+            });
+        } else {
+            // Fallback for browsers that don't support lazy loading
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+            document.body.appendChild(script);
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

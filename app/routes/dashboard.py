@@ -281,7 +281,7 @@ def index():
     # ===== RENDERIZAR TEMPLATE =====
     
     return render_template(
-        'dashboard/index.html',
+        'dashboard/dashboard.html',
         # Métricas de inventario
         total_laptops=total_laptops,
         total_available=int(total_available),
