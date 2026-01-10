@@ -55,19 +55,6 @@ def get_date_range(period='month'):
 
     return today.replace(day=1, hour=0, minute=0, second=0), today
 
-def admin_panel():
-    # ... código existente ...
-
-    # Obtener estadísticas de gastos
-    from app.models.expense import Expense
-    total_expenses = Expense.query.count()
-
-    return render_template(
-        'admin/panel.html',
-        # ... otros parámetros ...
-        total_expenses=total_expenses  # Añadir esto si quieres mostrar en el panel
-    )
-
 def get_growth_indicator(change):
     """Retorna indicador de crecimiento con color"""
     if change > 0:
