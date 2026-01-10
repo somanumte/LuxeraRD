@@ -341,7 +341,7 @@ class Laptop(TimestampMixin, db.Model):
                 'supplier': self.supplier.name if self.supplier else None,
                 'supplier_id': self.supplier_id,
                 'created_by_username': self.created_by.username if self.created_by else None,
-                'images': [img.to_dict() for img in self.images.all()] if hasattr(self, 'images') else []
+                'images': [img.to_dict() for img in self.images] if hasattr(self, 'images') else []
             })
 
         return data
