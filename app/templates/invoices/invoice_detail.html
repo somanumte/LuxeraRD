@@ -4,93 +4,6 @@
 
 {% block extra_css %}
 <style>
-    /* Indicador visual del tamaño carta */
-    @media screen {
-        .page-size-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8.5in;
-            height: 11in;
-            border: 2px dashed rgba(99, 102, 241, 0.3);
-            pointer-events: none;
-            z-index: 9999;
-            display: none;
-        }
-
-        .show-page-size .page-size-indicator {
-            display: block;
-        }
-    }
-
-    @media print {
-        @page {
-            margin: 0.5in;
-            size: letter;
-        }
-
-        body {
-            background: white !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            font-size: 11pt !important;
-            line-height: 1.2 !important;
-            width: 8.5in !important;
-            min-height: 11in !important;
-        }
-
-        .no-print {
-            display: none !important;
-        }
-
-        .print-area {
-            width: 7.5in !important;
-            min-height: 10in !important;
-            box-shadow: none !important;
-            border: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            max-width: none !important;
-        }
-
-        .print-optimize {
-            margin-bottom: 0.2in !important;
-            padding: 0.1in !important;
-        }
-
-        .print-compact {
-            margin: 0.1in 0 !important;
-            padding: 0.1in !important;
-        }
-
-        table {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            font-size: 9pt !important;
-        }
-
-        .summary-section {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-
-        .bg-gray-50 { background-color: #f9fafb !important; }
-        .bg-gray-100 { background-color: #f3f4f6 !important; }
-        .text-indigo-700 { color: #4338ca !important; }
-
-        /* Optimizar espacio para carta */
-        .space-optimize {
-            padding: 0.15in !important;
-            margin: 0.05in !important;
-        }
-
-        .compact-text {
-            font-size: 10pt !important;
-            line-height: 1.1 !important;
-        }
-    }
-
     .invoice-border {
         border: 1px solid #e5e7eb;
         border-radius: 8px;
@@ -100,13 +13,6 @@
     .watermark-bg {
         background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,20 L180,180 M180,20 L20,180' stroke='%23f3f4f6' stroke-width='0.5'/%3E%3C/svg%3E");
         background-size: 200px 200px;
-    }
-
-    /* Tamaño específico para carta */
-    .letter-size {
-        width: 8.5in;
-        min-height: 11in;
-        margin: 0 auto;
     }
 
     /* Estilos para mostrar dirección con saltos de línea */
@@ -132,23 +38,22 @@
         animation: fade-in 0.3s ease-in-out;
     }
 
-    /* Mejorar visualización del logo en impresión */
-    @media print {
-        .logo-print {
-            max-height: 50px !important;
-            filter: grayscale(100%) brightness(0%);
-        }
+    /* Marco estético para el logo */
+    .logo-frame {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        padding: 3px;
+        background-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-size-indicator"></div>
-
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 print:py-0">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Encabezado de acciones -->
-        <div class="no-print mb-6">
+        <div class="mb-6">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
                 <div class="flex-1">
                     <div class="flex items-center gap-4">
@@ -162,9 +67,6 @@
                                 Factura {{ invoice.invoice_number }}
                             </h1>
                             <div class="flex items-center gap-3 mt-1 flex-wrap">
-                                <button onclick="togglePageSize()" class="no-print text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition">
-                                    📏 Mostrar tamaño carta
-                                </button>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
                                     NCF: {{ invoice.ncf }}
                                 </p>
@@ -184,15 +86,7 @@
                 </div>
 
                 <div class="flex flex-wrap gap-3">
-                    <button onclick="window.print()"
-                            class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 font-semibold shadow-md hover:shadow-emerald-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>
-                        Imprimir Factura
-                    </button>
-
-                    <button onclick="simulateSave()" class="no-print inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 font-semibold shadow-md hover:shadow-blue-200">
+                    <button onclick="simulateSave()" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 font-semibold shadow-md hover:shadow-blue-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
@@ -300,23 +194,23 @@
             </div>
         </div>
 
-        <!-- Área de impresión optimizada para carta -->
-        <div class="print-area watermark-bg mx-auto bg-white text-gray-900 rounded-lg shadow-xl border border-gray-300 invoice-border letter-size compact-text">
+        <!-- Área de la factura -->
+        <div class="watermark-bg mx-auto bg-white text-gray-900 rounded-lg shadow-xl border border-gray-300 invoice-border">
             <!-- Encabezado con logo -->
-            <div class="bg-gradient-to-r from-indigo-800 to-purple-800 text-white p-4 print:p-3">
+            <div class="bg-gradient-to-r from-indigo-800 to-purple-800 text-white p-4">
                 <div class="flex items-start gap-4">
                     <!-- Logo de la empresa (si existe) -->
                     {% if settings.logo_path and settings.has_logo() %}
                     <div class="flex-shrink-0">
                         <img src="{{ settings.get_logo_url() }}"
                              alt="Logo {{ settings.company_name }}"
-                             class="h-16 w-auto object-contain print:h-14 logo-print">
+                             class="h-16 w-auto object-contain logo-frame">
                     </div>
                     {% endif %}
 
                     <!-- Información de la empresa -->
                     <div class="flex-1">
-                        <h1 class="text-lg font-bold text-white mb-1 print:text-base">
+                        <h1 class="text-lg font-bold text-white mb-1">
                             {{ settings.company_name }}
                         </h1>
                         <div class="space-y-0.5 text-xs text-indigo-100">
@@ -340,8 +234,8 @@
                     </div>
 
                     <div class="mt-2">
-                        <div class="text-xl font-bold text-white mb-3 tracking-tight text-center md:text-right print:text-lg">FACTURA</div>
-                        <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/20 print:p-2">
+                        <div class="text-xl font-bold text-white mb-3 tracking-tight text-center md:text-right">FACTURA</div>
+                        <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/20">
                             <div class="grid grid-cols-2 gap-2 text-xs">
                                 <div class="text-indigo-100 font-medium">Número:</div>
                                 <div class="text-white font-bold">{{ invoice.invoice_number }}</div>
@@ -375,10 +269,10 @@
             </div>
 
             <!-- Información compacta - Cliente e Información de Pago lado a lado del mismo tamaño -->
-            <div class="p-4 border-b border-gray-200 print:p-3">
+            <div class="p-4 border-b border-gray-200">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Cliente -->
-                    <div class="info-section space-optimize">
+                    <div class="info-section">
                         <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cliente</h2>
                         <div class="bg-gray-50 border border-gray-200 p-3 rounded-lg flex-grow">
                             <div class="space-y-2">
@@ -426,7 +320,7 @@
                     </div>
 
                     <!-- Información de Pago -->
-                    <div class="info-section space-optimize">
+                    <div class="info-section">
                         <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Información de Pago</h2>
                         <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg flex-grow">
                             <div class="space-y-2">
@@ -459,7 +353,7 @@
             </div>
 
             <!-- Tabla de items compacta - SIN campos editables -->
-            <div class="p-4 print:p-3">
+            <div class="p-4">
                 <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Detalle</h2>
                 <div class="overflow-hidden rounded-lg border border-gray-200">
                     <table class="w-full border-collapse">
@@ -474,11 +368,11 @@
                         <tbody class="divide-y divide-gray-100">
                             {% for item in invoice.items.order_by('line_order').all() %}
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="py-2 px-3 text-gray-900 font-semibold text-center align-top">
+                                <td class="py-2 px-3 text-gray-900 font-semibold text-center align-top text-xs">
                                     {{ item.quantity }}
                                 </td>
                                 <td class="py-2 px-3 text-gray-900 align-top">
-                                    <div class="font-medium text-gray-900 text-sm mb-0.5">{{ item.description }}</div>
+                                    <div class="font-medium text-gray-900 text-xs mb-0.5">{{ item.description }}</div>
                                     {% if item.laptop and item.laptop.sku %}
                                     <div class="text-xs text-gray-500 flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -488,10 +382,10 @@
                                     </div>
                                     {% endif %}
                                 </td>
-                                <td class="py-2 px-3 text-right text-gray-900 align-top font-medium">
+                                <td class="py-2 px-3 text-right text-gray-900 align-top font-medium text-xs">
                                     RD$ {{ "{:,.2f}".format(item.unit_price|float) }}
                                 </td>
-                                <td class="py-2 px-3 text-right font-bold text-gray-900 align-top">
+                                <td class="py-2 px-3 text-right font-bold text-gray-900 align-top text-xs">
                                     RD$ {{ "{:,.2f}".format(item.line_total|float) }}
                                 </td>
                             </tr>
@@ -502,7 +396,7 @@
             </div>
 
             <!-- Totales y notas compactos -->
-            <div class="p-4 bg-gray-50 border-t border-gray-200 print:p-3">
+            <div class="p-4 bg-gray-50 border-t border-gray-200">
                 <div class="flex flex-col lg:flex-row justify-between gap-4">
                     <!-- Notas -->
                     <div class="lg:w-2/3 space-y-3">
@@ -559,13 +453,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- ELIMINADO: Pie de página compacto -->
         </div>
 
         <!-- Botón de eliminación -->
         {% if invoice.status == 'draft' %}
-        <div class="no-print max-w-4xl mx-auto mt-6 flex justify-center">
+        <div class="max-w-4xl mx-auto mt-6 flex justify-center">
             <form method="POST" action="{{ url_for('invoices.invoice_delete', invoice_id=invoice.id) }}"
                   onsubmit="return confirm('¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.')">
                 <button type="submit" class="flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 font-semibold shadow-md hover:shadow-red-200">
@@ -581,11 +473,6 @@
 </div>
 
 <script>
-    // Funcionalidad para mostrar/ocultar indicador de tamaño carta
-    function togglePageSize() {
-        document.body.classList.toggle('show-page-size');
-    }
-
     // Funcionalidad de guardado simulada
     function simulateSave() {
         const button = event.target.closest('button');
@@ -615,8 +502,7 @@
 
         console.log('Factura configurada:', {
             fecha_actual: today,
-            fecha_vencimiento: dueDateFormatted,
-            tamaño_papel: 'Carta (8.5x11 pulgadas)'
+            fecha_vencimiento: dueDateFormatted
         });
     });
 </script>
