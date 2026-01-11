@@ -250,6 +250,26 @@
             max-width: 1in !important;
         }
 
+        /* Optimización de la sección de totales compacta */
+        #factura-impresion div[style*="width: 3in;"] {
+            width: 2.5in !important;
+            padding: 0.08in !important;
+            margin-right: 0 !important;
+        }
+
+        #factura-impresion div[style*="width: 3in;"] span {
+            font-size: 7pt !important;
+        }
+
+        #factura-impresion div[style*="font-size: 10pt"] {
+            font-size: 9pt !important;
+        }
+
+        /* Asegurar que el gradiente se imprima */
+        #factura-impresion div[style*="linear-gradient(135deg"] {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        }
+
         /* Optimización de la sección de totales */
         #total-display {
             font-size: 11pt !important;
@@ -463,28 +483,30 @@
         </div>
     </div>
 
-    <!-- Totales (ANTES de notas y términos) -->
-    <div style="padding: 0.15in; background-color: #f9fafb; border-top: 1px solid #d1d5db;" class="page-break-avoid">
-        <div style="background-color: white; border: 1px solid #9ca3af; border-radius: 3px; padding: 0.15in; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-            <div style="display: flex; flex-direction: column; gap: 0.08in;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.06in; border-bottom: 1px solid #d1d5db;">
-                    <span style="color: #4b5563; font-size: 8pt; font-weight: 600;">Subtotal:</span>
-                    <span style="color: #111827; font-size: 9pt; font-weight: 700;" id="subtotal-display">
-                        RD$ {{ "{:,.2f}".format(invoice.subtotal|float) }}
-                    </span>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.06in; border-bottom: 1px solid #d1d5db;">
-                    <span style="color: #4b5563; font-size: 8pt; font-weight: 600;">ITBIS (18%):</span>
-                    <span style="color: #111827; font-size: 9pt; font-weight: 700;" id="tax-display">
-                        RD$ {{ "{:,.2f}".format(invoice.tax_amount|float) }}
-                    </span>
-                </div>
-
-                <div style="padding-top: 0.08in; border-top: 2px solid #9ca3af;">
+    <!-- Totales compactos y estéticos -->
+    <div style="padding: 0.15in 0.15in 0.1in 0.15in;" class="page-break-avoid">
+        <div style="display: flex; justify-content: flex-end;">
+            <div style="width: 3in; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #cbd5e1; border-radius: 4px; padding: 0.12in; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; flex-direction: column; gap: 0.05in;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 9pt; font-weight: 700; color: #111827;">TOTAL FACTURA:</span>
-                        <span style="font-size: 11pt; font-weight: 900; color: #3730a3;" id="total-display">
+                        <span style="color: #64748b; font-size: 7.5pt; font-weight: 600;">Subtotal:</span>
+                        <span style="color: #334155; font-size: 8pt; font-weight: 700;">
+                            RD$ {{ "{:,.2f}".format(invoice.subtotal|float) }}
+                        </span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #64748b; font-size: 7.5pt; font-weight: 600;">ITBIS (18%):</span>
+                        <span style="color: #334155; font-size: 8pt; font-weight: 700;">
+                            RD$ {{ "{:,.2f}".format(invoice.tax_amount|float) }}
+                        </span>
+                    </div>
+
+                    <div style="height: 1px; background: linear-gradient(to right, transparent 0%, #cbd5e1 50%, transparent 100%); margin: 0.04in 0;"></div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.04in; border-top: 1px solid #94a3b8;">
+                        <span style="font-size: 8.5pt; font-weight: 800; color: #1e293b;">TOTAL:</span>
+                        <span style="font-size: 10pt; font-weight: 900; color: #1d4ed8; letter-spacing: 0.02em;">
                             RD$ {{ "{:,.2f}".format(invoice.total|float) }}
                         </span>
                     </div>
@@ -509,33 +531,6 @@
                 <div style="font-size: 8pt; color: #111827; white-space: pre-line; line-height: 1.3;">{{ invoice.terms }}</div>
             </div>
             {% endif %}
-        </div>
-    </div>
-
-    <!-- Pie de página optimizado -->
-    <div style="padding: 0.1in; border-top: 1px solid #d1d5db; background-color: #f3f4f6; text-align: center; font-size: 7pt;" class="page-break-avoid">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.1in; color: #4b5563; margin-bottom: 0.05in;">
-            <div style="text-align: left;">
-                <p style="font-weight: 600; margin-bottom: 0.02in;">Emitido por:</p>
-                <p style="margin: 0;">{{ settings.company_name }}</p>
-                {% if settings.company_rnc %}
-                <p style="margin: 0;">RNC: {{ settings.company_rnc }}</p>
-                {% endif %}
-            </div>
-            <div style="text-align: center;">
-                <p style="font-weight: 600; margin-bottom: 0.02in;">Documento válido</p>
-                <p style="margin: 0;">Factura {{ invoice.invoice_number }}</p>
-                <p style="margin: 0;">Fecha: {{ invoice.invoice_date.strftime('%d/%m/%Y') }}</p>
-            </div>
-            <div style="text-align: right;">
-                <p style="font-weight: 600; margin-bottom: 0.02in;">Condiciones</p>
-                <p style="margin: 0;">{% if invoice.due_date %}Vence: {{ invoice.due_date.strftime('%d/%m/%Y') }}{% else %}Pago inmediato{% endif %}</p>
-                <p style="margin: 0;">Método: {{ invoice.payment_method|title }}</p>
-            </div>
-        </div>
-        <div style="padding-top: 0.05in; border-top: 1px solid #d1d5db; color: #6b7280; font-size: 6pt;">
-            <p style="margin: 0.02in 0;">Este documento es una representación impresa de la factura electrónica original</p>
-            <p style="margin: 0.02in 0;">NCF: {{ invoice.ncf }} | Fecha de emisión: {{ invoice.invoice_date.strftime('%d/%m/%Y') }}</p>
         </div>
     </div>
 </div>
