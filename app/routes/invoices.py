@@ -15,9 +15,13 @@ import csv
 import io
 import json
 from sqlalchemy import or_, and_
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
+
 
 # ============================================
-# CREAR BLUEPRINT DE FACTURACIÃ"N
+# CREAR BLUEPRINT DE FACTURACION
 # ============================================
 
 invoices_bp = Blueprint(
@@ -787,3 +791,131 @@ def api_search_laptops():
         'description': l.short_description,
         'quantity': l.quantity
     } for l in laptops])
+
+
+# ============================================
+# RUTA: SUBIR LOGO
+# ============================================
+
+@invoices_bp.route('/settings/upload-logo', methods=['POST'])
+@login_required
+def upload_logo():
+    """
+    Subir logo para facturas
+
+    URL: /invoices/settings/upload-logo (POST)
+    """
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'No tienes permisos'}), 403
+
+    settings = InvoiceSettings.get_settings()
+
+    # Validar que se envió un archivo
+    if 'logo' not in request.files:
+        return jsonify({'success': False, 'message': 'No se envió ningún archivo'}), 400
+
+    file = request.files['logo']
+
+    # Validar que tenga nombre
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No se seleccionó archivo'}), 400
+
+    # Validar extensiones permitidas
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'}
+    if '.' not in file.filename or \
+            file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        return jsonify({
+            'success': False,
+            'message': 'Formato no permitido. Use PNG, JPG, GIF, SVG o WebP'
+        }), 400
+
+    # Validar tamaño (máximo 2MB)
+    if len(file.read()) > 2 * 1024 * 1024:
+        file.seek(0)
+        return jsonify({
+            'success': False,
+            'message': 'Archivo muy grande. Máximo 2MB'
+        }), 400
+
+    file.seek(0)
+
+    try:
+        # Crear directorio si no existe
+        logo_dir = os.path.join(current_app.root_path, 'static', 'logos')
+        os.makedirs(logo_dir, exist_ok=True)
+
+        # Eliminar logo anterior si existe
+        if settings.logo_path:
+            old_logo_path = os.path.join(logo_dir, settings.logo_path)
+            if os.path.exists(old_logo_path):
+                os.remove(old_logo_path)
+
+        # Generar nombre único para el archivo
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = secure_filename(file.filename)
+        name, ext = os.path.splitext(filename)
+        unique_filename = f"logo_{timestamp}{ext}"
+
+        # Guardar archivo
+        file_path = os.path.join(logo_dir, unique_filename)
+        file.save(file_path)
+
+        # Actualizar configuración
+        settings.logo_path = unique_filename
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Logo subido exitosamente',
+            'logo_url': settings.get_logo_url()
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error al subir logo: {str(e)}'
+        }), 500
+
+
+# ============================================
+# RUTA: ELIMINAR LOGO
+# ============================================
+
+@invoices_bp.route('/settings/remove-logo', methods=['POST'])
+@login_required
+def remove_logo():
+    """
+    Eliminar logo actual
+
+    URL: /invoices/settings/remove-logo (POST)
+    """
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'No tienes permisos'}), 403
+
+    settings = InvoiceSettings.get_settings()
+
+    try:
+        if settings.logo_path:
+            # Eliminar archivo físico
+            logo_dir = os.path.join(current_app.root_path, 'static', 'logos')
+            logo_path = os.path.join(logo_dir, settings.logo_path)
+
+            if os.path.exists(logo_path):
+                os.remove(logo_path)
+
+            # Limpiar campo en la base de datos
+            settings.logo_path = None
+            db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Logo eliminado exitosamente'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error al eliminar logo: {str(e)}'
+        }), 500

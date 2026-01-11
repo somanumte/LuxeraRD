@@ -29,69 +29,129 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Nombre de la Empresa <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               name="company_name" 
+                        <input type="text"
+                               name="company_name"
                                value="{{ settings.company_name }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             RNC de la Empresa
                         </label>
-                        <input type="text" 
-                               name="company_rnc" 
+                        <input type="text"
+                               name="company_rnc"
                                value="{{ settings.company_rnc or '' }}"
                                placeholder="000-0000000-0"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Dirección
                         </label>
-                        <textarea name="company_address" 
+                        <textarea name="company_address"
                                   rows="3"
                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">{{ settings.company_address or '' }}</textarea>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Teléfono
                         </label>
-                        <input type="text" 
-                               name="company_phone" 
+                        <input type="text"
+                               name="company_phone"
                                value="{{ settings.company_phone or '' }}"
                                placeholder="(809) 000-0000"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Email
                         </label>
-                        <input type="email" 
-                               name="company_email" 
+                        <input type="email"
+                               name="company_email"
                                value="{{ settings.company_email or '' }}"
                                placeholder="contacto@empresa.com"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Logo de la Empresa -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logo de la Empresa</h2>
+
+                <div class="space-y-4">
+                    <!-- Vista previa del logo -->
+                    <div id="logo-preview-container" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                        {% if settings.logo_path and settings.has_logo() %}
+                        <div class="text-center">
+                            <img src="{{ settings.get_logo_url() }}"
+                                 alt="Logo {{ settings.company_name }}"
+                                 id="logo-preview"
+                                 class="max-h-32 mx-auto mb-3 object-contain">
+                            <p class="text-xs text-gray-500">{{ settings.logo_path }}</p>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-8">
+                            <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-500">No hay logo configurado</p>
+                            <p class="text-xs text-gray-400">Recomendado: PNG o JPG, máximo 2MB</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Acciones del logo -->
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <input type="file"
+                                   id="logo-file-input"
+                                   accept="image/png, image/jpeg, image/gif, image/svg+xml, image/webp"
+                                   class="hidden">
+                            <button type="button"
+                                    onclick="document.getElementById('logo-file-input').click()"
+                                    class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                                Subir Logo
+                            </button>
+                        </div>
+
+                        {% if settings.logo_path and settings.has_logo() %}
+                        <button type="button"
+                                onclick="removeLogo()"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Eliminar
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Mensajes de estado -->
+                    <div id="logo-message" class="text-sm hidden"></div>
+                </div>
+            </div>
+
             <!-- Configuración de NCF y Numeración -->
             <div class="space-y-6">
                 <!-- NCF -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Configuración de NCF</h2>
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Prefijo NCF <span class="text-red-500">*</span>
                             </label>
-                            <select name="ncf_prefix" 
+                            <select name="ncf_prefix"
                                     class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <option value="B01" {% if settings.ncf_prefix == 'B01' %}selected{% endif %}>B01 - Crédito Fiscal</option>
                                 <option value="B02" {% if settings.ncf_prefix == 'B02' %}selected{% endif %}>B02 - Consumo</option>
@@ -102,17 +162,17 @@
                                 Tipo de comprobante fiscal según DGII
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Próximo NCF
                             </label>
                             <div class="flex gap-2">
-                                <input type="text" 
+                                <input type="text"
                                        value="{{ settings.ncf_prefix }}"
                                        disabled
                                        class="w-20 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
-                                <input type="text" 
+                                <input type="text"
                                        value="{{ '{:08d}'.format(settings.ncf_sequence) }}"
                                        disabled
                                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
@@ -121,13 +181,13 @@
                                 Próximo: {{ settings.ncf_prefix }}{{ '{:08d}'.format(settings.ncf_sequence) }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 NCF Válido Hasta
                             </label>
-                            <input type="date" 
-                                   name="ncf_valid_until" 
+                            <input type="date"
+                                   name="ncf_valid_until"
                                    value="{% if settings.ncf_valid_until %}{{ settings.ncf_valid_until }}{% endif %}"
                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -136,18 +196,18 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Numeración de Facturas -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Numeración de Facturas</h2>
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Prefijo de Factura
                             </label>
-                            <input type="text" 
-                                   name="invoice_prefix" 
+                            <input type="text"
+                                   name="invoice_prefix"
                                    value="{{ settings.invoice_prefix }}"
                                    maxlength="10"
                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
@@ -155,17 +215,17 @@
                                 Ejemplo: INV, FACT, etc.
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Próximo Número
                             </label>
                             <div class="flex gap-2">
-                                <input type="text" 
+                                <input type="text"
                                        value="{{ settings.invoice_prefix }}-"
                                        disabled
                                        class="w-24 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
-                                <input type="text" 
+                                <input type="text"
                                        value="{{ '{:08d}'.format(settings.invoice_sequence) }}"
                                        disabled
                                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500">
@@ -177,16 +237,16 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Términos y Condiciones por Defecto -->
             <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Términos y Condiciones por Defecto</h2>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Texto de Términos y Condiciones
                     </label>
-                    <textarea name="default_terms" 
+                    <textarea name="default_terms"
                               rows="6"
                               placeholder="Ej: Esta factura deberá ser pagada en un plazo de 30 días..."
                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">{{ settings.default_terms or '' }}</textarea>
@@ -196,18 +256,137 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Botones de Acción -->
         <div class="flex justify-end gap-3 mt-6">
-            <a href="{{ url_for('invoices.invoices_list') }}" 
+            <a href="{{ url_for('invoices.invoices_list') }}"
                class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold">
                 Cancelar
             </a>
-            <button type="submit" 
+            <button type="submit"
                     class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold">
                 Guardar Configuración
             </button>
         </div>
     </form>
 </div>
+
+<script>
+// Manejar subida de logo
+document.getElementById('logo-file-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tamaño (2MB máximo)
+    if (file.size > 2 * 1024 * 1024) {
+        showLogoMessage('El archivo es muy grande. Máximo 2MB.', 'error');
+        return;
+    }
+
+    // Mostrar preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('logo-preview-container').innerHTML = `
+            <div class="text-center">
+                <img src="${e.target.result}"
+                     alt="Preview"
+                     id="logo-preview"
+                     class="max-h-32 mx-auto mb-3 object-contain animate-fade-in">
+                <p class="text-xs text-gray-500">${file.name}</p>
+            </div>
+        `;
+    };
+    reader.readAsDataURL(file);
+
+    // Subir al servidor
+    uploadLogo(file);
+});
+
+function uploadLogo(file) {
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    showLogoMessage('Subiendo logo...', 'info');
+
+    fetch('{{ url_for("invoices.upload_logo") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showLogoMessage(data.message, 'success');
+            // Actualizar botón de eliminar
+            document.querySelector('button[onclick="removeLogo()"]')?.remove();
+            const actionsDiv = document.querySelector('.flex.gap-3');
+            if (actionsDiv) {
+                actionsDiv.innerHTML += `
+                    <button type="button"
+                            onclick="removeLogo()"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Eliminar
+                    </button>
+                `;
+            }
+        } else {
+            showLogoMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showLogoMessage('Error al subir el logo', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function removeLogo() {
+    if (!confirm('¿Estás seguro de eliminar el logo?')) return;
+
+    showLogoMessage('Eliminando logo...', 'info');
+
+    fetch('{{ url_for("invoices.remove_logo") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showLogoMessage(data.message, 'success');
+            // Restaurar vista inicial
+            document.getElementById('logo-preview-container').innerHTML = `
+                <div class="text-center py-8">
+                    <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">No hay logo configurado</p>
+                    <p class="text-xs text-gray-400">Recomendado: PNG o JPG, máximo 2MB</p>
+                </div>
+            `;
+            // Eliminar botón de eliminar
+            document.querySelector('button[onclick="removeLogo()"]')?.remove();
+        } else {
+            showLogoMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showLogoMessage('Error al eliminar el logo', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function showLogoMessage(message, type) {
+    const messageDiv = document.getElementById('logo-message');
+    messageDiv.textContent = message;
+    messageDiv.className = `text-sm ${type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-blue-600'}`;
+    messageDiv.classList.remove('hidden');
+
+    setTimeout(() => {
+        messageDiv.classList.add('hidden');
+    }, 3000);
+}
+</script>
 {% endblock %}

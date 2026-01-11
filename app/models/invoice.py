@@ -224,6 +224,30 @@ class InvoiceSettings(db.Model):
     # ===== LOGO =====
     logo_path = db.Column(db.String(255), nullable=True)
 
+    # ===== MÉTODOS ADICIONALES =====
+
+    def get_logo_url(self):
+        """Obtiene la URL completa del logo"""
+        if self.logo_path:
+            return f"/static/logos/{self.logo_path}"
+        return None
+
+    def has_logo(self):
+        """Verifica si existe un logo configurado"""
+        import os
+        from flask import current_app
+
+        if not self.logo_path:
+            return False
+
+        logo_full_path = os.path.join(
+            current_app.root_path,
+            'static',
+            'logos',
+            self.logo_path
+        )
+        return os.path.exists(logo_full_path)
+
     # ===== MÉTODOS =====
 
     def get_next_invoice_number(self):

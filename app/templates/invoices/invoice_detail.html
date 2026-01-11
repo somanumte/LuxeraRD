@@ -121,6 +121,24 @@
         display: flex;
         flex-direction: column;
     }
+
+    /* Animación para fade in */
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-in-out;
+    }
+
+    /* Mejorar visualización del logo en impresión */
+    @media print {
+        .logo-print {
+            max-height: 50px !important;
+            filter: grayscale(100%) brightness(0%);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -284,41 +302,44 @@
 
         <!-- Área de impresión optimizada para carta -->
         <div class="print-area watermark-bg mx-auto bg-white text-gray-900 rounded-lg shadow-xl border border-gray-300 invoice-border letter-size compact-text">
-            <!-- Encabezado compacto -->
+            <!-- Encabezado con logo -->
             <div class="bg-gradient-to-r from-indigo-800 to-purple-800 text-white p-4 print:p-3">
-                <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                <div class="flex items-start gap-4">
+                    <!-- Logo de la empresa (si existe) -->
+                    {% if settings.logo_path and settings.has_logo() %}
+                    <div class="flex-shrink-0">
+                        <img src="{{ settings.get_logo_url() }}"
+                             alt="Logo {{ settings.company_name }}"
+                             class="h-16 w-auto object-contain print:h-14 logo-print">
+                    </div>
+                    {% endif %}
+
+                    <!-- Información de la empresa -->
                     <div class="flex-1">
-                        <div class="flex items-start gap-3">
-                            <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm print:p-1">
-                                <svg class="w-6 h-6 text-white print:w-5 print:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                </svg>
+                        <h1 class="text-lg font-bold text-white mb-1 print:text-base">
+                            {{ settings.company_name }}
+                        </h1>
+                        <div class="space-y-0.5 text-xs text-indigo-100">
+                            {% if settings.company_rnc %}
+                            <p><span class="font-medium">RNC:</span> {{ settings.company_rnc }}</p>
+                            {% endif %}
+                            {% if settings.company_address %}
+                            <p class="max-w-md address-preserve">{{ settings.company_address }}</p>
+                            {% endif %}
+                            {% if settings.company_phone or settings.company_email %}
+                            <div class="flex flex-wrap gap-3 pt-0.5">
+                                {% if settings.company_phone %}
+                                <p>Tel: {{ settings.company_phone }}</p>
+                                {% endif %}
+                                {% if settings.company_email %}
+                                <p>Email: {{ settings.company_email }}</p>
+                                {% endif %}
                             </div>
-                            <div>
-                                <h1 class="text-lg font-bold text-white mb-1 print:text-base">{{ settings.company_name }}</h1>
-                                <div class="space-y-0.5 text-xs text-indigo-100">
-                                    {% if settings.company_rnc %}
-                                    <p><span class="font-medium">RNC:</span> {{ settings.company_rnc }}</p>
-                                    {% endif %}
-                                    {% if settings.company_address %}
-                                    <p class="max-w-md address-preserve">{{ settings.company_address }}</p>
-                                    {% endif %}
-                                    {% if settings.company_phone or settings.company_email %}
-                                    <div class="flex flex-wrap gap-3 pt-0.5">
-                                        {% if settings.company_phone %}
-                                        <p>Tel: {{ settings.company_phone }}</p>
-                                        {% endif %}
-                                        {% if settings.company_email %}
-                                        <p>Email: {{ settings.company_email }}</p>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <div class="mt-2 md:mt-0">
+                    <div class="mt-2">
                         <div class="text-xl font-bold text-white mb-3 tracking-tight text-center md:text-right print:text-lg">FACTURA</div>
                         <div class="bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-white/20 print:p-2">
                             <div class="grid grid-cols-2 gap-2 text-xs">
