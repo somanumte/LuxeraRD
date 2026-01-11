@@ -324,10 +324,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 no-print" id="encabezado-app">
-    <!-- ... contenido del header web (no se muestra en impresión) ... -->
-</div>
-
 <!-- Área de la factura optimizada para IMPRESIÓN PERFECTA -->
 <div id="factura-impresion" class="watermark-bg mx-auto bg-white text-gray-900 invoice-border page-break-avoid" style="max-width: 8in; margin: 0 auto;">
     <!-- Encabezado con logo -->
@@ -375,6 +371,17 @@
 
                         <div style="color: #e0e7ff; font-weight: 600;">NCF:</div>
                         <div style="color: white; font-weight: 700; font-family: monospace; text-align: right;">{{ invoice.ncf }}</div>
+
+                            {% if settings.ncf_valid_until %}
+                        <div style="color: #e0e7ff; font-weight: 600;">Válido Hasta:</div>
+                        <div style="color: white; font-weight: 700; text-align: right;">
+                            {% if settings.ncf_valid_until is string %}
+                                {{ settings.ncf_valid_until }}
+                            {% else %}
+                                {{ settings.ncf_valid_until.strftime('%d/%m/%Y') }}
+                            {% endif %}
+                        </div>
+                            {% endif %}
 
                         {% if invoice.due_date %}
                         <div style="color: #e0e7ff; font-weight: 600;">Vencimiento:</div>
