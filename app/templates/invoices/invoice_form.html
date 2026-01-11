@@ -710,6 +710,163 @@ function initializeCustomerFormForInvoice() {
     const form = document.getElementById('customer-form');
     if (!form) return;
 
+    // Seleccionar elementos del formulario (los mismos que en customers_list.html)
+    const customerTypeSelect = document.getElementById('customer_type');
+    const idTypeSelect = document.getElementById('id_type');
+    const idNumberInput = document.getElementById('id_number');
+    const personFields = document.getElementById('person-fields');
+    const personFields2 = document.getElementById('person-fields-2');
+    const companyFields = document.getElementById('company-fields');
+    const emailInput = document.getElementById('email');
+    const emailErrorMessage = document.getElementById('email-error-message');
+    const phonePrimaryInput = document.getElementById('phone_primary');
+    const phoneErrorMessage = document.getElementById('phone-error-message');
+    const idErrorMessage = document.getElementById('id-error-message');
+
+    // Función para formatear ID (igual que en customers_list.html)
+    function formatIdNumber(value) {
+        const digits = value.replace(/\D/g, '');
+        if (digits.length === 11) {
+            return digits.replace(/(\d{3})(\d{7})(\d{1})/, '$1-$2-$3');
+        } else if (digits.length === 9) {
+            return digits.replace(/(\d{3})(\d{5})(\d{1})/, '$1-$2-$3');
+        }
+        return digits;
+    }
+
+    // Función para detectar tipo de ID (igual que en customers_list.html)
+    function autoDetectIdType(value) {
+        const digits = value.replace(/\D/g, '');
+        if (digits.length === 11) {
+            customerTypeSelect.value = 'person';
+            idTypeSelect.value = 'cedula';
+            return 'cedula';
+        } else if (digits.length === 9) {
+            customerTypeSelect.value = 'company';
+            idTypeSelect.value = 'rnc';
+            return 'rnc';
+        } else if (digits.length > 0 && digits.length !== 11 && digits.length !== 9) {
+            if (idErrorMessage) {
+                idErrorMessage.textContent = 'Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
+                idErrorMessage.classList.remove('hidden');
+                idNumberInput.classList.add('border-red-500');
+            }
+            return null;
+        } else {
+            if (idErrorMessage) {
+                idErrorMessage.classList.add('hidden');
+                idNumberInput.classList.remove('border-red-500');
+            }
+            return null;
+        }
+    }
+
+    // Función para actualizar campos según tipo de cliente
+    function updateFormFields() {
+        const customerType = customerTypeSelect ? customerTypeSelect.value : 'person';
+
+        if (personFields && personFields2 && companyFields) {
+            if (customerType === 'person') {
+                personFields.classList.remove('hidden-field');
+                personFields2.classList.remove('hidden-field');
+                companyFields.classList.add('hidden-field');
+            } else {
+                personFields.classList.add('hidden-field');
+                personFields2.classList.add('hidden-field');
+                companyFields.classList.remove('hidden-field');
+            }
+        }
+    }
+
+    // Función para validar email
+    function validateEmail() {
+        const email = emailInput ? emailInput.value.trim() : '';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            if (emailErrorMessage) {
+                emailErrorMessage.textContent = 'El correo electrónico es requerido.';
+                emailErrorMessage.classList.remove('hidden');
+                emailInput.classList.add('border-red-500');
+            }
+            return false;
+        } else if (!emailRegex.test(email)) {
+            if (emailErrorMessage) {
+                emailErrorMessage.textContent = 'Por favor ingrese un correo electrónico válido.';
+                emailErrorMessage.classList.remove('hidden');
+                emailInput.classList.add('border-red-500');
+            }
+            return false;
+        } else {
+            if (emailErrorMessage) {
+                emailErrorMessage.classList.add('hidden');
+                emailInput.classList.remove('border-red-500');
+            }
+            return true;
+        }
+    }
+
+    // Función para validar teléfono
+    function validatePhone() {
+        const phonePrimary = phonePrimaryInput ? phonePrimaryInput.value.trim() : '';
+        if (!phonePrimary) {
+            if (phoneErrorMessage) {
+                phoneErrorMessage.textContent = 'El teléfono principal es requerido.';
+                phoneErrorMessage.classList.remove('hidden');
+                phonePrimaryInput.classList.add('border-red-500');
+            }
+            return false;
+        } else {
+            if (phoneErrorMessage) {
+                phoneErrorMessage.classList.add('hidden');
+                phonePrimaryInput.classList.remove('border-red-500');
+            }
+            return true;
+        }
+    }
+
+    // Event listeners para campos del formulario
+    if (idNumberInput) {
+        idNumberInput.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const formattedValue = formatIdNumber(e.target.value);
+            e.target.value = formattedValue;
+
+            const change = formattedValue.length - e.target.value.length;
+            e.target.setSelectionRange(cursorPosition + change, cursorPosition + change);
+
+            autoDetectIdType(formattedValue);
+            updateFormFields();
+        });
+
+        idNumberInput.addEventListener('blur', function() {
+            const digits = this.value.replace(/\D/g, '');
+            if (digits.length === 11 || digits.length === 9) {
+                this.value = formatIdNumber(this.value);
+                autoDetectIdType(this.value);
+                updateFormFields();
+            }
+        });
+    }
+
+    if (emailInput) {
+        emailInput.addEventListener('blur', validateEmail);
+    }
+
+    if (phonePrimaryInput) {
+        phonePrimaryInput.addEventListener('blur', validatePhone);
+    }
+
+    if (customerTypeSelect) {
+        customerTypeSelect.addEventListener('change', updateFormFields);
+    }
+
+    // Inicializar formulario si ya hay datos
+    if (idNumberInput && idNumberInput.value) {
+        idNumberInput.value = formatIdNumber(idNumberInput.value);
+        autoDetectIdType(idNumberInput.value);
+    }
+    updateFormFields();
+
     // Modificar el submit para que funcione en el contexto de factura
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -720,10 +877,58 @@ function initializeCustomerFormForInvoice() {
 
         // Obtener datos importantes del formulario antes de enviar
         const idNumber = document.getElementById('id_number')?.value;
-        const fullName = document.getElementById('full_name')?.value;
+        const firstName = document.getElementById('first_name')?.value;
+        const lastName = document.getElementById('last_name')?.value;
+        const companyName = document.getElementById('company_name')?.value;
+        const fullName = companyName || (firstName + ' ' + lastName) || '';
         const email = document.getElementById('email')?.value;
         const phonePrimary = document.getElementById('phone_primary')?.value;
-        const address = document.getElementById('address')?.value;
+        const addressLine1 = document.getElementById('address_line1')?.value;
+        const addressLine2 = document.getElementById('address_line2')?.value;
+        const city = document.getElementById('city')?.value;
+        const province = document.getElementById('province')?.value;
+        const address = `${addressLine1 || ''} ${addressLine2 || ''}, ${city || ''}, ${province || ''}`.trim();
+
+        // Validar antes de enviar
+        let isValid = true;
+
+        // Validar ID
+        const idValue = idNumberInput ? idNumberInput.value.trim() : '';
+        const digits = idValue.replace(/\D/g, '');
+        if (digits.length === 0) {
+            if (idErrorMessage) {
+                idErrorMessage.textContent = 'El número de identificación es requerido.';
+                idErrorMessage.classList.remove('hidden');
+                idNumberInput.classList.add('border-red-500');
+            }
+            isValid = false;
+        } else if (digits.length !== 11 && digits.length !== 9) {
+            if (idErrorMessage) {
+                idErrorMessage.textContent = 'Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
+                idErrorMessage.classList.remove('hidden');
+                idNumberInput.classList.add('border-red-500');
+            }
+            isValid = false;
+        } else {
+            if (idErrorMessage) {
+                idErrorMessage.classList.add('hidden');
+                idNumberInput.classList.remove('border-red-500');
+            }
+        }
+
+        // Validar email
+        if (!validateEmail()) isValid = false;
+
+        // Validar teléfono
+        if (!validatePhone()) isValid = false;
+
+        if (!isValid) {
+            const firstError = form.querySelector('.error-message:not(.hidden)');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
 
         // Mostrar loading
         submitBtn.disabled = true;
@@ -766,12 +971,9 @@ function initializeCustomerFormForInvoice() {
                         modal.classList.remove('active');
                     }, 500);
                 } else {
-                    // Si no viene el cliente en la respuesta, intentar recargar la lista
-                    reloadCustomersList();
-
-                    // Crear un objeto cliente temporal con los datos del formulario
+                    // Si no viene el cliente en la respuesta, crear un objeto temporal
                     const tempCustomer = {
-                        id: data.customer_id || Date.now(), // Usar ID de respuesta o temporal
+                        id: data.customer_id || Date.now(),
                         full_name: fullName || '',
                         id_number: idNumber || '',
                         email: email || '',
@@ -780,7 +982,7 @@ function initializeCustomerFormForInvoice() {
                         created_at: new Date().toISOString()
                     };
 
-                    // Agregar el cliente temporal a la lista (será reemplazado cuando se recargue)
+                    // Agregar el cliente temporal a la lista
                     allCustomers.push(tempCustomer);
 
                     // Seleccionar el cliente temporal
@@ -797,7 +999,7 @@ function initializeCustomerFormForInvoice() {
                                 document.getElementById('customer_search').value = idNumber;
                                 const results = filterCustomers(idNumber);
                                 if (results.length > 0) {
-                                    // Si encontramos resultados (después de recargar), seleccionar el primero
+                                    // Si encontramos resultados, seleccionar el primero
                                     selectCustomer(results[0]);
                                 }
                             }
@@ -837,11 +1039,11 @@ function initializeCustomerFormForInvoice() {
     });
 
     // Agregar botón de cancelar específico para el modal
-    const formFooter = form.querySelector('.flex.items-center.justify-end');
+    const formFooter = form.querySelector('.flex.items-center.justify-between');
     if (formFooter) {
         const cancelBtn = document.createElement('button');
         cancelBtn.type = 'button';
-        cancelBtn.className = 'px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold mr-3';
+        cancelBtn.className = 'px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium';
         cancelBtn.textContent = 'Cancelar';
         cancelBtn.onclick = function() {
             const modal = document.getElementById('customer-modal-invoice');
@@ -1036,7 +1238,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // El resto del código JavaScript existente (funciones para laptops, items, etc.) permanece igual
-// ... (mantener todas las funciones existentes como addLaptopItem, addCustomItem, calculateTotals, etc.)
 
 function hideEmptyMsg() {
     const msg = document.getElementById('empty_items_msg');
