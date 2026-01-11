@@ -1,234 +1,223 @@
-<!-- Formulario de cliente estilo Zoho - Compacto sin scroll -->
-        <form method="POST" id="customer-form" class="space-y-6">
-            {{ form.hidden_tag() }}
+<!-- Formulario de cliente estilo Zoho - Versión Compacta -->
+<form method="POST" id="customer-form" class="space-y-4">
+    {{ form.hidden_tag() }}
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
-                    </svg>
-                    Identificación del Cliente
-                </h2>
+    <!-- Sección 1: Identificación (2 columnas compactas) -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+            </svg>
+            Identificación
+        </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.id_number.label.text }} <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.id_number(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20", placeholder="Ingrese solo números", maxlength="13") }}
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="id-helper-text">
-                            Formato automático: 11 dígitos (Cédula) o 9 dígitos (RNC)
-                        </p>
-                        <div id="id-error-message" class="error-message hidden"></div>
-                        {% if form.id_number.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.id_number.errors[0] }}</p>
-                        {% endif %}
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                    {{ form.id_number.label.text }} <span class="text-red-500">*</span>
+                </label>
+                {{ form.id_number(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10", placeholder="Ej: 001-1234567-8", maxlength="13") }}
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    9 dígitos (RNC) o 11 dígitos (Cédula)
+                </p>
+                <div id="id-error-message" class="error-message hidden text-xs"></div>
+            </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.id_type.label.text }}
-                        </label>
-                        {{ form.id_type(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 readonly-field", readonly=True, tabindex="-1") }}
-                    </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                    {{ form.id_type.label.text }}
+                </label>
+                {{ form.id_type(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 readonly-field", readonly=True, tabindex="-1") }}
+            </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.customer_type.label.text }}
-                        </label>
-                        {{ form.customer_type(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 readonly-field", readonly=True, tabindex="-1") }}
-                    </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                    {{ form.customer_type.label.text }}
+                </label>
+                {{ form.customer_type(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 readonly-field", readonly=True, tabindex="-1") }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección 2: Información Personal/Empresa (combinada) -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Campos de Persona -->
+            <div id="person-fields" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.first_name.label.text }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.first_name(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
-                    </svg>
-                    <span id="info-header">Información Personal</span>
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div id="person-fields">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                                {{ form.first_name.label.text }} <span class="text-red-500">*</span>
-                            </label>
-                            {{ form.first_name(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                            {% if form.first_name.errors %}
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.first_name.errors[0] }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div id="person-fields-2">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                                {{ form.last_name.label.text }} <span class="text-red-500">*</span>
-                            </label>
-                            {{ form.last_name(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                            {% if form.last_name.errors %}
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.last_name.errors[0] }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div id="company-fields" class="hidden-field md:col-span-2">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                                {{ form.company_name.label.text }} <span class="text-red-500">*</span>
-                            </label>
-                            {{ form.company_name(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                            {% if form.company_name.errors %}
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.company_name.errors[0] }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
+            <div id="person-fields-2" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.last_name.label.text }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.last_name(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                    </svg>
-                    Información de Contacto
-                </h2>
+            <!-- Campos de Empresa -->
+            <div id="company-fields" class="hidden-field md:col-span-2">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.company_name.label.text }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.company_name(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.email.label.text }} <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.email(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        <div id="email-error-message" class="error-message hidden"></div>
-                        {% if form.email.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.email.errors[0] }}</p>
-                        {% endif %}
-                    </div>
+    <!-- Sección 3: Contacto y Dirección (combinada en 2 columnas) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Contacto -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                </svg>
+                Contacto
+            </h3>
 
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.email.label.text }} <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.email(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                    <div id="email-error-message" class="error-message hidden text-xs mt-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
                             {{ form.phone_primary.label.text }} <span class="text-red-500">*</span>
                         </label>
-                        {{ form.phone_primary(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        <div id="phone-error-message" class="error-message hidden"></div>
-                        {% if form.phone_primary.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.phone_primary.errors[0] }}</p>
-                        {% endif %}
+                        {{ form.phone_primary(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                        <div id="phone-error-message" class="error-message hidden text-xs mt-1"></div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.phone_secondary.label.text }}
-                        </label>
-                        {{ form.phone_secondary(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
                             {{ form.whatsapp.label.text }}
                         </label>
-                        {{ form.whatsapp(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
+                        {{ form.whatsapp(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.phone_secondary.label.text }}
+                    </label>
+                    {{ form.phone_secondary(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Dirección
+            </h3>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.address_line1.label.text }}
+                    </label>
+                    {{ form.address_line1(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.address_line2.label.text }}
+                    </label>
+                    {{ form.address_line2(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                            {{ form.city.label.text }}
+                        </label>
+                        {{ form.city(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                            {{ form.province.label.text }}
+                        </label>
+                        {{ form.province(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                        {{ form.postal_code.label.text }}
+                    </label>
+                    {{ form.postal_code(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección 4: Información Adicional Compacta -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+            </svg>
+            Información Adicional
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                    {{ form.credit_limit.label.text }}
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">$</span>
+                    {{ form.credit_limit(class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10") }}
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Dirección
-                </h2>
-
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.address_line1.label.text }}
-                        </label>
-                        {{ form.address_line1(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.address_line2.label.text }}
-                        </label>
-                        {{ form.address_line2(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                                {{ form.city.label.text }}
-                            </label>
-                            {{ form.city(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                                {{ form.province.label.text }}
-                            </label>
-                            {{ form.province(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                                {{ form.postal_code.label.text }}
-                            </label>
-                            {{ form.postal_code(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        </div>
-                    </div>
-                </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                    {{ form.notes.label.text }}
+                </label>
+                {{ form.notes(class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10", rows="2") }}
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-                    </svg>
-                    Información Adicional
-                </h2>
-
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.credit_limit.label.text }}
-                        </label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-                            {{ form.credit_limit(class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                            {{ form.notes.label.text }}
-                        </label>
-                        {{ form.notes(class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20") }}
-                    </div>
-
-                    <div>
-                        <label class="inline-flex items-center">
-                            {{ form.is_active(class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 font-semibold">{{ form.is_active.label.text }}</span>
-                        </label>
-                    </div>
-                </div>
+            <div class="flex items-center">
+                <label class="inline-flex items-center">
+                    {{ form.is_active(class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
+                    <span class="ml-2 text-xs font-semibold text-gray-700 dark:text-gray-300">{{ form.is_active.label.text }}</span>
+                </label>
             </div>
+        </div>
+    </div>
 
-            <div class="flex items-center justify-between">
-                <a href="{{ url_for('customers.customers_list') }}" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold">
-                    Cancelar
-                </a>
+    <!-- Botones -->
+    <div class="flex items-center justify-between pt-3">
+        <a href="{{ url_for('customers.customers_list') }}" class="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium">
+            Cancelar
+        </a>
 
-                <button type="submit" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
-                    {{ form.submit.label.text }}
-                </button>
-            </div>
-        </form>
+        <button type="submit" class="px-6 py-2 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded shadow hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200">
+            {{ form.submit.label.text }}
+        </button>
+    </div>
+</form>
+
 <style>
     .hidden-field {
         display: none;
@@ -243,14 +232,22 @@
         color: #9ca3af;
     }
 
-    /* Para pantallas muy grandes, limitamos el ancho */
+    .error-message {
+        color: #dc2626;
+    }
+    .dark .error-message {
+        color: #f87171;
+    }
+
+    /* Para pantallas grandes, limitamos el ancho */
     @media (min-width: 1280px) {
         #customer-form {
-            max-width: 1100px;
+            max-width: 900px;
             margin: 0 auto;
         }
     }
 </style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const customerTypeSelect = document.getElementById('customer_type');
@@ -259,16 +256,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const personFields = document.getElementById('person-fields');
     const personFields2 = document.getElementById('person-fields-2');
     const companyFields = document.getElementById('company-fields');
-    const infoHeader = document.getElementById('info-header');
-    const idHelperText = document.getElementById('id-helper-text');
-    const idErrorMessage = document.getElementById('id-error-message');
     const emailInput = document.getElementById('email');
     const emailErrorMessage = document.getElementById('email-error-message');
     const phonePrimaryInput = document.getElementById('phone_primary');
-    const phoneSecondaryInput = document.getElementById('phone_secondary');
     const phoneErrorMessage = document.getElementById('phone-error-message');
     const customerForm = document.getElementById('customer-form');
 
+    // Función para formatear ID (mantenida igual)
     function formatIdNumber(value) {
         const digits = value.replace(/\D/g, '');
         if (digits.length === 11) {
@@ -279,6 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return digits;
     }
 
+    // Función para detectar tipo de ID (mantenida igual)
     function autoDetectIdType(value) {
         const digits = value.replace(/\D/g, '');
         if (digits.length === 11) {
@@ -290,44 +285,59 @@ document.addEventListener('DOMContentLoaded', function() {
             idTypeSelect.value = 'rnc';
             return 'rnc';
         } else if (digits.length > 0 && digits.length !== 11 && digits.length !== 9) {
-           idErrorMessage.classList.remove('hidden');
+            showIdError('Debe tener 9 (RNC) u 11 (Cédula) dígitos.');
             return null;
         } else {
-            idErrorMessage.classList.add('hidden');
+            hideIdError();
             return null;
         }
     }
 
+    function showIdError(message) {
+        const errorDiv = document.getElementById('id-error-message');
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+        idNumberInput.classList.add('border-red-500');
+    }
+
+    function hideIdError() {
+        const errorDiv = document.getElementById('id-error-message');
+        errorDiv.classList.add('hidden');
+        idNumberInput.classList.remove('border-red-500');
+    }
+
+    // Función para actualizar campos (modificada para versión compacta)
     function updateFormFields() {
         const customerType = customerTypeSelect.value;
-        const idType = idTypeSelect.value;
 
         if (customerType === 'person') {
             personFields.classList.remove('hidden-field');
             personFields2.classList.remove('hidden-field');
             companyFields.classList.add('hidden-field');
-            infoHeader.textContent = 'Información Personal';
         } else if (customerType === 'company') {
             personFields.classList.add('hidden-field');
             personFields2.classList.add('hidden-field');
             companyFields.classList.remove('hidden-field');
-            infoHeader.textContent = 'Información de la Empresa';
         }
     }
 
+    // Funciones de validación (mantenidas igual)
     function validateEmail() {
         const email = emailInput.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email) {
             emailErrorMessage.textContent = 'El correo electrónico es requerido.';
             emailErrorMessage.classList.remove('hidden');
+            emailInput.classList.add('border-red-500');
             return false;
         } else if (!emailRegex.test(email)) {
             emailErrorMessage.textContent = 'Por favor ingrese un correo electrónico válido.';
             emailErrorMessage.classList.remove('hidden');
+            emailInput.classList.add('border-red-500');
             return false;
         } else {
             emailErrorMessage.classList.add('hidden');
+            emailInput.classList.remove('border-red-500');
             return true;
         }
     }
@@ -337,9 +347,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!phonePrimary) {
             phoneErrorMessage.textContent = 'El teléfono principal es requerido.';
             phoneErrorMessage.classList.remove('hidden');
+            phonePrimaryInput.classList.add('border-red-500');
             return false;
         } else {
             phoneErrorMessage.classList.add('hidden');
+            phonePrimaryInput.classList.remove('border-red-500');
             return true;
         }
     }
@@ -352,18 +364,19 @@ document.addEventListener('DOMContentLoaded', function() {
         let isIdValid = true;
 
         if (digits.length === 0) {
-            idErrorMessage.textContent = 'El número de identificación es requerido.';
-            idErrorMessage.classList.remove('hidden');
+            showIdError('El número de identificación es requerido.');
             isIdValid = false;
         } else if (digits.length !== 11 && digits.length !== 9) {
-            idErrorMessage.textContent = 'Debe tener 9 (RNC) u 11 (Cédula) dígitos.';
-            idErrorMessage.classList.remove('hidden');
+            showIdError('Debe tener 9 (RNC) u 11 (Cédula) dígitos.');
             isIdValid = false;
+        } else {
+            hideIdError();
         }
 
         return isEmailValid && isPhoneValid && isIdValid;
     }
 
+    // Event listeners (mantenidos igual)
     idNumberInput.addEventListener('input', function(e) {
         const cursorPosition = e.target.selectionStart;
         const formattedValue = formatIdNumber(e.target.value);
@@ -372,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const change = formattedValue.length - e.target.value.length;
         e.target.setSelectionRange(cursorPosition + change, cursorPosition + change);
 
-        const detectedType = autoDetectIdType(formattedValue);
+        autoDetectIdType(formattedValue);
         updateFormFields();
     });
 
