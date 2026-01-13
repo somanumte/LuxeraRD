@@ -6,6 +6,7 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+        <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
@@ -15,80 +16,107 @@
                     Gestiona todas tus facturas y comprobantes fiscales
                 </p>
             </div>
-            <a href="{{ url_for('invoices.invoice_new') }}"
-               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Nueva Factura
-            </a>
+            <div class="flex gap-3">
+                <a href="{{ url_for('invoices.settings') }}"
+                   class="inline-flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Configuración
+                </a>
+                <a href="{{ url_for('invoices.invoice_new') }}"
+                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Nueva Factura
+                </a>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <!-- Estadísticas por Estado -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ total_invoices }}</p>
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Total</p>
+                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ total_invoices }}</p>
                     </div>
-                    <div class="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg">
+                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Emitidas</p>
-                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">{{ status_counts.issued }}</p>
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Emitidas</p>
+                        <p class="text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ status_counts.issued }}</p>
                     </div>
-                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pagadas</p>
-                        <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">{{ status_counts.paid }}</p>
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Pagadas</p>
+                        <p class="text-xl font-bold text-green-600 dark:text-green-400 mt-1">{{ status_counts.paid }}</p>
                     </div>
-                    <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Vencidas</p>
-                        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{{ status_counts.overdue }}</p>
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Vencidas</p>
+                        <p class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{{ status_counts.overdue }}</p>
                     </div>
-                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-lg">
+                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Monto Total</p>
-                        <p class="text-xl font-bold text-gray-900 dark:text-white mt-2 truncate" title="RD$ {{ '{:,.2f}'.format(total_amount|float) }}">RD$ {{ "{:,.0f}".format(total_amount|float) }}</p>
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Canceladas</p>
+                        <p class="text-xl font-bold text-red-600 dark:text-red-400 mt-1">{{ status_counts.cancelled }}</p>
                     </div>
-                    <div class="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-red-100 dark:bg-red-900/30 p-2 rounded-lg">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Monto Total</p>
+                        <p class="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1 truncate" title="RD$ {{ '{:,.2f}'.format(total_amount|float) }}">
+                            RD$ {{ "{:,.0f}".format(total_amount|float) }}
+                        </p>
+                    </div>
+                    <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg">
+                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
@@ -96,6 +124,50 @@
             </div>
         </div>
 
+        <!-- ============================================ -->
+        <!-- NUEVO: Estadísticas por Tipo de NCF -->
+        <!-- ============================================ -->
+        {% if ncf_type_counts %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 mb-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Comprobantes por Tipo de NCF
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                {% for ncf_code, count in ncf_type_counts.items() %}
+                <a href="{{ url_for('invoices.invoices_list', ncf_type=ncf_code) }}"
+                   class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                          {% if ncf_type_filter == ncf_code %}
+                          bg-indigo-600 text-white
+                          {% else %}
+                          bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30
+                          {% endif %}">
+                    <span class="font-bold mr-1">{{ ncf_code }}</span>
+                    {% if ncf_types and ncf_code in ncf_types %}
+                    <span class="hidden sm:inline mr-1">- {{ ncf_types[ncf_code].name }}</span>
+                    {% endif %}
+                    <span class="{% if ncf_type_filter == ncf_code %}bg-white/20{% else %}bg-indigo-100 dark:bg-indigo-900/50{% endif %} px-1.5 py-0.5 rounded-full text-xs">
+                        {{ count }}
+                    </span>
+                </a>
+                {% endfor %}
+
+                {% if ncf_type_filter %}
+                <a href="{{ url_for('invoices.invoices_list', q=search_query, status=status_filter, date_from=date_from, date_to=date_to) }}"
+                   class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Quitar filtro NCF
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Filtros de Búsqueda -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +177,12 @@
             </h3>
 
             <form method="get" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Mantener filtro de tipo NCF si está activo -->
+                {% if ncf_type_filter %}
+                <input type="hidden" name="ncf_type" value="{{ ncf_type_filter }}">
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Buscar
@@ -129,6 +206,29 @@
                             <option value="issued" {% if status_filter == 'issued' %}selected{% endif %}>Emitida</option>
                             <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Pagada</option>
                             <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                    </div>
+
+                    <!-- NUEVO: Filtro por Tipo de NCF -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Tipo NCF
+                        </label>
+                        <select name="ncf_type" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Todos</option>
+                            {% if ncf_types %}
+                                {% for code, info in ncf_types.items() %}
+                                <option value="{{ code }}" {% if ncf_type_filter == code %}selected{% endif %}>
+                                    {{ code }} - {{ info.name }}
+                                </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="B01" {% if ncf_type_filter == 'B01' %}selected{% endif %}>B01 - Crédito Fiscal</option>
+                                <option value="B02" {% if ncf_type_filter == 'B02' %}selected{% endif %}>B02 - Consumo</option>
+                                <option value="B14" {% if ncf_type_filter == 'B14' %}selected{% endif %}>B14 - Regímenes Especiales</option>
+                                <option value="B15" {% if ncf_type_filter == 'B15' %}selected{% endif %}>B15 - Gubernamental</option>
+                                <option value="B16" {% if ncf_type_filter == 'B16' %}selected{% endif %}>B16 - Exportaciones</option>
+                            {% endif %}
                         </select>
                     </div>
 
@@ -165,7 +265,7 @@
                     </div>
 
                     <div class="flex items-end">
-                        <a href="{{ url_for('invoices.export_csv', q=search_query, status=status_filter, date_from=date_from, date_to=date_to) }}"
+                        <a href="{{ url_for('invoices.export_csv', q=search_query, status=status_filter, ncf_type=ncf_type_filter, date_from=date_from, date_to=date_to) }}"
                            class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center font-medium">
                             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -177,6 +277,29 @@
             </form>
         </div>
 
+        <!-- Indicador de filtro activo -->
+        {% if ncf_type_filter %}
+        <div class="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                <span class="text-sm text-indigo-700 dark:text-indigo-300">
+                    Mostrando solo comprobantes tipo
+                    <strong>{{ ncf_type_filter }}</strong>
+                    {% if ncf_types and ncf_type_filter in ncf_types %}
+                    ({{ ncf_types[ncf_type_filter].name }})
+                    {% endif %}
+                </span>
+            </div>
+            <a href="{{ url_for('invoices.invoices_list', q=search_query, status=status_filter, date_from=date_from, date_to=date_to) }}"
+               class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                Ver todos
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Tabla de Facturas -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
             {% if invoices %}
             <div class="overflow-x-auto">
@@ -187,7 +310,7 @@
                                 Factura
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                NCF
+                                NCF / Tipo
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Fecha
@@ -220,9 +343,32 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-gray-900 dark:text-white font-mono">
-                                    {{ invoice.ncf }}
-                                </span>
+                                <div class="flex flex-col">
+                                    <span class="text-sm text-gray-900 dark:text-white font-mono">
+                                        {{ invoice.ncf }}
+                                    </span>
+                                    <!-- Badge del tipo de NCF -->
+                                    {% if invoice.ncf_type %}
+                                    <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                        {% if invoice.ncf_type == 'B01' %}
+                                        bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                        {% elif invoice.ncf_type == 'B02' %}
+                                        bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                                        {% elif invoice.ncf_type == 'B14' %}
+                                        bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400
+                                        {% elif invoice.ncf_type == 'B15' %}
+                                        bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400
+                                        {% else %}
+                                        bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                                        {% endif %}
+                                    ">
+                                        {{ invoice.ncf_type }}
+                                        {% if invoice.ncf_type_name %}
+                                        <span class="hidden lg:inline ml-1">- {{ invoice.ncf_type_name }}</span>
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex flex-col">
@@ -243,6 +389,9 @@
                                     </span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
                                         {{ invoice.customer.id_number }}
+                                        {% if invoice.customer.id_type == 'rnc' %}
+                                        <span class="ml-1 text-blue-600 dark:text-blue-400">(RNC)</span>
+                                        {% endif %}
                                     </span>
                                 </div>
                             </td>
@@ -265,33 +414,75 @@
                                 {% endif %}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ url_for('invoices.invoice_detail', invoice_id=invoice.id) }}"
-                                   class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3">
-                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </a>
-                                {% if invoice.status == 'draft' %}
-                                <a href="{{ url_for('invoices.invoice_edit', invoice_id=invoice.id) }}"
-                                   class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </a>
-                                {% endif %}
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ url_for('invoices.invoice_detail', invoice_id=invoice.id) }}"
+                                       class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                       title="Ver detalle">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </a>
+                                    {% if invoice.status == 'draft' %}
+                                    <a href="{{ url_for('invoices.invoice_edit', invoice_id=invoice.id) }}"
+                                       class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                       title="Editar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </a>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Paginación (si existe) -->
+            {% if pagination %}
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        Mostrando <span class="font-medium">{{ pagination.page }}</span> de <span class="font-medium">{{ pagination.pages }}</span> páginas
+                        ({{ pagination.total }} facturas)
+                    </p>
+                    <nav class="flex gap-2">
+                        {% if pagination.has_prev %}
+                        <a href="{{ url_for('invoices.invoices_list', page=pagination.prev_num, q=search_query, status=status_filter, ncf_type=ncf_type_filter, date_from=date_from, date_to=date_to) }}"
+                           class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+                            Anterior
+                        </a>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                        <a href="{{ url_for('invoices.invoices_list', page=pagination.next_num, q=search_query, status=status_filter, ncf_type=ncf_type_filter, date_from=date_from, date_to=date_to) }}"
+                           class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+                            Siguiente
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
+
             {% else %}
+            <!-- Estado vacío -->
             <div class="px-6 py-12 text-center">
                 <div class="text-gray-400">
                     <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
+                    {% if search_query or status_filter or ncf_type_filter or date_from or date_to %}
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">No se encontraron facturas</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No hay facturas que coincidan con los filtros aplicados.</p>
+                    <div class="mt-6">
+                        <a href="{{ url_for('invoices.invoices_list') }}"
+                           class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium">
+                            Limpiar filtros
+                        </a>
+                    </div>
+                    {% else %}
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">No hay facturas</h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Comienza creando tu primera factura.</p>
                     <div class="mt-6">
@@ -303,6 +494,7 @@
                             Nueva Factura
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}

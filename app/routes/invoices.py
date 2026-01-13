@@ -1,11 +1,17 @@
 # ============================================
-# RUTAS DE FACTURACIÃ"N
+# RUTAS DE FACTURACIÓN
 # ============================================
+# Actualizado para manejar NCF con secuencias independientes por tipo
+# Según regulaciones DGII República Dominicana
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from app import db
-from app.models.invoice import Invoice, InvoiceItem, InvoiceSettings
+from app.models.invoice import (
+    Invoice, InvoiceItem, InvoiceSettings, NCFSequence,
+    NCF_TYPES, NCF_SALES_TYPES, get_ncf_types_for_sales,
+    suggest_ncf_type_for_customer, initialize_default_ncf_sequences
+)
 from app.models.customer import Customer
 from app.models.laptop import Laptop
 from app.services.invoice_inventory_service import InvoiceInventoryService
@@ -18,7 +24,6 @@ from sqlalchemy import or_, and_
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
-
 
 # ============================================
 # CREAR BLUEPRINT DE FACTURACION
@@ -39,20 +44,21 @@ invoices_bp = Blueprint(
 @login_required
 def invoices_list():
     """
-    Lista de todas las facturas con bÃºsqueda y filtros
+    Lista de todas las facturas con búsqueda y filtros
 
     URL: /invoices/
     """
-    # ParÃ¡metros de bÃºsqueda
+    # Parámetros de búsqueda
     search_query = request.args.get('q', '').strip()
     status_filter = request.args.get('status', '').strip()
+    ncf_type_filter = request.args.get('ncf_type', '').strip()
     date_from = request.args.get('date_from', '').strip()
     date_to = request.args.get('date_to', '').strip()
 
     # Query base
     query = Invoice.query
 
-    # Aplicar bÃºsqueda
+    # Aplicar búsqueda
     if search_query:
         query = query.join(Customer).filter(
             or_(
@@ -68,6 +74,10 @@ def invoices_list():
     # Aplicar filtro de estado
     if status_filter:
         query = query.filter(Invoice.status == status_filter)
+
+    # Aplicar filtro de tipo de NCF
+    if ncf_type_filter:
+        query = query.filter(Invoice.ncf_type == ncf_type_filter)
 
     # Aplicar filtro de fechas
     if date_from:
@@ -87,7 +97,7 @@ def invoices_list():
     # Ordenar por fecha descendente
     invoices = query.order_by(Invoice.invoice_date.desc(), Invoice.id.desc()).all()
 
-    # Calcular estadÃ­sticas
+    # Calcular estadísticas
     total_invoices = len(invoices)
     total_amount = sum(inv.total for inv in invoices)
 
@@ -100,16 +110,24 @@ def invoices_list():
         'overdue': sum(1 for inv in invoices if inv.is_overdue)
     }
 
+    # Contar por tipo de NCF
+    ncf_type_counts = {}
+    for ncf_type in NCF_SALES_TYPES:
+        ncf_type_counts[ncf_type] = sum(1 for inv in invoices if inv.ncf_type == ncf_type)
+
     return render_template(
         'invoices/invoices_list.html',
         invoices=invoices,
         search_query=search_query,
         status_filter=status_filter,
+        ncf_type_filter=ncf_type_filter,
         date_from=date_from,
         date_to=date_to,
         total_invoices=total_invoices,
         total_amount=total_amount,
-        status_counts=status_counts
+        status_counts=status_counts,
+        ncf_type_counts=ncf_type_counts,
+        ncf_types=NCF_TYPES
     )
 
 
@@ -125,8 +143,11 @@ def invoice_new():
 
     URL: /invoices/new
     """
-    # Obtener configuraciÃ³n
+    # Obtener configuración
     settings = InvoiceSettings.get_settings()
+
+    # Inicializar secuencias de NCF si no existen
+    initialize_default_ncf_sequences()
 
     # Obtener clientes activos
     customers = Customer.query.filter_by(is_active=True).order_by(Customer.first_name, Customer.company_name).all()
@@ -140,13 +161,32 @@ def invoice_new():
     # Serializar laptops a diccionarios con todas las relaciones
     laptops = [laptop.to_dict(include_relationships=True) for laptop in laptops_query]
 
+    # Obtener tipos de NCF disponibles para ventas
+    ncf_types_list = get_ncf_types_for_sales()
+
+    # Obtener secuencias activas con su estado
+    ncf_sequences = {}
+    for ncf_type in NCF_SALES_TYPES:
+        sequence = NCFSequence.get_or_create(ncf_type)
+        ncf_sequences[ncf_type] = {
+            'next_preview': sequence.next_ncf_preview,
+            'is_valid': sequence.is_valid,
+            'is_expired': sequence.is_expired,
+            'is_exhausted': sequence.is_exhausted,
+            'remaining': sequence.remaining_count,
+            'valid_until': sequence.valid_until.strftime('%d/%m/%Y') if sequence.valid_until else None
+        }
+
     return render_template(
         'invoices/invoice_form.html',
         settings=settings,
         customers=customers,
         laptops=laptops,
         invoice=None,
-        is_edit=False
+        is_edit=False,
+        ncf_types=ncf_types_list,
+        ncf_sequences=ncf_sequences,
+        default_ncf_type='B02'
     )
 
 
@@ -158,7 +198,7 @@ def invoice_new():
 @login_required
 def invoice_create():
     """
-    Procesar creaciÃ³n de nueva factura
+    Procesar creación de nueva factura
 
     URL: /invoices/create (POST)
     """
@@ -172,12 +212,57 @@ def invoice_create():
         terms = request.form.get('terms', '').strip()
         status = request.form.get('status', 'draft')
 
+        # ===== NUEVO: Obtener tipo de NCF y NCF manual =====
+        ncf_type = request.form.get('ncf_type', '').strip().upper()
+        manual_ncf = request.form.get('manual_ncf', '').strip().upper()
+        use_manual_ncf = request.form.get('use_manual_ncf') == 'true'
+
         # Validaciones
         if not customer_id:
             flash('Debes seleccionar un cliente', 'error')
             return redirect(url_for('invoices.invoice_new'))
 
         customer = Customer.query.get_or_404(int(customer_id))
+
+        # ===== LÓGICA DE ASIGNACIÓN DE NCF =====
+
+        # Si no se especificó tipo de NCF, asignar automáticamente según el cliente
+        if not ncf_type:
+            ncf_type = Invoice.get_suggested_ncf_type(customer)
+
+        # Validar que el tipo de NCF sea válido para ventas
+        if ncf_type not in NCF_SALES_TYPES:
+            flash(f'El tipo de comprobante "{ncf_type}" no es válido para facturas de venta. '
+                  f'Tipos válidos: {", ".join(NCF_SALES_TYPES)}', 'error')
+            return redirect(url_for('invoices.invoice_new'))
+
+        # Validar que el NCF sea apropiado para el cliente (genera advertencias)
+        is_valid, warning_msg = Invoice.validate_ncf_for_customer(ncf_type, customer)
+        if not is_valid:
+            flash(warning_msg, 'error')
+            return redirect(url_for('invoices.invoice_new'))
+
+        if warning_msg:
+            flash(warning_msg, 'warning')
+
+        # Obtener configuración
+        settings = InvoiceSettings.get_settings()
+
+        # ===== GENERAR O VALIDAR NCF =====
+        if use_manual_ncf and manual_ncf:
+            # El usuario ingresó un NCF manualmente
+            is_valid, error_msg = settings.validate_manual_ncf(manual_ncf, ncf_type)
+            if not is_valid:
+                flash(f'Error en NCF manual:\n{error_msg}', 'error')
+                return redirect(url_for('invoices.invoice_new'))
+            ncf = manual_ncf
+        else:
+            # Generar NCF automáticamente de la secuencia
+            try:
+                ncf = settings.get_next_ncf(ncf_type)
+            except ValueError as e:
+                flash(f'Error al generar NCF: {str(e)}', 'error')
+                return redirect(url_for('invoices.invoice_new'))
 
         # Procesar items del formulario
         items_data = []
@@ -194,15 +279,14 @@ def invoice_create():
                 flash(f'Error de stock: {error_msg}', 'error')
                 return redirect(url_for('invoices.invoice_new'))
 
-        # Obtener configuraciÃ³n y generar nÃºmeros
-        settings = InvoiceSettings.get_settings()
+        # Generar número de factura
         invoice_number = settings.get_next_invoice_number()
-        ncf = settings.get_next_ncf()
 
         # Crear factura
         invoice = Invoice(
             invoice_number=invoice_number,
             ncf=ncf,
+            ncf_type=ncf_type,  # ===== NUEVO CAMPO =====
             customer_id=customer.id,
             invoice_date=datetime.strptime(invoice_date, '%Y-%m-%d').date() if invoice_date else date.today(),
             due_date=datetime.strptime(due_date, '%Y-%m-%d').date() if due_date else None,
@@ -259,11 +343,13 @@ def invoice_create():
                 flash(f'Error al actualizar inventario: {error_msg}', 'error')
                 return redirect(url_for('invoices.invoice_new'))
 
-        # Guardar configuraciÃ³n actualizada
+        # Guardar configuración actualizada
         db.session.add(settings)
         db.session.commit()
 
-        flash(f'Factura {invoice_number} creada exitosamente', 'success')
+        # Mensaje de éxito con información del NCF
+        ncf_type_name = NCF_TYPES.get(ncf_type, {}).get('name', ncf_type)
+        flash(f'Factura {invoice_number} creada exitosamente con {ncf_type_name} ({ncf})', 'success')
         return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
     except Exception as e:
@@ -293,12 +379,16 @@ def invoice_detail(invoice_id):
     # Verificar disponibilidad de items
     availability_check = InvoiceInventoryService.check_invoice_items_availability(invoice)
 
+    # Información del tipo de NCF
+    ncf_type_info = NCF_TYPES.get(invoice.ncf_type, {})
+
     return render_template(
         'invoices/invoice_detail.html',
         invoice=invoice,
         settings=settings,
         inventory_summary=inventory_summary,
-        availability_check=availability_check
+        availability_check=availability_check,
+        ncf_type_info=ncf_type_info
     )
 
 
@@ -331,9 +421,23 @@ def invoice_edit(invoice_id):
     ).order_by(Laptop.display_name).all()
 
     # Serializar laptops a diccionarios con todas las relaciones
-    # IMPORTANTE: Usar to_dict(include_relationships=True) para incluir brand, model, processor, ram, etc.
-    # El frontend necesita estos campos para la búsqueda y visualización correcta
     laptops = [laptop.to_dict(include_relationships=True) for laptop in laptops_query]
+
+    # Obtener tipos de NCF disponibles para ventas
+    ncf_types_list = get_ncf_types_for_sales()
+
+    # Obtener secuencias activas con su estado
+    ncf_sequences = {}
+    for ncf_type in NCF_SALES_TYPES:
+        sequence = NCFSequence.get_or_create(ncf_type)
+        ncf_sequences[ncf_type] = {
+            'next_preview': sequence.next_ncf_preview,
+            'is_valid': sequence.is_valid,
+            'is_expired': sequence.is_expired,
+            'is_exhausted': sequence.is_exhausted,
+            'remaining': sequence.remaining_count,
+            'valid_until': sequence.valid_until.strftime('%d/%m/%Y') if sequence.valid_until else None
+        }
 
     return render_template(
         'invoices/invoice_form.html',
@@ -341,7 +445,10 @@ def invoice_edit(invoice_id):
         settings=settings,
         customers=customers,
         laptops=laptops,
-        is_edit=True
+        is_edit=True,
+        ncf_types=ncf_types_list,
+        ncf_sequences=ncf_sequences,
+        default_ncf_type=invoice.ncf_type
     )
 
 
@@ -356,6 +463,9 @@ def invoice_update(invoice_id):
     Actualizar factura existente
 
     URL: /invoices/<id>/update (POST)
+
+    NOTA: El NCF no se puede cambiar una vez creada la factura,
+    según regulaciones de la DGII.
     """
     invoice = Invoice.query.get_or_404(invoice_id)
 
@@ -382,7 +492,7 @@ def invoice_update(invoice_id):
                 flash(f'Error de stock: {error_msg}', 'error')
                 return redirect(url_for('invoices.invoice_edit', invoice_id=invoice.id))
 
-        # Actualizar datos bÃ¡sicos
+        # Actualizar datos básicos (NO se permite cambiar NCF ni tipo de NCF)
         invoice.invoice_date = datetime.strptime(request.form.get('invoice_date'), '%Y-%m-%d').date()
         due_date = request.form.get('due_date')
         invoice.due_date = datetime.strptime(due_date, '%Y-%m-%d').date() if due_date else None
@@ -476,7 +586,7 @@ def invoice_change_status(invoice_id):
     old_status = invoice.status
 
     if new_status not in ['draft', 'issued', 'paid', 'cancelled', 'overdue']:
-        flash('Estado invÃ¡lido', 'error')
+        flash('Estado inválido', 'error')
         return redirect(url_for('invoices.invoice_detail', invoice_id=invoice.id))
 
     try:
@@ -586,6 +696,7 @@ def export_csv():
     # Aplicar los mismos filtros que en la lista
     search_query = request.args.get('q', '').strip()
     status_filter = request.args.get('status', '').strip()
+    ncf_type_filter = request.args.get('ncf_type', '').strip()
     date_from = request.args.get('date_from', '').strip()
     date_to = request.args.get('date_to', '').strip()
 
@@ -604,6 +715,9 @@ def export_csv():
 
     if status_filter:
         query = query.filter(Invoice.status == status_filter)
+
+    if ncf_type_filter:
+        query = query.filter(Invoice.ncf_type == ncf_type_filter)
 
     if date_from:
         try:
@@ -625,10 +739,10 @@ def export_csv():
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Encabezados
+    # Encabezados (incluye tipo de NCF)
     writer.writerow([
-        'NÃºmero', 'NCF', 'Fecha', 'Cliente', 'RNC/CÃ©dula',
-        'Subtotal', 'ITBIS', 'Total', 'Estado', 'MÃ©todo de Pago'
+        'Número', 'NCF', 'Tipo NCF', 'Fecha', 'Cliente', 'RNC/Cédula',
+        'Subtotal', 'ITBIS', 'Total', 'Estado', 'Método de Pago'
     ])
 
     # Datos
@@ -636,6 +750,7 @@ def export_csv():
         writer.writerow([
             inv.invoice_number,
             inv.ncf,
+            inv.ncf_type,
             inv.invoice_date.strftime('%Y-%m-%d'),
             inv.customer.full_name,
             inv.customer.id_number,
@@ -657,39 +772,49 @@ def export_csv():
 
 
 # ============================================
-# RUTA: CONFIGURACIÃ"N DE FACTURACIÃ"N
+# RUTA: CONFIGURACIÓN DE FACTURACIÓN
 # ============================================
 
 @invoices_bp.route('/settings', methods=['GET'])
 @login_required
 def settings():
     """
-    Mostrar configuraciÃ³n de facturaciÃ³n
+    Mostrar configuración de facturación
 
     URL: /invoices/settings
     """
     if not current_user.is_admin:
-        flash('No tienes permiso para acceder a esta pÃ¡gina', 'error')
+        flash('No tienes permiso para acceder a esta página', 'error')
         return redirect(url_for('invoices.invoices_list'))
 
     settings = InvoiceSettings.get_settings()
-    return render_template('invoices/settings.html', settings=settings)
+
+    # Inicializar y obtener todas las secuencias de NCF
+    initialize_default_ncf_sequences()
+    ncf_sequences = NCFSequence.get_all_active()
+
+    return render_template(
+        'invoices/settings.html',
+        settings=settings,
+        ncf_sequences=ncf_sequences,
+        ncf_types=NCF_TYPES
+    )
 
 
 # ============================================
-# RUTA: ACTUALIZAR CONFIGURACIÃ"N
+# RUTA: ACTUALIZAR CONFIGURACIÓN
 # ============================================
 
 @invoices_bp.route('/settings/update', methods=['POST'])
 @login_required
 def settings_update():
     """
-    Actualizar configuraciÃ³n de facturaciÃ³n
+    Actualizar configuración de facturación
 
     URL: /invoices/settings/update (POST)
     """
     if not current_user.is_admin:
-        flash('No tienes permiso para realizar esta acciÃ³n', 'error')
+        flash('No tienes permiso para realizar esta acción', 'error')
         return redirect(url_for('invoices.invoices_list'))
 
     settings = InvoiceSettings.get_settings()
@@ -700,21 +825,210 @@ def settings_update():
         settings.company_address = request.form.get('company_address', '').strip()
         settings.company_phone = request.form.get('company_phone', '').strip()
         settings.company_email = request.form.get('company_email', '').strip()
-        settings.ncf_prefix = request.form.get('ncf_prefix', 'B02').strip().upper()
         settings.invoice_prefix = request.form.get('invoice_prefix', 'INV').strip().upper()
         settings.default_terms = request.form.get('default_terms', '').strip()
+
+        # Legacy: mantener ncf_prefix para compatibilidad
+        settings.ncf_prefix = request.form.get('ncf_prefix', 'B02').strip().upper()
 
         ncf_valid_until = request.form.get('ncf_valid_until')
         if ncf_valid_until:
             settings.ncf_valid_until = datetime.strptime(ncf_valid_until, '%Y-%m-%d').date()
 
         db.session.commit()
-        flash('ConfiguraciÃ³n actualizada exitosamente', 'success')
+        flash('Configuración actualizada exitosamente', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Error al actualizar configuraciÃ³n: {str(e)}', 'error')
+        flash(f'Error al actualizar configuración: {str(e)}', 'error')
 
     return redirect(url_for('invoices.settings'))
+
+
+# ============================================
+# RUTA: ACTUALIZAR SECUENCIA NCF
+# ============================================
+
+@invoices_bp.route('/settings/ncf-sequence/<ncf_type>/update', methods=['POST'])
+@login_required
+def update_ncf_sequence(ncf_type):
+    """
+    Actualizar una secuencia de NCF específica
+
+    URL: /invoices/settings/ncf-sequence/<tipo>/update (POST)
+    """
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'No tienes permisos'}), 403
+
+    if ncf_type not in NCF_TYPES:
+        return jsonify({'success': False, 'message': f'Tipo de NCF "{ncf_type}" no válido'}), 400
+
+    try:
+        sequence = NCFSequence.get_or_create(ncf_type)
+
+        # Actualizar campos
+        new_sequence = request.form.get('current_sequence')
+        if new_sequence:
+            sequence.current_sequence = int(new_sequence)
+
+        range_start = request.form.get('range_start')
+        if range_start:
+            sequence.range_start = int(range_start)
+
+        range_end = request.form.get('range_end')
+        if range_end:
+            sequence.range_end = int(range_end) if range_end.strip() else None
+
+        valid_until = request.form.get('valid_until')
+        if valid_until:
+            sequence.valid_until = datetime.strptime(valid_until, '%Y-%m-%d').date()
+        else:
+            sequence.valid_until = None
+
+        is_active = request.form.get('is_active')
+        sequence.is_active = is_active == 'true' or is_active == '1'
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Secuencia {ncf_type} actualizada exitosamente',
+            'sequence': sequence.to_dict()
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ============================================
+# API: SUGERIR TIPO DE NCF PARA CLIENTE
+# ============================================
+
+@invoices_bp.route('/api/ncf/suggest/<int:customer_id>')
+@login_required
+def api_suggest_ncf_type(customer_id):
+    """
+    API para sugerir el tipo de NCF basado en el cliente
+
+    URL: /invoices/api/ncf/suggest/<customer_id>
+
+    Returns:
+        JSON con el tipo de NCF sugerido y razón
+    """
+    customer = Customer.query.get(customer_id)
+
+    if not customer:
+        return jsonify({
+            'success': False,
+            'message': 'Cliente no encontrado'
+        }), 404
+
+    suggestion = suggest_ncf_type_for_customer(customer)
+
+    # Obtener información de la secuencia actual
+    sequence = NCFSequence.get_or_create(suggestion['suggested_type'])
+
+    return jsonify({
+        'success': True,
+        'suggestion': {
+            **suggestion,
+            'next_ncf_preview': sequence.next_ncf_preview,
+            'sequence_valid': sequence.is_valid,
+            'sequence_remaining': sequence.remaining_count
+        },
+        'customer': {
+            'id': customer.id,
+            'name': customer.full_name,
+            'id_type': customer.id_type,
+            'id_number': customer.id_number
+        }
+    })
+
+
+# ============================================
+# API: OBTENER TIPOS DE NCF DISPONIBLES
+# ============================================
+
+@invoices_bp.route('/api/ncf/types')
+@login_required
+def api_get_ncf_types():
+    """
+    API para obtener los tipos de NCF disponibles para ventas
+
+    URL: /invoices/api/ncf/types
+    """
+    ncf_types_list = get_ncf_types_for_sales()
+
+    # Agregar información de secuencia a cada tipo
+    for ncf_type in ncf_types_list:
+        sequence = NCFSequence.get_or_create(ncf_type['code'])
+        ncf_type['sequence'] = {
+            'next_preview': sequence.next_ncf_preview,
+            'is_valid': sequence.is_valid,
+            'is_expired': sequence.is_expired,
+            'is_exhausted': sequence.is_exhausted,
+            'remaining': sequence.remaining_count,
+            'valid_until': sequence.valid_until.isoformat() if sequence.valid_until else None
+        }
+
+    return jsonify({
+        'success': True,
+        'types': ncf_types_list
+    })
+
+
+# ============================================
+# API: VALIDAR NCF MANUAL
+# ============================================
+
+@invoices_bp.route('/api/ncf/validate', methods=['POST'])
+@login_required
+def api_validate_ncf():
+    """
+    API para validar un NCF ingresado manualmente
+
+    URL: /invoices/api/ncf/validate (POST)
+
+    Body JSON:
+        {
+            "ncf": "B0100000001",
+            "ncf_type": "B01"
+        }
+    """
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            'success': False,
+            'valid': False,
+            'message': 'No se recibieron datos'
+        }), 400
+
+    ncf = data.get('ncf', '').strip().upper()
+    ncf_type = data.get('ncf_type', '').strip().upper()
+
+    if not ncf:
+        return jsonify({
+            'success': True,
+            'valid': False,
+            'message': 'El NCF no puede estar vacío'
+        })
+
+    if not ncf_type:
+        return jsonify({
+            'success': True,
+            'valid': False,
+            'message': 'Debe especificar el tipo de NCF'
+        })
+
+    settings = InvoiceSettings.get_settings()
+    is_valid, error_msg = settings.validate_manual_ncf(ncf, ncf_type)
+
+    return jsonify({
+        'success': True,
+        'valid': is_valid,
+        'message': error_msg if error_msg else 'NCF válido y disponible'
+    })
 
 
 # ============================================
@@ -746,13 +1060,22 @@ def api_search_customers():
         )
     ).limit(10).all()
 
-    return jsonify([{
-        'id': c.id,
-        'name': c.full_name,
-        'id_number': c.id_number,
-        'email': c.email,
-        'phone': c.phone_primary
-    } for c in customers])
+    # Incluir información para sugerir tipo de NCF
+    results = []
+    for c in customers:
+        suggestion = suggest_ncf_type_for_customer(c)
+        results.append({
+            'id': c.id,
+            'name': c.full_name,
+            'id_number': c.id_number,
+            'id_type': c.id_type,
+            'email': c.email,
+            'phone': c.phone_primary,
+            'suggested_ncf_type': suggestion['suggested_type'],
+            'suggested_ncf_name': suggestion['type_name']
+        })
+
+    return jsonify(results)
 
 
 # ============================================

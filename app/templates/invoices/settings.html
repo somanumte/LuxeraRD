@@ -2,6 +2,66 @@
 
 {% block title %}Configuración de Facturación{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Modal para edición de secuencias */
+    .sequence-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .sequence-modal-overlay.active {
+        display: flex;
+    }
+
+    .sequence-modal {
+        background-color: white;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .sequence-modal {
+        background-color: #1f2937;
+    }
+
+    /* Tarjetas de secuencia NCF */
+    .ncf-sequence-card {
+        transition: all 0.2s ease;
+    }
+
+    .ncf-sequence-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .ncf-sequence-card.expired {
+        border-color: #f87171;
+        background-color: rgba(248, 113, 113, 0.05);
+    }
+
+    .ncf-sequence-card.exhausted {
+        border-color: #fbbf24;
+        background-color: rgba(251, 191, 36, 0.05);
+    }
+
+    .ncf-sequence-card.inactive {
+        opacity: 0.6;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="p-6 space-y-8">
     <!-- Header -->
@@ -160,335 +220,183 @@
             </div>
         </div>
 
-        <!-- Segunda fila: NCF + Numeración -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Configuración de NCF (ACTUALIZADO CON TODOS LOS TIPOS DGII) -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- ============================================ -->
+        <!-- NUEVA SECCIÓN: SECUENCIAS DE NCF -->
+        <!-- ============================================ -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                    <div class="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Configuración de NCF</h2>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Secuencias de NCF</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Gestiona las secuencias de cada tipo de comprobante fiscal</p>
+                    </div>
                 </div>
+                <a href="https://dgii.gov.do" target="_blank" rel="noopener"
+                   class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline flex items-center">
+                    Solicitar más NCF en DGII
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
 
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Prefijo NCF <span class="text-red-500">*</span>
-                        </label>
-                        <select name="ncf_prefix"
-                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
-                            <!-- COMPROBANTES PARA VENTAS -->
-                            <optgroup label="Comprobantes para Ventas (Emisión)">
-                                <option value="B01" {% if settings.ncf_prefix == 'B01' %}selected{% endif %}>B01 - Factura de Crédito Fiscal</option>
-                                <option value="B02" {% if settings.ncf_prefix == 'B02' %}selected{% endif %}>B02 - Factura de Consumo</option>
-                                <option value="B03" {% if settings.ncf_prefix == 'B03' %}selected{% endif %}>B03 - Nota de Débito</option>
-                                <option value="B04" {% if settings.ncf_prefix == 'B04' %}selected{% endif %}>B04 - Nota de Crédito</option>
-                                <option value="B14" {% if settings.ncf_prefix == 'B14' %}selected{% endif %}>B14 - Régimenes Especiales</option>
-                                <option value="B15" {% if settings.ncf_prefix == 'B15' %}selected{% endif %}>B15 - Gubernamental</option>
-                            </optgroup>
-
-                            <!-- COMPROBANTES PARA GASTOS -->
-                            <optgroup label="Comprobantes para Gastos (Recepción)">
-                                <option value="B11" {% if settings.ncf_prefix == 'B11' %}selected{% endif %}>B11 - Comprobante de Compras</option>
-                                <option value="B12" {% if settings.ncf_prefix == 'B12' %}selected{% endif %}>B12 - Gastos Menores</option>
-                                <option value="B13" {% if settings.ncf_prefix == 'B13' %}selected{% endif %}>B13 - Pagos al Exterior</option>
-                                <option value="B16" {% if settings.ncf_prefix == 'B16' %}selected{% endif %}>B16 - Exportaciones</option>
-                            </optgroup>
-
-                            <!-- COMPROBANTES REGÍMENES ESPECIALES (NO CONTRIBUYENTES) -->
-                            <optgroup label="Regímenes Especiales (No Contribuyentes)">
-                                <option value="E31" {% if settings.ncf_prefix == 'E31' %}selected{% endif %}>E31 - Crédito Fiscal (No Contrib.)</option>
-                                <option value="E32" {% if settings.ncf_prefix == 'E32' %}selected{% endif %}>E32 - Consumo (No Contrib.)</option>
-                                <option value="E33" {% if settings.ncf_prefix == 'E33' %}selected{% endif %}>E33 - Nota Débito (No Contrib.)</option>
-                                <option value="E34" {% if settings.ncf_prefix == 'E34' %}selected{% endif %}>E34 - Nota Crédito (No Contrib.)</option>
-                                <option value="E41" {% if settings.ncf_prefix == 'E41' %}selected{% endif %}>E41 - Régimen Esp. (No Contrib.)</option>
-                                <option value="E42" {% if settings.ncf_prefix == 'E42' %}selected{% endif %}>E42 - Gubernamental (No Contrib.)</option>
-                                <option value="E43" {% if settings.ncf_prefix == 'E43' %}selected{% endif %}>E43 - Exportaciones (No Contrib.)</option>
-                                <option value="E44" {% if settings.ncf_prefix == 'E44' %}selected{% endif %}>E44 - Pagos Exterior (No Contrib.)</option>
-                                <option value="E45" {% if settings.ncf_prefix == 'E45' %}selected{% endif %}>E45 - Compras (No Contrib.)</option>
-                            </optgroup>
-                        </select>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Tipo de comprobante fiscal según DGII. Para ventas normales use B01 o B02.
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Próximo NCF
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="text"
-                                   value="{{ settings.ncf_prefix }}"
-                                   disabled
-                                   class="w-24 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-center">
-                            <input type="text"
-                                   value="{{ '{:08d}'.format(settings.ncf_sequence) }}"
-                                   disabled
-                                   class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono">
-                        </div>
-                        <p class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Próximo: <span class="font-mono text-indigo-600 dark:text-indigo-400">{{ settings.ncf_prefix }}{{ '{:08d}'.format(settings.ncf_sequence) }}</span>
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            NCF Válido Hasta <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date"
-                               name="ncf_valid_until"
-                               value="{% if settings.ncf_valid_until %}{{ settings.ncf_valid_until }}{% endif %}"
-                               required
-                               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Fecha de vencimiento de la secuencia de NCF (obligatorio según DGII)
-                        </p>
-                    </div>
-
-                    <!-- Secuencia de NCF (manual) -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Iniciar secuencia en
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="text"
-                                   value="{{ settings.ncf_prefix }}"
-                                   disabled
-                                   class="w-24 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-center">
-                            <input type="number"
-                                   name="ncf_sequence"
-                                   value="{{ settings.ncf_sequence }}"
-                                   min="1"
-                                   class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Solo modifica si necesitas reiniciar la numeración (ej: nueva rango autorizado)
+            <!-- Información general -->
+            <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">Sistema de NCF por Tipo</h3>
+                        <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                            Cada tipo de comprobante tiene su propia secuencia independiente.
+                            El sistema asigna automáticamente B01 para clientes con RNC y B02 para cédulas.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Numeración de Facturas -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            <!-- Grid de secuencias NCF -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="ncf-sequences-grid">
+                {% if ncf_sequences %}
+                    {% for sequence in ncf_sequences %}
+                    <div class="ncf-sequence-card border-2 rounded-lg p-4
+                                {% if sequence.is_expired %}expired border-red-300{% elif sequence.is_exhausted %}exhausted border-yellow-300{% elif not sequence.is_active %}inactive border-gray-300{% else %}border-gray-200 dark:border-gray-600{% endif %}"
+                         data-ncf-type="{{ sequence.ncf_type }}">
+
+                        <!-- Header de la tarjeta -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl font-bold text-gray-900 dark:text-white">{{ sequence.ncf_type }}</span>
+                                {% if sequence.is_expired %}
+                                <span class="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 rounded">
+                                    Vencido
+                                </span>
+                                {% elif sequence.is_exhausted %}
+                                <span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 rounded">
+                                    Agotado
+                                </span>
+                                {% elif not sequence.is_active %}
+                                <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 rounded">
+                                    Inactivo
+                                </span>
+                                {% else %}
+                                <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded">
+                                    Activo
+                                </span>
+                                {% endif %}
+                            </div>
+                            <button type="button"
+                                    onclick="openSequenceModal('{{ sequence.ncf_type }}')"
+                                    class="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Nombre del tipo -->
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            {{ sequence.name }}
+                        </p>
+
+                        <!-- Próximo NCF -->
+                        <div class="mb-3">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Próximo NCF:</p>
+                            <p class="text-lg font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                {{ sequence.next_ncf_preview }}
+                            </p>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+                            <div class="flex justify-between">
+                                <span>Rango:</span>
+                                <span class="font-mono">{{ sequence.range_start }} - {{ sequence.range_end if sequence.range_end else '∞' }}</span>
+                            </div>
+                            {% if sequence.remaining_count %}
+                            <div class="flex justify-between">
+                                <span>Disponibles:</span>
+                                <span class="{% if sequence.remaining_count < 100 %}text-yellow-600 dark:text-yellow-400{% else %}text-green-600 dark:text-green-400{% endif %}">
+                                    {{ "{:,}".format(sequence.remaining_count) }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            {% if sequence.valid_until %}
+                            <div class="flex justify-between">
+                                <span>Vence:</span>
+                                <span class="{% if sequence.is_expired %}text-red-600 dark:text-red-400{% endif %}">
+                                    {{ sequence.valid_until.strftime('%d/%m/%Y') if sequence.valid_until else 'Sin fecha' }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Barra de progreso (si tiene rango) -->
+                        {% if sequence.range_end and sequence.remaining_count %}
+                        {% set progress = ((sequence.current_sequence - sequence.range_start) / (sequence.range_end - sequence.range_start)) * 100 %}
+                        <div class="mt-3">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full {% if progress > 90 %}bg-red-500{% elif progress > 70 %}bg-yellow-500{% else %}bg-green-500{% endif %}"
+                                     style="width: {{ progress }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1 text-right">{{ "%.1f"|format(progress) }}% usado</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full text-center py-8">
+                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                    </div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Numeración de Facturas</h2>
-                </div>
-
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Prefijo de Factura
-                        </label>
-                        <input type="text"
-                               name="invoice_prefix"
-                               value="{{ settings.invoice_prefix }}"
-                               maxlength="10"
-                               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Ejemplo: INV, FACT, BOL, etc.
+                        <p class="text-gray-500 dark:text-gray-400">No hay secuencias configuradas</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                            Se crearán automáticamente al emitir la primera factura
                         </p>
                     </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Próximo Número
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="text"
-                                   value="{{ settings.invoice_prefix }}-"
-                                   disabled
-                                   class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono">
-                            <input type="text"
-                                   value="{{ '{:08d}'.format(settings.invoice_sequence) }}"
-                                   disabled
-                                   class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono">
-                        </div>
-                        <p class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Próxima: <span class="font-mono text-indigo-600 dark:text-indigo-400">{{ settings.invoice_prefix }}-{{ '{:08d}'.format(settings.invoice_sequence) }}</span>
-                        </p>
-                    </div>
-
-                    <!-- Secuencia de Facturas (manual) -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Iniciar numeración en
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="text"
-                                   value="{{ settings.invoice_prefix }}-"
-                                   disabled
-                                   class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono">
-                            <input type="number"
-                                   name="invoice_sequence"
-                                   value="{{ settings.invoice_sequence }}"
-                                   min="1"
-                                   class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Solo modifica si necesitas reiniciar la numeración
-                        </p>
-                    </div>
-
-                    <!-- Formato de fecha para numeración -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Incluir año en numeración
-                        </label>
-                        <div class="flex items-center">
-                            <input type="checkbox"
-                                   name="include_year_in_number"
-                                   id="include_year_in_number"
-                                   class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                   {% if settings.include_year_in_number %}checked{% endif %}>
-                            <label for="include_year_in_number" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                Ej: INV-2024-000001
-                            </label>
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Recomendado para reiniciar numeración cada año
-                        </p>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Tercera fila: Configuraciones adicionales -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Configuración de ITBIS -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Configuración de ITBIS</h2>
+        <!-- Numeración de Facturas -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+            <div class="flex items-center gap-2 mb-6">
+                <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                    </svg>
                 </div>
-
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Porcentaje de ITBIS (%)
-                        </label>
-                        <div class="flex items-center">
-                            <input type="number"
-                                   name="itbis_percentage"
-                                   value="18"
-                                   min="0"
-                                   max="100"
-                                   step="0.01"
-                                   class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">%</span>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Tasa de impuesto actual en República Dominicana: 18%
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Incluir ITBIS por defecto
-                        </label>
-                        <div class="flex items-center">
-                            <input type="checkbox"
-                                   name="include_itbis_by_default"
-                                   id="include_itbis_by_default"
-                                   class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                   {% if settings.include_itbis_by_default %}checked{% endif %}>
-                            <label for="include_itbis_by_default" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                Aplicar ITBIS automáticamente en todas las facturas
-                            </label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Exentos de ITBIS
-                        </label>
-                        <textarea name="itbis_exempt_items"
-                                  rows="3"
-                                  placeholder="Ej: Libros, medicinas, alimentos básicos..."
-                                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">{{ settings.itbis_exempt_items or '' }}</textarea>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Lista de productos/servicios exentos de ITBIS (uno por línea)
-                        </p>
-                    </div>
-                </div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Numeración de Facturas</h2>
             </div>
 
-            <!-- Configuración de Vencimientos -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Configuración de Vencimientos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Prefijo de Factura
+                    </label>
+                    <input type="text"
+                           name="invoice_prefix"
+                           value="{{ settings.invoice_prefix }}"
+                           maxlength="10"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        Ejemplo: INV, FACT, BOL, etc.
+                    </p>
                 </div>
 
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Días para vencimiento por defecto
-                        </label>
-                        <div class="flex items-center">
-                            <input type="number"
-                                   name="default_due_days"
-                                   value="{{ settings.default_due_days or 30 }}"
-                                   min="1"
-                                   max="365"
-                                   class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">días</span>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Número de días después de la emisión para el vencimiento
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Recordar vencimientos
-                        </label>
-                        <div class="flex items-center">
-                            <input type="number"
-                                   name="reminder_days_before"
-                                   value="{{ settings.reminder_days_before or 7 }}"
-                                   min="1"
-                                   max="30"
-                                   class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">días antes del vencimiento</span>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Enviar recordatorios esta cantidad de días antes del vencimiento
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Cargo por mora (% mensual)
-                        </label>
-                        <div class="flex items-center">
-                            <input type="number"
-                                   name="late_fee_percentage"
-                                   value="{{ settings.late_fee_percentage or 2 }}"
-                                   min="0"
-                                   max="20"
-                                   step="0.01"
-                                   class="w-32 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">% mensual</span>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Porcentaje de interés por mora aplicado mensualmente
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Próximo Número
+                    </label>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-lg font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                            {{ settings.invoice_prefix }}-{{ '{:08d}'.format(settings.invoice_sequence) }}
                         </p>
                     </div>
                 </div>
@@ -507,98 +415,13 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Texto de Términos y Condiciones
-                </label>
                 <textarea name="default_terms"
                           rows="5"
-                          placeholder="Ej: Esta factura deberá ser pagada en un plazo de 30 días. Cualquier retraso en el pago generará un interés del 2% mensual..."
+                          placeholder="Ej: Esta factura deberá ser pagada en un plazo de 30 días..."
                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">{{ settings.default_terms or '' }}</textarea>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     Estos términos aparecerán automáticamente en todas las nuevas facturas
                 </p>
-            </div>
-
-            <div class="mt-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Notas por defecto
-                </label>
-                <textarea name="default_notes"
-                          rows="3"
-                          placeholder="Ej: Gracias por su compra. Para cualquier consulta contactar a..."
-                          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">{{ settings.default_notes or '' }}</textarea>
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Notas que aparecerán automáticamente en todas las nuevas facturas
-                </p>
-            </div>
-        </div>
-
-        <!-- Configuración de PDF -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-            <div class="flex items-center gap-2 mb-6">
-                <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Configuración de PDF</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Tamaño de papel
-                    </label>
-                    <select name="paper_size"
-                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
-                        <option value="letter" {% if settings.paper_size == 'letter' %}selected{% endif %}>Carta (8.5" x 11")</option>
-                        <option value="a4" {% if settings.paper_size == 'a4' %}selected{% endif %}>A4 (210mm x 297mm)</option>
-                        <option value="legal" {% if settings.paper_size == 'legal' %}selected{% endif %}>Legal (8.5" x 14")</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Orientación
-                    </label>
-                    <select name="paper_orientation"
-                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
-                        <option value="portrait" {% if settings.paper_orientation == 'portrait' %}selected{% endif %}>Vertical</option>
-                        <option value="landscape" {% if settings.paper_orientation == 'landscape' %}selected{% endif %}>Horizontal</option>
-                    </select>
-                </div>
-
-                <div class="md:col-span-2">
-                    <div class="flex items-center">
-                        <input type="checkbox"
-                               name="show_business_info_in_footer"
-                               id="show_business_info_in_footer"
-                               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                               {% if settings.show_business_info_in_footer %}checked{% endif %}>
-                        <label for="show_business_info_in_footer" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                            Mostrar información de la empresa en pie de página
-                        </label>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        RNC, teléfono y email aparecerán en el pie de página del PDF
-                    </p>
-                </div>
-
-                <div class="md:col-span-2">
-                    <div class="flex items-center">
-                        <input type="checkbox"
-                               name="show_qr_code"
-                               id="show_qr_code"
-                               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                               {% if settings.show_qr_code %}checked{% endif %}>
-                        <label for="show_qr_code" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                            Incluir código QR en facturas
-                        </label>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Genera un código QR con los datos de la factura para verificación rápida
-                    </p>
-                </div>
             </div>
         </div>
 
@@ -619,19 +442,244 @@
     </form>
 </div>
 
+<!-- ============================================ -->
+<!-- MODAL PARA EDITAR SECUENCIA NCF -->
+<!-- ============================================ -->
+<div id="sequence-modal" class="sequence-modal-overlay">
+    <div class="sequence-modal">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                    Editar Secuencia <span id="modal-ncf-type" class="text-indigo-600 dark:text-indigo-400"></span>
+                </h3>
+                <button type="button" onclick="closeSequenceModal()"
+                        class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p id="modal-ncf-name" class="mt-1 text-sm text-gray-500 dark:text-gray-400"></p>
+        </div>
+
+        <form id="sequence-form" class="p-6 space-y-5">
+            <input type="hidden" id="modal-ncf-type-input" name="ncf_type">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Secuencia Actual
+                </label>
+                <input type="number"
+                       id="modal-current-sequence"
+                       name="current_sequence"
+                       min="1"
+                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Próximo número que se usará en esta secuencia
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Rango Inicio
+                    </label>
+                    <input type="number"
+                           id="modal-range-start"
+                           name="range_start"
+                           min="1"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Rango Fin
+                    </label>
+                    <input type="number"
+                           id="modal-range-end"
+                           name="range_end"
+                           placeholder="Sin límite"
+                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Fecha de Vencimiento
+                </label>
+                <input type="date"
+                       id="modal-valid-until"
+                       name="valid_until"
+                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Fecha de vencimiento de la autorización DGII
+                </p>
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox"
+                       id="modal-is-active"
+                       name="is_active"
+                       class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                <label for="modal-is-active" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Secuencia activa
+                </label>
+            </div>
+
+            <div id="modal-message" class="hidden p-3 rounded-lg"></div>
+        </form>
+
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+            <button type="button" onclick="closeSequenceModal()"
+                    class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                Cancelar
+            </button>
+            <button type="button" onclick="saveSequence()"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-// Manejar subida de logo
+// Datos de secuencias NCF
+const ncfSequences = {{ ncf_sequences|map(attribute='to_dict')|list|tojson if ncf_sequences else '[]' }};
+const ncfTypes = {{ ncf_types|tojson if ncf_types else '{}' }};
+
+// ==========================================
+// FUNCIONES DEL MODAL DE SECUENCIAS NCF
+// ==========================================
+
+function openSequenceModal(ncfType) {
+    const modal = document.getElementById('sequence-modal');
+    const sequence = ncfSequences.find(s => s.ncf_type === ncfType);
+
+    if (!sequence) {
+        console.error('Secuencia no encontrada:', ncfType);
+        return;
+    }
+
+    // Rellenar datos del modal
+    document.getElementById('modal-ncf-type').textContent = ncfType;
+    document.getElementById('modal-ncf-type-input').value = ncfType;
+    document.getElementById('modal-ncf-name').textContent = sequence.name;
+    document.getElementById('modal-current-sequence').value = sequence.current_sequence;
+    document.getElementById('modal-range-start').value = sequence.range_start;
+    document.getElementById('modal-range-end').value = sequence.range_end || '';
+    document.getElementById('modal-valid-until').value = sequence.valid_until || '';
+    document.getElementById('modal-is-active').checked = sequence.is_active;
+
+    // Ocultar mensajes previos
+    document.getElementById('modal-message').classList.add('hidden');
+
+    // Mostrar modal
+    modal.classList.add('active');
+}
+
+function closeSequenceModal() {
+    document.getElementById('sequence-modal').classList.remove('active');
+}
+
+function saveSequence() {
+    const ncfType = document.getElementById('modal-ncf-type-input').value;
+    const formData = new FormData();
+
+    formData.append('current_sequence', document.getElementById('modal-current-sequence').value);
+    formData.append('range_start', document.getElementById('modal-range-start').value);
+    formData.append('range_end', document.getElementById('modal-range-end').value);
+    formData.append('valid_until', document.getElementById('modal-valid-until').value);
+    formData.append('is_active', document.getElementById('modal-is-active').checked ? 'true' : 'false');
+
+    const messageDiv = document.getElementById('modal-message');
+    messageDiv.innerHTML = `
+        <div class="flex items-center text-blue-700 dark:text-blue-300">
+            <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Guardando...
+        </div>
+    `;
+    messageDiv.className = 'p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20';
+    messageDiv.classList.remove('hidden');
+
+    fetch(`/invoices/settings/ncf-sequence/${ncfType}/update`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageDiv.innerHTML = `
+                <div class="flex items-center text-green-700 dark:text-green-300">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    ${data.message}
+                </div>
+            `;
+            messageDiv.className = 'p-3 rounded-lg bg-green-50 dark:bg-green-900/20';
+
+            // Recargar la página después de 1 segundo
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            messageDiv.innerHTML = `
+                <div class="flex items-center text-red-700 dark:text-red-300">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    ${data.message}
+                </div>
+            `;
+            messageDiv.className = 'p-3 rounded-lg bg-red-50 dark:bg-red-900/20';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        messageDiv.innerHTML = `
+            <div class="flex items-center text-red-700 dark:text-red-300">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Error al guardar. Intente nuevamente.
+            </div>
+        `;
+        messageDiv.className = 'p-3 rounded-lg bg-red-50 dark:bg-red-900/20';
+    });
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeSequenceModal();
+    }
+});
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('sequence-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSequenceModal();
+    }
+});
+
+// ==========================================
+// FUNCIONES DEL LOGO
+// ==========================================
+
 document.getElementById('logo-file-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validar tamaño (2MB máximo)
     if (file.size > 2 * 1024 * 1024) {
         showLogoMessage('El archivo es muy grande. Máximo 2MB.', 'error');
         return;
     }
 
-    // Mostrar preview
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('logo-preview-container').innerHTML = `
@@ -639,14 +687,13 @@ document.getElementById('logo-file-input').addEventListener('change', function(e
                 <img src="${e.target.result}"
                      alt="Preview"
                      id="logo-preview"
-                     class="max-h-40 mx-auto mb-4 object-contain animate-fade-in">
+                     class="max-h-40 mx-auto mb-4 object-contain">
                 <p class="text-xs text-gray-500">${file.name}</p>
             </div>
         `;
     };
     reader.readAsDataURL(file);
 
-    // Subir al servidor
     uploadLogo(file);
 });
 
@@ -664,21 +711,6 @@ function uploadLogo(file) {
     .then(data => {
         if (data.success) {
             showLogoMessage(data.message, 'success');
-            // Actualizar botón de eliminar
-            document.querySelector('button[onclick="removeLogo()"]')?.remove();
-            const actionsDiv = document.querySelector('.flex.gap-3');
-            if (actionsDiv) {
-                actionsDiv.innerHTML += `
-                    <button type="button"
-                            onclick="removeLogo()"
-                            class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors flex items-center justify-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                        Eliminar
-                    </button>
-                `;
-            }
         } else {
             showLogoMessage(data.message, 'error');
         }
@@ -704,7 +736,6 @@ function removeLogo() {
     .then(data => {
         if (data.success) {
             showLogoMessage(data.message, 'success');
-            // Restaurar vista inicial
             document.getElementById('logo-preview-container').innerHTML = `
                 <div class="text-center py-6">
                     <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
@@ -716,8 +747,6 @@ function removeLogo() {
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG o JPG, máximo 2MB</p>
                 </div>
             `;
-            // Eliminar botón de eliminar
-            document.querySelector('button[onclick="removeLogo()"]')?.remove();
         } else {
             showLogoMessage(data.message, 'error');
         }
@@ -738,16 +767,5 @@ function showLogoMessage(message, type) {
         messageDiv.classList.add('hidden');
     }, 3000);
 }
-
-// Validar campos obligatorios
-document.querySelector('form').addEventListener('submit', function(e) {
-    const ncfValidUntil = document.querySelector('input[name="ncf_valid_until"]');
-    if (!ncfValidUntil.value) {
-        e.preventDefault();
-        showLogoMessage('La fecha de vencimiento del NCF es obligatoria según DGII', 'error');
-        ncfValidUntil.focus();
-        return false;
-    }
-});
 </script>
 {% endblock %}
