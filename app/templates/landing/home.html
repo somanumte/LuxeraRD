@@ -62,6 +62,7 @@
         color: var(--text-primary);
         -webkit-font-smoothing: antialiased;
         transition: background-color 0.5s var(--ease-out-expo);
+        overflow-x: hidden;
     }
 
     /* =========================================
@@ -101,6 +102,7 @@
         border: none;
         cursor: pointer;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
     }
 
     .btn-lux:hover {
@@ -177,13 +179,33 @@
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
     .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
 
     @keyframes fadeInUp {
         to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes spin-reverse {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+    }
+
+    @keyframes ping {
+        75%, 100% { transform: scale(2); opacity: 0; }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
     /* =========================================
-       3. HERO SECTION (MANTENIENDO TU LAPTOP)
+       3. HERO SECTION - CARRUSEL 5 PRODUCTOS
        ========================================= */
     .hero-section {
         min-height: 100vh;
@@ -195,31 +217,6 @@
         background: var(--bg-deep);
     }
 
-    .hero-bg-glow {
-        position: absolute;
-        width: 60vw;
-        height: 60vw;
-        background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
-        border-radius: 50%;
-        top: -10%;
-        right: -10%;
-        z-index: 0;
-        animation: pulse 8s ease-in-out infinite alternate;
-        filter: blur(80px);
-    }
-
-    .hero-bg-glow-2 {
-        position: absolute;
-        width: 40vw;
-        height: 40vw;
-        background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
-        border-radius: 50%;
-        bottom: -10%;
-        left: -10%;
-        z-index: 0;
-        filter: blur(60px);
-    }
-
     .hero-content {
         position: relative;
         z-index: 2;
@@ -227,21 +224,41 @@
         grid-template-columns: 1fr 1fr;
         gap: 4rem;
         align-items: center;
+        width: 100%;
+    }
+
+    .hero-text {
+        padding-left: 3rem;
+        position: relative;
+        min-height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .hero-label {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
         padding: 0.5rem 1.25rem;
         border-radius: 100px;
-        background: rgba(124, 58, 237, 0.05);
-        border: 1px solid rgba(124, 58, 237, 0.1);
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 0.7rem;
+        font-family: var(--font-heading);
+        font-weight: 700;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
         margin-bottom: 1.5rem;
-        color: var(--accent-primary);
-        backdrop-filter: blur(5px);
+    }
+
+    .hero-label span:first-child {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
     }
 
     .hero-title {
@@ -249,45 +266,240 @@
         font-size: clamp(3rem, 5vw, 5rem);
         line-height: 1.1;
         font-weight: 700;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.5rem;
         letter-spacing: -0.02em;
         color: var(--text-primary);
+    }
+
+    .hero-title-gradient {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        transition: all 0.3s ease;
     }
 
     .hero-desc {
         font-size: 1.25rem;
         color: var(--text-secondary);
         max-width: 500px;
+        line-height: 1.6;
+        border-left: 2px solid var(--border-light);
+        padding-left: 1.5rem;
         margin-bottom: 2.5rem;
     }
 
     .hero-visual {
         position: relative;
-        perspective: 1000px;
-        height: 600px;
+        height: 70vh;
         display: flex;
         align-items: center;
         justify-content: center;
+        perspective: 2000px;
     }
 
-    .hero-laptop {
-        width: 120%;
-        max-width: 800px;
-        height: auto;
-        transform: rotateY(-10deg) rotateX(5deg);
-        filter: drop-shadow(0 30px 60px rgba(0,0,0,0.15));
-        transition: transform 0.1s ease-out;
-        z-index: 2;
-    }
-
-    .hero-circle-deco {
+    .hero-rings {
         position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ring-1 {
+        width: 600px;
+        height: 600px;
         border: 1px solid var(--border-light);
         border-radius: 50%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1;
+        animation: spin 60s linear infinite;
+    }
+
+    .ring-2 {
+        position: absolute;
+        width: 450px;
+        height: 450px;
+        border: 1px dashed var(--border-light);
+        border-radius: 50%;
+        animation: spin 40s linear infinite reverse;
+    }
+
+    .tilt-card {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        aspect-ratio: 16/10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: transform 0.1s ease-out;
+    }
+
+    .tilt-content {
+        position: relative;
+        z-index: 10;
+        transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hero-image {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 50px 100px rgba(0,0,0,0.25));
+        transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .hero-image {
+        filter: drop-shadow(0 50px 100px rgba(0,0,0,0.5));
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--border-light);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    }
+
+    [data-theme="dark"] .glass-panel {
+        background: rgba(10, 10, 10, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .spec-card {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+    }
+
+    [data-theme="dark"] .spec-card {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Aurora Background */
+    .aurora-container {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .aurora-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.35;
+        transition: background-color 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Carrusel Controls */
+    .carousel-controls {
+        position: absolute;
+        bottom: 2rem;
+        left: 3rem;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .carousel-dots {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .carousel-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        opacity: 0.3;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-dot.active {
+        width: 24px;
+        border-radius: 4px;
+        background: var(--accent-primary);
+        opacity: 1;
+    }
+
+    .carousel-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .carousel-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: scale(1.1);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--border-light);
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--accent-primary);
+        width: 0%;
+        transition: width 0.1s linear;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-family: var(--font-heading);
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
     }
 
     /* =========================================
@@ -342,9 +554,13 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 1.5rem;
-        background: #ffffff; /* Cambiado a blanco puro */
+        background: #ffffff;
         border-radius: 16px;
         overflow: hidden;
+    }
+
+    [data-theme="dark"] .img-container {
+        background: #1a1a1a;
     }
 
     .product-img {
@@ -536,6 +752,7 @@
         position: relative;
         transition: all 0.4s var(--ease-out-expo);
         box-shadow: var(--shadow-card);
+        text-decoration: none;
     }
 
     .category-card:hover {
@@ -618,14 +835,32 @@
     /* =========================================
        9. RESPONSIVE
        ========================================= */
+    @media (max-width: 1200px) {
+        .hero-content {
+            gap: 3rem;
+        }
+
+        .hero-text {
+            padding-left: 2rem;
+        }
+    }
+
     @media (max-width: 1024px) {
         .hero-content {
             grid-template-columns: 1fr;
             text-align: center;
+            gap: 4rem;
+        }
+
+        .hero-text {
+            padding-left: 0;
+            padding-right: 0;
+            min-height: auto;
+            order: 2;
         }
 
         .hero-desc {
-            margin: 0 auto 2rem;
+            margin: 0 auto 2.5rem;
         }
 
         .section-padding {
@@ -635,6 +870,35 @@
         .container-xl {
             padding: 0 1.5rem;
         }
+
+        .hero-visual {
+            height: 50vh;
+            order: 1;
+        }
+
+        .glass-panel {
+            display: none !important;
+        }
+
+        .ring-1 {
+            width: 400px;
+            height: 400px;
+        }
+
+        .ring-2 {
+            width: 300px;
+            height: 300px;
+        }
+
+        .carousel-controls {
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     @media (max-width: 768px) {
@@ -642,8 +906,12 @@
             font-size: 2.5rem;
         }
 
+        .hero-desc {
+            font-size: 1.1rem;
+        }
+
         .hero-visual {
-            height: 400px;
+            height: 40vh;
         }
 
         .products-grid {
@@ -654,7 +922,129 @@
         .categories-grid {
             grid-template-columns: 1fr;
         }
+
+        .section-padding {
+            padding: 3rem 0;
+        }
     }
+
+    @media (max-width: 480px) {
+        .container-xl {
+            padding: 0 1rem;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+        }
+
+        .btn-lux {
+            padding: 0.875rem 1.75rem;
+            font-size: 0.875rem;
+        }
+
+        .theme-toggle {
+            bottom: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* =========================================
+       10. UTILITY CLASSES
+       ========================================= */
+    .flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-start { justify-content: flex-start; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+    .gap-8 { gap: 2rem; }
+    .mt-12 { margin-top: 3rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mb-12 { margin-bottom: 3rem; }
+    .mb-16 { margin-bottom: 4rem; }
+    .pt-8 { padding-top: 2rem; }
+    .pt-12 { padding-top: 3rem; }
+    .pb-8 { padding-bottom: 2rem; }
+    .px-8 { padding-left: 2rem; padding-right: 2rem; }
+    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    .text-center { text-align: center; }
+    .text-sm { font-size: 0.875rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-4xl { font-size: 2.25rem; }
+    .text-5xl { font-size: 3rem; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .uppercase { text-transform: uppercase; }
+    .tracking-widest { letter-spacing: 0.1em; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .max-w-2xl { max-width: 42rem; }
+    .max-w-lg { max-width: 32rem; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .block { display: block; }
+    .inline-block { display: inline-block; }
+    .hidden { display: none !important; }
+    .border-t { border-top: 1px solid var(--border-light); }
+    .border-gray-200 { border-color: rgba(0, 0, 0, 0.1); }
+    .dark\:border-gray-800 { border-color: rgba(255, 255, 255, 0.1); }
+    .text-muted { color: var(--text-muted); }
+    .text-gray-400 { color: #9ca3af; }
+    .text-gray-500 { color: #6b7280; }
+    .text-gray-600 { color: #4b5563; }
+    .text-accent-primary { color: var(--accent-primary); }
+    .bg-surface { background: var(--bg-surface); }
+    .grid { display: grid; }
+    .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .md\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .md\:text-5xl { font-size: 3rem; }
+    .lg\:justify-start { justify-content: flex-start; }
+    .sm\:flex-row { flex-direction: row; }
+    .flex-col { flex-direction: column; }
+    .ml-2 { margin-left: 0.5rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .group-hover\:gap-4:hover { gap: 1rem; }
+    .transition-all { transition: all 0.3s ease; }
+    .group { position: relative; }
+    .opacity-50 { opacity: 0.5; }
+    .opacity-80 { opacity: 0.8; }
+    .text-white { color: white; }
+    .text-white\/80 { color: rgba(255, 255, 255, 0.8); }
+    .bg-white\/20 { background: rgba(255, 255, 255, 0.2); }
+    .backdrop-blur-sm { backdrop-filter: blur(4px); }
+    .rounded-xl { border-radius: 0.75rem; }
+    .w-16 { width: 4rem; }
+    .h-16 { height: 4rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .inline-flex { display: inline-flex; }
+    .absolute { position: absolute; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+    .from-purple-600\/20 { --tw-gradient-from: rgba(147, 51, 234, 0.2); }
+    .to-pink-600\/20 { --tw-gradient-to: rgba(219, 39, 119, 0.2); }
+    .from-blue-600\/20 { --tw-gradient-from: rgba(37, 99, 235, 0.2); }
+    .to-indigo-600\/20 { --tw-gradient-to: rgba(79, 70, 229, 0.2); }
+    .from-emerald-600\/20 { --tw-gradient-from: rgba(5, 150, 105, 0.2); }
+    .to-teal-600\/20 { --tw-gradient-to: rgba(13, 148, 136, 0.2); }
 </style>
 {% endblock %}
 
@@ -666,86 +1056,247 @@
 </button>
 
 <!-- ============================================
-     HERO SECTION (MANTENIENDO TU LAPTOP PRINCIPAL)
+     HERO SECTION - CARRUSEL 5 PRODUCTOS
      ============================================ -->
 <section class="hero-section">
-    <div class="hero-bg-glow"></div>
-    <div class="hero-bg-glow-2"></div>
+    <!-- Aurora Background -->
+    <div class="aurora-container">
+        <div id="aurora-1" class="aurora-blob" style="width: 60vw; height: 60vw; top: -20%; left: -10%; background: rgba(124, 58, 237, 0.15);"></div>
+        <div id="aurora-2" class="aurora-blob" style="width: 50vw; height: 50vw; bottom: -20%; right: -10%; background: rgba(6, 182, 212, 0.15);"></div>
+    </div>
 
     <div class="container-xl">
         <div class="hero-content">
-            <!-- Texto -->
+            <!-- LEFT CONTENT - Carrusel de texto -->
             <div class="hero-text fade-in-up">
-                <span class="hero-label">Nueva Colección 2024</span>
-                <h1 class="hero-title">
-                    Potencia que desafía <br>
-                    <span class="text-gradient">la realidad.</span>
-                </h1>
-                <p class="hero-desc">
-                    Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.
-                </p>
-                <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
-                    <a href="{{ url_for('public.catalog') }}" class="btn-lux">
-                        Ver Catálogo
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                    <a href="#featured" class="btn-lux dark">
-                        Destacados
-                    </a>
+                <!-- Contenedor de slides -->
+                <div id="text-slider" style="position: relative; min-height: 500px;">
+                    {% if featured_laptops and featured_laptops|length > 0 %}
+                        {% for laptop in featured_laptops[:5] %}
+                        <div class="text-slide {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" style="display: {% if loop.first %}block{% else %}none{% endif %};">
+                            <!-- Tag -->
+                            <div style="overflow: hidden; margin-bottom: 1.5rem;">
+                                <div class="hero-label">
+                                    <span></span>
+                                    <span class="product-tag">
+                                        {{ laptop.brand.name if laptop.brand else 'SERIE PREMIUM' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Titles -->
+                            <div style="margin-bottom: 2rem;">
+                                <div style="overflow: hidden;">
+                                    <h1 class="hero-title scramble-text product-title-1">
+                                        {% set words = laptop.display_name.split() %}
+                                        {{ words[:2]|join(' ') if words|length >= 2 else laptop.display_name }}
+                                    </h1>
+                                </div>
+                                <div style="overflow: hidden;">
+                                    <h1 class="hero-title hero-title-gradient scramble-text product-title-2">
+                                        {% set words = laptop.display_name.split() %}
+                                        {{ words[2:]|join(' ') if words|length > 2 else 'desafía la realidad' }}
+                                    </h1>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div style="overflow: hidden; margin-bottom: 2.5rem;">
+                                <p class="hero-desc product-desc">
+                                    {{ laptop.description if laptop.description else 'Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.' }}
+                                </p>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3rem;">
+                                <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="btn-lux" style="background: var(--accent-primary); color: white; border: none;">
+                                    Comprar Ahora
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                                <a href="#featured" class="btn-lux dark">
+                                    Ver Destacados
+                                </a>
+                            </div>
+
+                            <!-- Footer Specs -->
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <p class="stat-value spec-1-val">
+                                        {{ laptop.processor.name if laptop.processor else 'i7' }}
+                                    </p>
+                                    <p class="stat-label spec-1-label">Procesador</p>
+                                </div>
+                                <div class="stat-item">
+                                    <p class="stat-value spec-2-val">
+                                        {{ laptop.ram.name if laptop.ram else '16GB' }}
+                                    </p>
+                                    <p class="stat-label spec-2-label">Memoria</p>
+                                </div>
+                                <div class="stat-item">
+                                    <p class="stat-value spec-3-val">
+                                        {{ laptop.display.refresh_rate if laptop.display and laptop.display.refresh_rate else '120Hz' }}
+                                    </p>
+                                    <p class="stat-label spec-3-label">Pantalla</p>
+                                </div>
+                                <div class="stat-item">
+                                    <p class="stat-value spec-4-val">
+                                        {{ laptop.storage.name if laptop.storage else '1TB' }}
+                                    </p>
+                                    <p class="stat-label spec-4-label">Almacenamiento</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Placeholder si no hay productos -->
+                        <div class="text-slide active">
+                            <div style="overflow: hidden; margin-bottom: 1.5rem;">
+                                <div class="hero-label">
+                                    <span></span>
+                                    <span>SERIE PREMIUM</span>
+                                </div>
+                            </div>
+                            <h1 class="hero-title scramble-text">Potencia que</h1>
+                            <h1 class="hero-title hero-title-gradient scramble-text">desafía la realidad</h1>
+                            <p class="hero-desc">Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.</p>
+                            <div class="stats-grid">
+                                <div class="stat-item"><p class="stat-value">i7</p><p class="stat-label">Procesador</p></div>
+                                <div class="stat-item"><p class="stat-value">16GB</p><p class="stat-label">Memoria</p></div>
+                                <div class="stat-item"><p class="stat-value">120Hz</p><p class="stat-label">Pantalla</p></div>
+                                <div class="stat-item"><p class="stat-value">1TB</p><p class="stat-label">Almacenamiento</p></div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
 
-                <!-- Stats -->
-                <div class="mt-12 flex gap-8 justify-center lg:justify-start border-t border-gray-200 pt-8">
-                    <div>
-                        <p class="text-2xl font-bold font-heading">{{ total_products|default(500) }}+</p>
-                        <p class="text-sm text-muted uppercase tracking-wider">Productos</p>
+                <!-- Controles del carrusel -->
+                <div class="carousel-controls">
+                    <div class="carousel-dots" id="carousel-dots">
+                        {% if featured_laptops and featured_laptops|length > 0 %}
+                            {% for i in range(featured_laptops[:5]|length) %}
+                            <div class="carousel-dot {% if loop.first %}active{% endif %}" data-index="{{ i }}"></div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="carousel-dot active" data-index="0"></div>
+                        {% endif %}
                     </div>
-                    <div>
-                        <p class="text-2xl font-bold font-heading">1000+</p>
-                        <p class="text-sm text-muted uppercase tracking-wider">Clientes</p>
+                    <div class="carousel-nav">
+                        <button class="carousel-btn" id="prev-btn">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button class="carousel-btn" id="next-btn">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <div>
-                        <p class="text-2xl font-bold font-heading">24/7</p>
-                        <p class="text-sm text-muted uppercase tracking-wider">Soporte</p>
-                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
                 </div>
             </div>
 
-            <!-- Imagen 3D Interactiva -->
-            <div class="hero-visual fade-in-up delay-200" id="heroVisual">
-                <div class="hero-circle-deco" style="width: 400px; height: 400px;"></div>
-                <div class="hero-circle-deco" style="width: 600px; height: 600px;"></div>
+            <!-- RIGHT VISUAL - Carrusel de imágenes -->
+            <div class="hero-visual fade-in-up delay-200">
+                <!-- Rings -->
+                <div class="hero-rings">
+                    <div class="ring-1"></div>
+                    <div class="ring-2"></div>
+                </div>
 
-                <!-- MANTENIENDO TU LAPTOP PRINCIPAL -->
-                {% if featured_laptops and featured_laptops|length > 0 %}
-                    {% set hero_laptop = featured_laptops[0] %}
-                    {% if hero_laptop.images and hero_laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
-                        {% set cover = hero_laptop.images|selectattr('is_cover', 'equalto', True)|first %}
-                        <img
-                            src="{{ url_for('static', filename=cover.image_path) }}"
-                            alt="{{ hero_laptop.display_name }}"
-                            class="hero-laptop"
-                            id="heroLaptop"
-                            loading="eager"
-                        >
-                    {% elif hero_laptop.images and hero_laptop.images|length > 0 %}
-                        <img
-                            src="{{ url_for('static', filename=hero_laptop.images[0].image_path) }}"
-                            alt="{{ hero_laptop.display_name }}"
-                            class="hero-laptop"
-                            id="heroLaptop"
-                            loading="eager"
-                        >
+                <!-- Contenedor de imágenes -->
+                <div id="image-slider" style="position: relative; width: 100%; height: 100%;">
+                    {% if featured_laptops and featured_laptops|length > 0 %}
+                        {% for laptop in featured_laptops[:5] %}
+                        <div id="tilt-card-{{ loop.index0 }}" class="tilt-card {% if loop.first %}active{% else %}hidden{% endif %}">
+
+                            <!-- Tech Specs Card -->
+                            <div class="glass-panel" style="position: absolute; left: -3rem; top: 20%; z-index: 40; padding: 1.5rem; border-radius: 1.5rem; width: 16rem;">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
+                                    <div class="card-icon-bg" style="width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; background: var(--accent-primary); display: flex; align-items: center; justify-content: center; color: white;">
+                                        <i class="fa-solid fa-microchip"></i>
+                                    </div>
+                                    <div>
+                                        <p style="font-size: 0.65rem; font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Sistema</p>
+                                        <p class="card-title" style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">Rendimiento</p>
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="spec-card">
+                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">CPU</p>
+                                        <p class="badge-cpu" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
+                                            {{ laptop.processor.name if laptop.processor else 'M4 Max' }}
+                                        </p>
+                                    </div>
+                                    <div class="spec-card">
+                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">GPU</p>
+                                        <p class="badge-gpu" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
+                                            {{ laptop.graphics_card.name if laptop.graphics_card else 'RTX 4090' }}
+                                        </p>
+                                    </div>
+                                    <div class="spec-card">
+                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">RAM</p>
+                                        <p class="badge-ram" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
+                                            {{ laptop.ram.name if laptop.ram else '64 GB' }}
+                                        </p>
+                                    </div>
+                                    <div class="spec-card">
+                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">SSD</p>
+                                        <p class="badge-ssd" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
+                                            {{ laptop.storage.name if laptop.storage else '2 TB' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Image -->
+                            <div class="tilt-content">
+                                {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
+                                    {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
+                                    <img
+                                        src="{{ url_for('static', filename=cover.image_path) }}"
+                                        alt="{{ laptop.display_name }}"
+                                        class="hero-image"
+                                        loading="eager"
+                                    >
+                                {% elif laptop.images and laptop.images|length > 0 %}
+                                    <img
+                                        src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
+                                        alt="{{ laptop.display_name }}"
+                                        class="hero-image"
+                                        loading="eager"
+                                    >
+                                {% else %}
+                                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-laptop" style="font-size: 8rem; color: var(--text-muted);"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Price -->
+                            <div class="glass-panel" style="position: absolute; right: -3rem; bottom: 20%; z-index: 40; padding: 1rem 1.5rem; border-radius: 100px; display: flex; align-items: center; gap: 1rem;">
+                                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                    <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;">Desde</span>
+                                    <span class="price-tag" style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--text-primary);">
+                                        RD$ {{ "{:,.2f}".format(laptop.sale_price) }}
+                                    </span>
+                                </div>
+                                <div style="position: relative; width: 12px; height: 12px;">
+                                    <div style="position: absolute; inset: 0; background: #10b981; border-radius: 50%; opacity: 0.75; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+                                    <div style="position: relative; width: 12px; height: 12px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     {% else %}
-                        <div class="w-full h-full flex items-center justify-center">
-                            <i class="fas fa-laptop text-gray-400 text-8xl"></i>
+                        <!-- Placeholder si no hay productos -->
+                        <div id="tilt-card-0" class="tilt-card active">
+                            <div class="tilt-content">
+                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-laptop" style="font-size: 8rem; color: var(--text-muted);"></i>
+                                </div>
+                            </div>
                         </div>
                     {% endif %}
-                {% else %}
-                    <div class="w-full h-full flex items-center justify-center">
-                        <i class="fas fa-laptop text-gray-400 text-8xl"></i>
-                    </div>
-                {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -1089,47 +1640,248 @@
         }
     }
 
-    // Cargar tema guardado
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        const html = document.documentElement;
-        const icon = document.getElementById('theme-icon');
-
-        html.setAttribute('data-theme', savedTheme);
-
-        if (savedTheme === 'dark') {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-        } else {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+    // --- 2. SCRAMBLE TEXT EFFECT ---
+    class TextScramble {
+        constructor(el) {
+            this.el = el;
+            this.chars = '!<>-_\\/[]{}—=+*^?#________';
+            this.update = this.update.bind(this);
         }
 
-        // --- 2. EFECTO PARALLAX PARA LA LAPTOP ---
-        const heroVisual = document.getElementById('heroVisual');
-        const heroLaptop = document.getElementById('heroLaptop');
+        setText(newText) {
+            const oldText = this.el.innerText;
+            const length = Math.max(oldText.length, newText.length);
+            const promise = new Promise((resolve) => this.resolve = resolve);
+            this.queue = [];
+            for (let i = 0; i < length; i++) {
+                const from = oldText[i] || '';
+                const to = newText[i] || '';
+                const start = Math.floor(Math.random() * 40);
+                const end = start + Math.floor(Math.random() * 40);
+                this.queue.push({ from, to, start, end });
+            }
+            cancelAnimationFrame(this.frameRequest);
+            this.frame = 0;
+            this.update();
+            return promise;
+        }
 
-        if(heroVisual && heroLaptop) {
-            heroVisual.addEventListener('mousemove', (e) => {
-                const rect = heroVisual.getBoundingClientRect();
+        update() {
+            let output = '';
+            let complete = 0;
+            for (let i = 0, n = this.queue.length; i < n; i++) {
+                let { from, to, start, end, char } = this.queue[i];
+                if (this.frame >= end) {
+                    complete++;
+                    output += to;
+                } else if (this.frame >= start) {
+                    if (!char || Math.random() < 0.28) {
+                        char = this.randomChar();
+                        this.queue[i].char = char;
+                    }
+                    output += `<span style="opacity: 0.5;">${char}</span>`;
+                } else {
+                    output += from;
+                }
+            }
+            this.el.innerHTML = output;
+            if (complete === this.queue.length) {
+                this.resolve();
+            } else {
+                this.frameRequest = requestAnimationFrame(this.update);
+                this.frame++;
+            }
+        }
+
+        randomChar() {
+            return this.chars[Math.floor(Math.random() * this.chars.length)];
+        }
+    }
+
+    // --- 3. CARRUSEL DE 5 PRODUCTOS ---
+    class HeroCarousel {
+        constructor() {
+            this.currentIndex = 0;
+            this.totalSlides = 0;
+            this.autoPlayInterval = null;
+            this.progressInterval = null;
+            this.slideDuration = 5000; // 5 segundos por slide
+            this.progressStep = 0;
+
+            this.textSlides = document.querySelectorAll('.text-slide');
+            this.imageSlides = document.querySelectorAll('.tilt-card');
+            this.dots = document.querySelectorAll('.carousel-dot');
+            this.progressFill = document.getElementById('progress-fill');
+
+            this.totalSlides = Math.min(this.textSlides.length, 5); // Máximo 5 slides
+
+            // Scramblers para cada slide
+            this.scramblers = [];
+
+            this.init();
+        }
+
+        init() {
+            // Inicializar scramblers para cada slide
+            this.textSlides.forEach((slide, index) => {
+                const title1 = slide.querySelector('.product-title-1');
+                const title2 = slide.querySelector('.product-title-2');
+
+                if (title1 && title2) {
+                    const scrambler1 = new TextScramble(title1);
+                    const scrambler2 = new TextScramble(title2);
+
+                    // Guardar referencias
+                    this.scramblers[index] = { title1: scrambler1, title2: scrambler2 };
+
+                    // Animar al cargar
+                    scrambler1.setText(title1.innerText);
+                    scrambler2.setText(title2.innerText);
+                }
+            });
+
+            // Inicializar controles
+            document.getElementById('prev-btn').addEventListener('click', () => this.prevSlide());
+            document.getElementById('next-btn').addEventListener('click', () => this.nextSlide());
+
+            // Inicializar dots
+            this.dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => this.goToSlide(index));
+            });
+
+            // Inicializar efecto tilt en todas las imágenes
+            this.imageSlides.forEach(slide => {
+                this.initTiltEffect(slide);
+            });
+
+            // Iniciar autoplay
+            this.startAutoPlay();
+
+            // Pausar autoplay al hacer hover
+            const heroSection = document.querySelector('.hero-section');
+            heroSection.addEventListener('mouseenter', () => this.pauseAutoPlay());
+            heroSection.addEventListener('mouseleave', () => this.startAutoPlay());
+        }
+
+        initTiltEffect(slide) {
+            slide.addEventListener('mousemove', (e) => {
+                const rect = slide.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
-
-                const rotateX = ((y - centerY) / centerY) * -10;
-                const rotateY = ((x - centerX) / centerX) * 10;
-
-                heroLaptop.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+                const rotateX = ((y - centerY) / 30) * -1;
+                const rotateY = (x - centerX) / 30;
+                slide.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             });
 
-            heroVisual.addEventListener('mouseleave', () => {
-                heroLaptop.style.transform = `perspective(1000px) rotateX(5deg) rotateY(-10deg) scale(1)`;
+            slide.addEventListener('mouseleave', () => {
+                slide.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
             });
         }
 
-        // --- 3. ANIMACIÓN AL SCROLL ---
+        updateSlide(index) {
+            // Ocultar todos los slides
+            this.textSlides.forEach(slide => slide.style.display = 'none');
+            this.imageSlides.forEach(slide => {
+                slide.classList.remove('active');
+                slide.classList.add('hidden');
+            });
+            this.dots.forEach(dot => dot.classList.remove('active'));
+
+            // Mostrar slide actual
+            this.textSlides[index].style.display = 'block';
+            this.imageSlides[index].classList.remove('hidden');
+            this.imageSlides[index].classList.add('active');
+            this.dots[index].classList.add('active');
+
+            // Actualizar índice actual
+            this.currentIndex = index;
+
+            // Activar efecto scramble en el slide actual
+            this.activateScramble(index);
+
+            // Reiniciar progreso
+            this.resetProgress();
+        }
+
+        activateScramble(index) {
+            // Obtener elementos del slide actual
+            const currentSlide = this.textSlides[index];
+            const title1 = currentSlide.querySelector('.product-title-1');
+            const title2 = currentSlide.querySelector('.product-title-2');
+
+            if (title1 && title2 && this.scramblers[index]) {
+                // Re-animar el efecto scramble
+                this.scramblers[index].title1.setText(title1.innerText);
+                this.scramblers[index].title2.setText(title2.innerText);
+            } else if (title1 && title2) {
+                // Crear nuevos scramblers si no existen
+                const scrambler1 = new TextScramble(title1);
+                const scrambler2 = new TextScramble(title2);
+
+                scrambler1.setText(title1.innerText);
+                scrambler2.setText(title2.innerText);
+
+                // Guardar referencias
+                this.scramblers[index] = { title1: scrambler1, title2: scrambler2 };
+            }
+        }
+
+        nextSlide() {
+            const nextIndex = (this.currentIndex + 1) % this.totalSlides;
+            this.updateSlide(nextIndex);
+        }
+
+        prevSlide() {
+            const prevIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
+            this.updateSlide(prevIndex);
+        }
+
+        goToSlide(index) {
+            if (index >= 0 && index < this.totalSlides) {
+                this.updateSlide(index);
+            }
+        }
+
+        startAutoPlay() {
+            this.stopAutoPlay();
+
+            // Iniciar progreso
+            this.resetProgress();
+            this.progressInterval = setInterval(() => {
+                this.progressStep += 2; // +2% cada 100ms = 100% en 5000ms
+                if (this.progressStep > 100) {
+                    this.progressStep = 100;
+                    this.nextSlide();
+                }
+                this.progressFill.style.width = `${this.progressStep}%`;
+            }, 100);
+
+            // Auto slide cada X segundos
+            this.autoPlayInterval = setInterval(() => {
+                this.nextSlide();
+            }, this.slideDuration);
+        }
+
+        pauseAutoPlay() {
+            clearInterval(this.autoPlayInterval);
+            clearInterval(this.progressInterval);
+        }
+
+        stopAutoPlay() {
+            clearInterval(this.autoPlayInterval);
+            clearInterval(this.progressInterval);
+        }
+
+        resetProgress() {
+            this.progressStep = 0;
+            this.progressFill.style.width = '0%';
+        }
+    }
+
+    // --- 4. ANIMACIÓN AL SCROLL ---
+    function initScrollAnimations() {
         const observerOptions = {
             root: null,
             rootMargin: '0px',
@@ -1145,11 +1897,87 @@
             });
         }, observerOptions);
 
-        // Observar elementos con animación
         document.querySelectorAll('.fade-in-up').forEach((el) => {
             el.style.opacity = '0';
             observer.observe(el);
         });
+    }
+
+    // --- 5. AURORA BACKGROUND ANIMATION ---
+    function initAuroraBackground() {
+        const aurora1 = document.getElementById('aurora-1');
+        const aurora2 = document.getElementById('aurora-2');
+
+        if (!aurora1 || !aurora2) return;
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX / window.innerWidth;
+            mouseY = e.clientY / window.innerHeight;
+        });
+
+        function animateAurora() {
+            const moveX = (mouseX - 0.5) * 40;
+            const moveY = (mouseY - 0.5) * 40;
+
+            aurora1.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            aurora2.style.transform = `translate(${-moveX * 0.7}px, ${-moveY * 0.7}px)`;
+
+            requestAnimationFrame(animateAurora);
+        }
+
+        animateAurora();
+    }
+
+    // --- 6. INITIALIZE EVERYTHING ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+
+        html.setAttribute('data-theme', savedTheme);
+
+        if (savedTheme === 'dark') {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        } else {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        // Inicializar carrusel
+        const carousel = new HeroCarousel();
+
+        // Inicializar efectos
+        initScrollAnimations();
+        initAuroraBackground();
+
+        // Actualizar colores de aurora según el tema
+        function updateAuroraColors() {
+            const aurora1 = document.getElementById('aurora-1');
+            const aurora2 = document.getElementById('aurora-2');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+            if (aurora1 && aurora2) {
+                if (isDark) {
+                    aurora1.style.background = 'rgba(191, 90, 242, 0.15)';
+                    aurora2.style.background = 'rgba(100, 210, 255, 0.15)';
+                } else {
+                    aurora1.style.background = 'rgba(124, 58, 237, 0.15)';
+                    aurora2.style.background = 'rgba(6, 182, 212, 0.15)';
+                }
+            }
+        }
+
+        // Observar cambios en el tema
+        const observer = new MutationObserver(updateAuroraColors);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // Inicializar colores
+        updateAuroraColors();
     });
 </script>
 {% endblock %}
