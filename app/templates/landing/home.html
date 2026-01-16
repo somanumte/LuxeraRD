@@ -4,32 +4,370 @@
 
 {% block meta_description %}Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.{% endblock %}
 
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --pl-bg: #ffffff;
+        --pl-bg-alt: #ffffff;
+        --pl-card-bg: #ffffff; /* Blanco puro para tarjetas */
+        --pl-text: #1d1d1f;
+        --pl-text-muted: #6e6e73;
+        --pl-border: rgba(0, 0, 0, 0.08);
+        --pl-accent: #6b21a8; /* Púrpura Premium */
+        --pl-glow: rgba(107, 33, 168, 0.12);
+    }
+
+    [data-theme="dark"] {
+        --pl-bg: #000000;
+        --pl-bg-alt: #0a0a0a;
+        --pl-card-bg: #121212;
+        --pl-text: #f5f5f7;
+        --pl-text-muted: #a1a1a6;
+        --pl-border: rgba(255, 255, 255, 0.12);
+        --pl-accent: #bf5af2; /* Púrpura Vibrante para modo oscuro */
+        --pl-glow: rgba(191, 90, 242, 0.25);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--pl-bg-alt);
+        color: var(--pl-text);
+        transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Product Card Styles */
+    .product-card {
+        background-color: var(--pl-card-bg);
+        border: 1px solid var(--pl-border);
+        border-radius: 2.5rem;
+        transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 2.25rem;
+        height: 100%;
+    }
+
+    .product-card:hover {
+        transform: translateY(-12px);
+        border-color: var(--pl-accent);
+    }
+
+    .img-container {
+        height: 240px;
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        background: transparent;
+    }
+
+    .product-img {
+        max-width: 90%;
+        height: auto;
+        object-fit: contain;
+        transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .product-card:hover .product-img {
+        transform: scale(1.08) translateY(-10px);
+    }
+
+    .badge {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        z-index: 20;
+        padding: 0.5rem 1rem;
+        border-radius: 99px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    [data-theme="dark"] .badge {
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .badge-new { background: rgba(107, 33, 168, 0.08); color: #6b21a8; border-color: rgba(107, 33, 168, 0.2); }
+    [data-theme="dark"] .badge-new { background: rgba(191, 90, 242, 0.15); color: #bf5af2; border-color: rgba(191, 90, 242, 0.3); }
+
+    .badge-offer { background: rgba(255, 59, 48, 0.08); color: #d70015; border-color: rgba(255, 59, 48, 0.2); }
+    [data-theme="dark"] .badge-offer { background: rgba(255, 69, 58, 0.15); color: #ff453a; border-color: rgba(255, 69, 58, 0.3); }
+
+    .badge-featured { background: rgba(107, 33, 168, 0.08); color: #6b21a8; border-color: rgba(107, 33, 168, 0.2); }
+    [data-theme="dark"] .badge-featured { background: rgba(191, 90, 242, 0.15); color: #bf5af2; border-color: rgba(191, 90, 242, 0.3); }
+
+    .badge-last { background: rgba(245, 158, 11, 0.08); color: #d97706; border-color: rgba(245, 158, 11, 0.2); }
+    [data-theme="dark"] .badge-last { background: rgba(255, 179, 64, 0.15); color: #ffb340; border-color: rgba(255, 179, 64, 0.3); }
+
+    .badge-soldout { background: rgba(239, 68, 68, 0.08); color: #dc2626; border-color: rgba(239, 68, 68, 0.2); }
+    [data-theme="dark"] .badge-soldout { background: rgba(255, 69, 58, 0.15); color: #ff453a; border-color: rgba(255, 69, 58, 0.3); }
+
+    .spec-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-bottom: 2.25rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--pl-border);
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0.75rem;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover .spec-item {
+        background: rgba(128, 128, 128, 0.04);
+    }
+
+    .spec-icon-wrapper {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(128, 128, 128, 0.05);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        color: var(--pl-accent);
+        border: 1px solid var(--pl-border);
+    }
+
+    .spec-text {
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: var(--pl-text-muted);
+    }
+
+    .btn-premium {
+        width: 100%;
+        padding: 1.1rem;
+        border-radius: 1.25rem;
+        background: var(--pl-text);
+        color: var(--pl-bg);
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        margin-top: auto;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .btn-premium:hover {
+        background: var(--pl-accent);
+        color: white;
+        transform: scale(1.02);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+
+    .theme-toggle {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 100;
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        background: var(--pl-card-bg);
+        border: 1px solid var(--pl-border);
+        color: var(--pl-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .theme-toggle:hover {
+        transform: rotate(15deg) scale(1.1);
+        border-color: var(--pl-accent);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+
+    .text-gradient {
+        background: linear-gradient(180deg, var(--pl-text) 30%, var(--pl-text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Section Styles */
+    .section-spacing {
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+    }
+
+    .container-custom {
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    /* Hero Section */
+    .hero-title {
+        font-size: 3.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .subtitle {
+        font-size: 1.25rem;
+        color: var(--pl-text-muted);
+        line-height: 1.6;
+    }
+
+    .btn-primary {
+        background: var(--pl-accent);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 1.25rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--pl-accent);
+        padding: 1rem 2rem;
+        border-radius: 1.25rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--pl-accent);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .btn-secondary:hover {
+        background: var(--pl-accent);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+
+    /* Features Section */
+    .feature-card {
+        background: var(--pl-card-bg);
+        border: 1px solid var(--pl-border);
+        border-radius: 2rem;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--pl-accent);
+        box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1);
+    }
+
+    .feature-icon {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Category Cards */
+    .category-card {
+        height: 320px;
+        border-radius: 2rem;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -5px rgba(0,0,0,0.15);
+    }
+
+    /* Override existing styles */
+    .bg-apple-gray-light {
+        background-color: var(--pl-bg) !important;
+    }
+
+    .bg-white {
+        background-color: var(--pl-bg) !important;
+    }
+
+    .text-apple-gray {
+        color: var(--pl-text) !important;
+    }
+
+    .text-apple-text-secondary {
+        color: var(--pl-text-muted) !important;
+    }
+
+    .border-gray-200 {
+        border-color: var(--pl-border) !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
+<!-- Botón de cambio de tema -->
+<button class="theme-toggle" onclick="toggleTheme()" title="Cambiar Tema">
+    <i id="theme-icon" class="fa-solid fa-sun text-xl"></i>
+</button>
+
 <!-- ============================================
-     HERO SECTION - SLIDER DE PRODUCTOS
+     HERO SECTION
      ============================================ -->
-<section id="hero" class="relative min-h-screen flex items-center bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden">
     <!-- Decorative Elements -->
-    <div class="absolute top-20 right-10 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-    <div class="absolute bottom-20 left-10 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
-    
+    <div class="absolute top-20 right-10 w-72 h-72 bg-purple-100 dark:bg-purple-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+    <div class="absolute bottom-20 left-10 w-96 h-96 bg-pink-100 dark:bg-pink-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
+
     <div class="container-custom relative z-10 py-20">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
             <!-- Text Content -->
             <div class="text-center lg:text-left" data-animate>
-                <span class="inline-block px-4 py-2 bg-blue-50 text-apple-blue rounded-full text-sm font-semibold mb-6">
-                    ✨ Nuevos modelos disponibles
-                </span>
-                
                 <h1 class="hero-title text-apple-gray mb-6">
                     Eleva tu productividad con la <span class="text-gradient">mejor tecnología</span>
                 </h1>
-                
+
                 <p class="subtitle mb-8 max-w-lg mx-auto lg:mx-0">
                     Descubre laptops de última generación con rendimiento excepcional, diseño elegante y soporte técnico especializado.
                 </p>
-                
+
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                     <a href="{{ url_for('public.catalog') }}" class="btn-primary">
                         <i class="fas fa-laptop mr-2"></i>
@@ -40,7 +378,7 @@
                         Ver Destacados
                     </a>
                 </div>
-                
+
                 <!-- Stats -->
                 <div class="grid grid-cols-3 gap-6 mt-12 max-w-md mx-auto lg:mx-0">
                     <div class="text-center lg:text-left">
@@ -60,82 +398,47 @@
 
             <!-- Hero Image/Product -->
             <div class="relative" data-animate>
-                <div class="relative z-10 transform hover:scale-105 transition-transform duration-500">
+                <div class="relative z-10 transform transition-transform duration-500">
                     {% if featured_laptops and featured_laptops|length > 0 %}
                         {% set hero_laptop = featured_laptops[0] %}
                         {% if hero_laptop.images and hero_laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
                             {% set cover = hero_laptop.images|selectattr('is_cover', 'equalto', True)|first %}
-                            <img
-                                src="{{ url_for('static', filename=cover.image_path) }}"
-                                alt="{{ hero_laptop.display_name }}"
-                                class="w-full h-auto drop-shadow-2xl"
-                                loading="eager"
-                            >
+                            <div class="img-container">
+                                <img
+                                    src="{{ url_for('static', filename=cover.image_path) }}"
+                                    alt="{{ hero_laptop.display_name }}"
+                                    class="product-img"
+                                    loading="eager"
+                                >
+                            </div>
                         {% elif hero_laptop.images and hero_laptop.images|length > 0 %}
-                            <img
-                                src="{{ url_for('static', filename=hero_laptop.images[0].image_path) }}"
-                                alt="{{ hero_laptop.display_name }}"
-                                class="w-full h-auto drop-shadow-2xl"
-                                loading="eager"
-                            >
+                            <div class="img-container">
+                                <img
+                                    src="{{ url_for('static', filename=hero_laptop.images[0].image_path) }}"
+                                    alt="{{ hero_laptop.display_name }}"
+                                    class="product-img"
+                                    loading="eager"
+                                >
+                            </div>
                         {% else %}
-                            <div class="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
-                                <i class="fas fa-laptop text-gray-400 text-9xl"></i>
+                            <div class="img-container">
+                                <div class="flex items-center justify-center h-full">
+                                    <i class="fas fa-laptop text-gray-400 text-6xl"></i>
+                                </div>
                             </div>
                         {% endif %}
                     {% else %}
                         <!-- Placeholder if no featured laptops -->
-                        <div class="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
-                            <i class="fas fa-laptop text-gray-400 text-9xl"></i>
+                        <div class="img-container">
+                            <div class="flex items-center justify-center h-full">
+                                <i class="fas fa-laptop text-gray-400 text-6xl"></i>
+                            </div>
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- Floating Cards -->
-                <div class="absolute -top-4 -left-4 bg-white p-4 rounded-2xl shadow-xl animate-bounce" style="animation-duration: 3s;">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-sm">Garantía Oficial</p>
-                            <p class="text-xs text-gray-600">1 año incluido</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="absolute -bottom-4 -right-4 bg-white p-4 rounded-2xl shadow-xl animate-bounce" style="animation-duration: 4s; animation-delay: 1s;">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-shipping-fast text-blue-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-sm">Envío Gratis</p>
-                            <p class="text-xs text-gray-600">En todo el país</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- Elementos flotantes eliminados -->
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================
-     MARCAS ASOCIADAS
-     ============================================ -->
-<section class="py-12 bg-white border-y border-gray-100">
-    <div class="container-custom">
-        <p class="text-center text-apple-text-secondary text-sm font-semibold mb-8 uppercase tracking-wide">
-            Marcas de confianza mundial
-        </p>
-        <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 hover:opacity-100 transition-opacity">
-            <!-- Brand logos would go here - using text for now -->
-            <div class="text-2xl font-bold text-gray-400">Dell</div>
-            <div class="text-2xl font-bold text-gray-400">HP</div>
-            <div class="text-2xl font-bold text-gray-400">Lenovo</div>
-            <div class="text-2xl font-bold text-gray-400">ASUS</div>
-            <div class="text-2xl font-bold text-gray-400">Apple</div>
-            <div class="text-2xl font-bold text-gray-400">Acer</div>
         </div>
     </div>
 </section>
@@ -147,10 +450,10 @@
     <div class="container-custom">
         <!-- Section Header -->
         <div class="text-center mb-16" data-animate>
-            <span class="inline-block px-4 py-2 bg-white text-apple-blue rounded-full text-sm font-semibold mb-4">
+            <span class="badge badge-new mb-4">
                 ⚡ Lo más popular
             </span>
-            <h2 class="section-title text-apple-gray mb-4">
+            <h2 class="hero-title text-apple-gray mb-4 text-4xl md:text-5xl">
                 Productos Destacados
             </h2>
             <p class="subtitle max-w-2xl mx-auto">
@@ -158,26 +461,41 @@
             </p>
         </div>
 
-        <!-- Products Grid -->
-        <div class="products-grid mb-12">
+        <!-- NUEVO DISEÑO DE PRODUCTOS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
             {% if featured_laptops %}
                 {% for laptop in featured_laptops[:6] %}
-                <article class="product-card" data-animate style="animation-delay: {{ loop.index * 0.1 }}s;">
+                <div class="product-card">
+                    <!-- Badge -->
+                    {% if loop.index == 1 %}
+                    <div class="badge badge-new">Nuevo Lanzamiento</div>
+                    {% elif loop.index == 2 %}
+                    <div class="badge badge-offer">Oferta Exclusiva</div>
+                    {% else %}
+                    <div class="badge badge-featured">Destacado</div>
+                    {% endif %}
+
+                    {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
+                    <div class="badge badge-last" style="top: 5rem;">¡Últimas unidades!</div>
+                    {% elif laptop.quantity == 0 %}
+                    <div class="badge badge-soldout" style="top: 5rem;">Agotado</div>
+                    {% endif %}
+
                     <!-- Product Image -->
-                    <div class="aspect-[4/3] overflow-hidden bg-white relative group">
+                    <div class="img-container">
                         {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
                             {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
                             <img
                                 src="{{ url_for('static', filename=cover.image_path) }}"
                                 alt="{{ laptop.display_name }}"
-                                class="product-image w-full h-full object-contain p-6"
+                                class="product-img"
                                 loading="lazy"
                             >
                         {% elif laptop.images and laptop.images|length > 0 %}
                             <img
                                 src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
                                 alt="{{ laptop.display_name }}"
-                                class="product-image w-full h-full object-contain p-6"
+                                class="product-img"
                                 loading="lazy"
                             >
                         {% else %}
@@ -185,103 +503,101 @@
                                 <i class="fas fa-laptop text-gray-300 text-6xl"></i>
                             </div>
                         {% endif %}
-
-                        <!-- Quick View Badge -->
-                        <div class="absolute top-4 left-4 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Destacado
-                        </div>
-
-                        {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
-                        <div class="absolute top-4 right-4 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            ¡Últimas unidades!
-                        </div>
-                        {% elif laptop.quantity == 0 %}
-                        <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            Agotado
-                        </div>
-                        {% endif %}
-
-                        <!-- Overlay on Hover -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                            <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="w-full btn-primary text-center">
-                                Ver Detalles
-                            </a>
-                        </div>
                     </div>
 
                     <!-- Product Info -->
-                    <div class="p-6">
-                        <!-- Brand -->
-                        <p class="text-sm text-apple-text-secondary mb-2 font-medium">
+                    <div class="mb-8">
+                        <p class="text-sm text-apple-text-secondary mb-1 font-medium">
                             {{ laptop.brand.name if laptop.brand else 'Marca' }}
                         </p>
-
-                        <!-- Name -->
-                        <h3 class="text-xl font-semibold text-apple-gray mb-3 line-clamp-2">
-                            {{ laptop.display_name }}
+                        <h3 class="text-2xl font-bold text-apple-gray tracking-tight truncate w-full" title="{{ laptop.display_name }}">
+                            {{ laptop.display_name[:30] }}{% if laptop.display_name|length > 30 %}...{% endif %}
                         </h3>
 
-                        <!-- Specs -->
-                        <div class="space-y-2 mb-4 text-sm text-apple-text-secondary">
-                            {% if laptop.processor %}
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-microchip w-4"></i>
-                                <span>{{ laptop.processor.name[:30] }}{% if laptop.processor.name|length > 30 %}...{% endif %}</span>
+                        <!-- Price -->
+                        <div class="mt-3">
+                            {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-apple-text-secondary">RD$</span>
+                                <span class="text-3xl font-extrabold text-apple-gray tracking-tighter">${{ "{:,.2f}".format(laptop.discount_price) }}</span>
+                                <span class="text-sm font-semibold text-apple-text-secondary line-through opacity-40">${{ "{:,.2f}".format(laptop.sale_price) }}</span>
+                            </div>
+                            {% else %}
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-xs font-bold text-apple-text-secondary">RD$</span>
+                                <span class="text-3xl font-extrabold text-apple-gray tracking-tighter">${{ "{:,.2f}".format(laptop.sale_price) }}</span>
                             </div>
                             {% endif %}
-
-                            {% if laptop.ram %}
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-memory w-4"></i>
-                                <span>{{ laptop.ram.name }}</span>
-                            </div>
-                            {% endif %}
-
-                            {% if laptop.storage %}
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-hdd w-4"></i>
-                                <span>{{ laptop.storage.name }}</span>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Price & Action -->
-                        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                            <div>
-                                {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
-                                <p class="text-sm text-gray-400 line-through">
-                                    ${{ "{:,.2f}".format(laptop.sale_price) }}
-                                </p>
-                                <p class="text-2xl font-bold text-apple-gray">
-                                    ${{ "{:,.2f}".format(laptop.discount_price) }}
-                                </p>
-                                {% else %}
-                                <p class="text-2xl font-bold text-apple-gray">
-                                    ${{ "{:,.2f}".format(laptop.sale_price) }}
-                                </p>
-                                {% endif %}
-                            </div>
-
-                            <a href="{{ url_for('public.product_detail', id=laptop.id) }}"
-                               class="p-3 bg-apple-blue text-white rounded-full hover:bg-apple-blue-dark transition-colors"
-                               aria-label="Ver detalles de {{ laptop.display_name }}">
-                                <i class="fas fa-arrow-right"></i>
-                            </a>
                         </div>
                     </div>
-                </article>
+
+                    <!-- Tech Specs Reordenadas -->
+                    <div class="spec-list">
+                        {% if laptop.processor %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-microchip"></i></div>
+                            <span class="spec-text truncate">{{ laptop.processor.name[:30] }}{% if laptop.processor.name|length > 30 %}...{% endif %}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.graphics_card %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-gamepad"></i></div>
+                            <span class="spec-text">{{ laptop.graphics_card.name[:30] }}{% if laptop.graphics_card.name|length > 30 %}...{% endif %}</span>
+                        </div>
+                        {% else %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-gamepad"></i></div>
+                            <span class="spec-text">Gráficos Integrados</span>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.screen_size %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-display"></i></div>
+                            <span class="spec-text">{{ laptop.screen_size }}" Pantalla</span>
+                        </div>
+                        {% else %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-display"></i></div>
+                            <span class="spec-text">Pantalla Full HD</span>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.ram %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-memory"></i></div>
+                            <span class="spec-text">{{ laptop.ram.name }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if laptop.storage %}
+                        <div class="spec-item">
+                            <div class="spec-icon-wrapper"><i class="fa-solid fa-hard-drive"></i></div>
+                            <span class="spec-text">{{ laptop.storage.name }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Action Button -->
+                    <a href="{{ url_for('public.product_detail', id=laptop.id) }}"
+                       class="btn-premium">
+                        <span>Ver Detalles</span>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </a>
+                </div>
                 {% endfor %}
             {% else %}
                 <!-- Placeholder when no products -->
-                {% for i in range(6) %}
-                <div class="product-card skeleton h-96"></div>
+                {% for i in range(3) %}
+                <div class="product-card skeleton h-[600px]"></div>
                 {% endfor %}
             {% endif %}
         </div>
 
         <!-- View All Button -->
-        <div class="text-center" data-animate>
-            <a href="{{ url_for('public.catalog') }}" class="btn-primary inline-flex">
+        <div class="text-center mt-12" data-animate>
+            <a href="{{ url_for('public.catalog') }}" class="btn-primary inline-flex px-8 py-4 text-lg">
                 Ver Todos los Productos
                 <i class="fas fa-arrow-right ml-2"></i>
             </a>
@@ -292,14 +608,14 @@
 <!-- ============================================
      POR QUÉ ELEGIRNOS
      ============================================ -->
-<section id="features" class="section-spacing bg-white">
+<section id="features" class="section-spacing">
     <div class="container-custom">
         <!-- Section Header -->
         <div class="text-center mb-16" data-animate>
-            <span class="inline-block px-4 py-2 bg-blue-50 text-apple-blue rounded-full text-sm font-semibold mb-4">
+            <span class="badge badge-new mb-4">
                 💎 Beneficios
             </span>
-            <h2 class="section-title text-apple-gray mb-4">
+            <h2 class="hero-title text-apple-gray mb-4 text-4xl md:text-5xl">
                 ¿Por Qué Elegirnos?
             </h2>
             <p class="subtitle max-w-2xl mx-auto">
@@ -308,11 +624,13 @@
         </div>
 
         <!-- Features Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             <!-- Feature 1: Garantía Oficial -->
             <div class="feature-card text-center" data-animate style="animation-delay: 0.1s;">
-                <div class="feature-icon mx-auto">
-                    <i class="fas fa-shield-alt text-3xl text-apple-blue"></i>
+                <div class="feature-icon">
+                    <div class="spec-icon-wrapper mx-auto">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
                 </div>
                 <h3 class="text-xl font-semibold text-apple-gray mb-3">
                     Garantía Oficial
@@ -324,8 +642,10 @@
 
             <!-- Feature 2: Envío Rápido -->
             <div class="feature-card text-center" data-animate style="animation-delay: 0.2s;">
-                <div class="feature-icon mx-auto">
-                    <i class="fas fa-shipping-fast text-3xl text-green-600"></i>
+                <div class="feature-icon">
+                    <div class="spec-icon-wrapper mx-auto">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
                 </div>
                 <h3 class="text-xl font-semibold text-apple-gray mb-3">
                     Envío Gratis
@@ -337,8 +657,10 @@
 
             <!-- Feature 3: Soporte Técnico -->
             <div class="feature-card text-center" data-animate style="animation-delay: 0.3s;">
-                <div class="feature-icon mx-auto">
-                    <i class="fas fa-headset text-3xl text-purple-600"></i>
+                <div class="feature-icon">
+                    <div class="spec-icon-wrapper mx-auto">
+                        <i class="fas fa-headset"></i>
+                    </div>
                 </div>
                 <h3 class="text-xl font-semibold text-apple-gray mb-3">
                     Soporte 24/7
@@ -350,8 +672,10 @@
 
             <!-- Feature 4: Precios Competitivos -->
             <div class="feature-card text-center" data-animate style="animation-delay: 0.4s;">
-                <div class="feature-icon mx-auto">
-                    <i class="fas fa-tags text-3xl text-orange-600"></i>
+                <div class="feature-icon">
+                    <div class="spec-icon-wrapper mx-auto">
+                        <i class="fas fa-tags"></i>
+                    </div>
                 </div>
                 <h3 class="text-xl font-semibold text-apple-gray mb-3">
                     Mejores Precios
@@ -371,7 +695,7 @@
     <div class="container-custom">
         <!-- Section Header -->
         <div class="text-center mb-16" data-animate>
-            <h2 class="section-title text-apple-gray mb-4">
+            <h2 class="hero-title text-apple-gray mb-4 text-4xl md:text-5xl">
                 Compra por Categoría
             </h2>
             <p class="subtitle max-w-2xl mx-auto">
@@ -380,17 +704,19 @@
         </div>
 
         <!-- Categories Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             <!-- Gaming -->
             <a href="{{ url_for('public.catalog', category='gaming') }}" class="group" data-animate>
-                <div class="relative overflow-hidden rounded-3xl h-80 bg-gradient-to-br from-red-500 to-purple-600">
-                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
+                <div class="category-card bg-gradient-to-br from-purple-600 to-pink-600">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                     <div class="relative h-full flex flex-col justify-end p-8 text-white">
-                        <i class="fas fa-gamepad text-6xl mb-4 opacity-80"></i>
+                        <div class="spec-icon-wrapper bg-white/20 backdrop-blur-sm mb-4 w-16 h-16">
+                            <i class="fas fa-gamepad text-2xl"></i>
+                        </div>
                         <h3 class="text-3xl font-bold mb-2">Gaming</h3>
                         <p class="text-white/80">Máximo rendimiento para juegos</p>
                         <div class="mt-4 inline-flex items-center gap-2 font-semibold group-hover:gap-4 transition-all">
-                            Explorar <i class="fas fa-arrow-right"></i>
+                            Explorar <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
                 </div>
@@ -398,14 +724,16 @@
 
             <!-- Profesional -->
             <a href="{{ url_for('public.catalog', category='workstation') }}" class="group" data-animate style="animation-delay: 0.1s;">
-                <div class="relative overflow-hidden rounded-3xl h-80 bg-gradient-to-br from-blue-500 to-indigo-600">
-                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
+                <div class="category-card bg-gradient-to-br from-blue-600 to-indigo-600">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                     <div class="relative h-full flex flex-col justify-end p-8 text-white">
-                        <i class="fas fa-briefcase text-6xl mb-4 opacity-80"></i>
+                        <div class="spec-icon-wrapper bg-white/20 backdrop-blur-sm mb-4 w-16 h-16">
+                            <i class="fas fa-briefcase text-2xl"></i>
+                        </div>
                         <h3 class="text-3xl font-bold mb-2">Profesional</h3>
                         <p class="text-white/80">Para trabajo y productividad</p>
                         <div class="mt-4 inline-flex items-center gap-2 font-semibold group-hover:gap-4 transition-all">
-                            Explorar <i class="fas fa-arrow-right"></i>
+                            Explorar <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
                 </div>
@@ -413,14 +741,16 @@
 
             <!-- Estudiantes -->
             <a href="{{ url_for('public.catalog', category='laptop') }}" class="group" data-animate style="animation-delay: 0.2s;">
-                <div class="relative overflow-hidden rounded-3xl h-80 bg-gradient-to-br from-green-500 to-teal-600">
-                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
+                <div class="category-card bg-gradient-to-br from-emerald-600 to-teal-600">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                     <div class="relative h-full flex flex-col justify-end p-8 text-white">
-                        <i class="fas fa-graduation-cap text-6xl mb-4 opacity-80"></i>
+                        <div class="spec-icon-wrapper bg-white/20 backdrop-blur-sm mb-4 w-16 h-16">
+                            <i class="fas fa-graduation-cap text-2xl"></i>
+                        </div>
                         <h3 class="text-3xl font-bold mb-2">Estudiantes</h3>
                         <p class="text-white/80">Perfectas para estudio y tareas</p>
                         <div class="mt-4 inline-flex items-center gap-2 font-semibold group-hover:gap-4 transition-all">
-                            Explorar <i class="fas fa-arrow-right"></i>
+                            Explorar <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
                 </div>
@@ -432,7 +762,7 @@
 <!-- ============================================
      CTA FINAL
      ============================================ -->
-<section id="contact" class="section-spacing bg-gradient-to-br from-apple-blue to-indigo-700 text-white relative overflow-hidden">
+<section id="contact" class="section-spacing bg-gradient-to-br from-purple-700 to-pink-700 text-white relative overflow-hidden">
     <!-- Decorative Elements -->
     <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full filter blur-3xl"></div>
     <div class="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full filter blur-3xl"></div>
@@ -447,11 +777,11 @@
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url_for('public.catalog') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-apple-blue rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors">
+                <a href="{{ url_for('public.catalog') }}" class="btn-premium bg-white text-purple-700 hover:bg-purple-800 hover:text-white">
                     <i class="fas fa-shopping-bag mr-2"></i>
                     Ver Catálogo Completo
                 </a>
-                <a href="{{ url_for('main.contact') }}" class="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-apple-blue transition-colors">
+                <a href="{{ url_for('main.contact') }}" class="btn-premium bg-transparent border border-white text-white hover:bg-white hover:text-purple-700">
                     <i class="fas fa-phone mr-2"></i>
                     Contactar Ahora
                 </a>
@@ -484,8 +814,38 @@
 
 {% block extra_js %}
 <script>
-    // Intersection Observer for scroll animations
+    // Toggle theme function
+    function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+    }
+
+    function updateIcon(theme) {
+        const icon = document.getElementById('theme-icon');
+        if (theme === 'dark') {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        } else {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+    }
+
+    // Check for saved theme preference
     document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const html = document.documentElement;
+
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        // Intersection Observer for scroll animations
         const animateElements = document.querySelectorAll('[data-animate]');
 
         const observer = new IntersectionObserver((entries) => {
@@ -505,17 +865,6 @@
             el.style.transform = 'translateY(30px)';
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
-        });
-    });
-
-    // Product card hover effect
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px)';
-        });
-
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
         });
     });
 </script>
