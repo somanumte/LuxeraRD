@@ -342,7 +342,7 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 1.5rem;
-        background: var(--bg-surface);
+        background: #ffffff; /* Cambiado a blanco puro */
         border-radius: 16px;
         overflow: hidden;
     }
@@ -833,6 +833,13 @@
                             <div class="spec-item">
                                 <div class="spec-icon-wrapper"><i class="fa-solid fa-gamepad"></i></div>
                                 <span class="spec-text">{{ laptop.graphics_card.name[:25] }}{% if laptop.graphics_card.name|length > 25 %}...{% endif %}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if laptop.display %}
+                            <div class="spec-item">
+                                <div class="spec-icon-wrapper"><i class="fa-solid fa-display"></i></div>
+                                <span class="spec-text">{{ laptop.display.name[:25] }}{% if laptop.display.name|length > 25 %}...{% endif %}</span>
                             </div>
                             {% endif %}
 
