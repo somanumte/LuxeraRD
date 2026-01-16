@@ -1,5 +1,5 @@
 # ============================================
-# PUNTO DE ENTRADA DE LA APLICACIÓN LUXERA
+# PUNTO DE ENTRADA DE LA APLICACIÓN LUXERA  Prueba
 # ============================================
 # Comando: python run.py
 
