@@ -5,55 +5,102 @@
 {% block meta_description %}Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.{% endblock %}
 
 {% block extra_css %}
-<!-- Fuentes Premium: Outfit (Moderna) y Space Grotesk (Tech) -->
+<!-- Fuentes Premium: Satoshi (Moderna) y Clash Display (Bold) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
     /* =========================================
-       1. VARIABLES & CORE SETTINGS
+       1. VARIABLES & CORE SETTINGS (Mejorado)
        ========================================= */
     :root {
-        --bg-deep: #ffffff;
-        --bg-surface: #f5f5f7;
+        /* Paleta refinada - Evitando el púrpura genérico */
+        --bg-deep: #fafafa;
+        --bg-surface: #f0f0f0;
         --bg-card: #ffffff;
+        --bg-elevated: #ffffff;
 
-        --text-primary: #1d1d1f;
-        --text-secondary: #424245;
-        --text-muted: #86868b;
+        --text-primary: #0a0a0a;
+        --text-secondary: #3d3d3d;
+        --text-muted: #737373;
+        --text-subtle: #a3a3a3;
 
-        --accent-primary: #7c3aed;
-        --accent-secondary: #06b6d4;
-        --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-        --accent-glow: 0 0 40px rgba(124, 58, 237, 0.15);
+        /* Colores de acento más sofisticados */
+        --accent-primary: #0066ff;
+        --accent-secondary: #00d4aa;
+        --accent-tertiary: #ff6b35;
+        --accent-gradient: linear-gradient(135deg, #0066ff 0%, #00d4aa 100%);
+        --accent-glow: 0 0 60px rgba(0, 102, 255, 0.15);
 
-        --border-light: rgba(0, 0, 0, 0.08);
+        --border-light: rgba(0, 0, 0, 0.06);
+        --border-medium: rgba(0, 0, 0, 0.1);
         --border-hover: rgba(0, 0, 0, 0.15);
-        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.05);
 
-        --font-body: 'Outfit', sans-serif;
-        --font-heading: 'Space Grotesk', sans-serif;
-        --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+        --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.12);
+
+        /* Tipografía distintiva */
+        --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-heading: 'Syne', sans-serif;
+
+        /* Easing functions */
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+        --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* Variables dinámicas para el carrusel */
+        --dynamic-gradient: linear-gradient(135deg, #0066ff 0%, #00d4aa 100%);
+        --dynamic-accent: #0066ff;
+        --dynamic-accent-rgb: 0, 102, 255;
+        --dynamic-aurora1: rgba(0, 102, 255, 0.08);
+        --dynamic-aurora2: rgba(0, 212, 170, 0.08);
     }
 
     [data-theme="dark"] {
-        --bg-deep: #000000;
+        --bg-deep: #050505;
         --bg-surface: #0a0a0a;
-        --bg-card: #121212;
+        --bg-card: #111111;
+        --bg-elevated: #181818;
 
-        --text-primary: #f5f5f7;
-        --text-secondary: #a1a1a6;
-        --text-muted: #6e6e73;
+        --text-primary: #fafafa;
+        --text-secondary: #d4d4d4;
+        --text-muted: #737373;
+        --text-subtle: #525252;
 
-        --accent-primary: #bf5af2;
-        --accent-secondary: #64d2ff;
-        --accent-gradient: linear-gradient(135deg, #bf5af2 0%, #5e5ce6 100%);
-        --accent-glow: 0 0 40px rgba(191, 90, 242, 0.25);
+        --accent-primary: #3b82f6;
+        --accent-secondary: #10b981;
+        --accent-tertiary: #f97316;
+        --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        --accent-glow: 0 0 80px rgba(59, 130, 246, 0.25);
 
-        --border-light: rgba(255, 255, 255, 0.12);
-        --border-hover: rgba(255, 255, 255, 0.2);
-        --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
+        --border-light: rgba(255, 255, 255, 0.06);
+        --border-medium: rgba(255, 255, 255, 0.1);
+        --border-hover: rgba(255, 255, 255, 0.18);
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+        --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.5);
+
+        --dynamic-gradient: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        --dynamic-accent: #3b82f6;
+        --dynamic-accent-rgb: 59, 130, 246;
+        --dynamic-aurora1: rgba(59, 130, 246, 0.12);
+        --dynamic-aurora2: rgba(16, 185, 129, 0.1);
+    }
+
+    /* =========================================
+       2. BASE STYLES
+       ========================================= */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
     }
 
     body {
@@ -61,21 +108,158 @@
         background-color: var(--bg-deep);
         color: var(--text-primary);
         -webkit-font-smoothing: antialiased;
-        transition: background-color 0.5s var(--ease-out-expo);
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.5s var(--ease-out-expo), color 0.5s var(--ease-out-expo);
         overflow-x: hidden;
+        line-height: 1.6;
     }
 
     /* =========================================
-       2. UTILIDADES Y COMPONENTES
+       3. VISUAL EFFECTS & BACKGROUNDS
+       ========================================= */
+
+    /* Noise texture overlay */
+    .noise-overlay {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.02;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Grid pattern */
+    .grid-pattern {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.03;
+        background-image:
+            linear-gradient(var(--text-primary) 1px, transparent 1px),
+            linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
+        background-size: 100px 100px;
+        z-index: 0;
+        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+
+    [data-theme="dark"] .grid-pattern {
+        opacity: 0.04;
+    }
+
+    /* Aurora container */
+    .aurora-container {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .aurora-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0.5;
+        transition: all 1.5s var(--ease-out-expo);
+        will-change: transform, background;
+    }
+
+    .aurora-blob-1 {
+        width: 50vw;
+        height: 50vw;
+        top: -15%;
+        left: -10%;
+        background: var(--dynamic-aurora1);
+    }
+
+    .aurora-blob-2 {
+        width: 40vw;
+        height: 40vw;
+        bottom: -15%;
+        right: -5%;
+        background: var(--dynamic-aurora2);
+    }
+
+    /* Floating particles */
+    .particles-container {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .particle {
+        position: absolute;
+        background: var(--text-primary);
+        border-radius: 50%;
+        opacity: 0.06;
+        animation: float-particle var(--duration) var(--delay) infinite ease-in-out;
+    }
+
+    @keyframes float-particle {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.06;
+        }
+        50% {
+            transform: translate(var(--tx), var(--ty)) scale(1.2);
+            opacity: 0.12;
+        }
+    }
+
+    /* =========================================
+       4. CUSTOM CURSOR
+       ========================================= */
+    .cursor {
+        position: fixed;
+        pointer-events: none;
+        z-index: 10001;
+        mix-blend-mode: difference;
+    }
+
+    .cursor-dot {
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: transform 0.15s var(--ease-out-expo);
+    }
+
+    .cursor-ring {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.2s var(--ease-out-expo);
+    }
+
+    .cursor.hovering .cursor-dot {
+        transform: translate(-50%, -50%) scale(2);
+    }
+
+    .cursor.hovering .cursor-ring {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+
+    @media (hover: none) {
+        .cursor { display: none; }
+    }
+
+    /* =========================================
+       5. CONTAINERS & UTILITIES
        ========================================= */
     .container-xl {
-        max-width: 1440px;
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 0 2rem;
+        padding: 0 clamp(1rem, 4vw, 3rem);
     }
 
     .section-padding {
-        padding: 8rem 0;
+        padding: clamp(4rem, 10vw, 8rem) 0;
     }
 
     .text-gradient {
@@ -85,213 +269,246 @@
         background-clip: text;
     }
 
-    /* Botones Premium */
-    .btn-lux {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 1rem 2.5rem;
-        background: var(--text-primary);
-        color: var(--bg-deep);
-        font-weight: 700;
-        border-radius: 100px;
-        font-family: var(--font-heading);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        transition: all 0.3s var(--ease-out-expo);
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        text-decoration: none;
-    }
-
-    .btn-lux:hover {
-        transform: scale(1.05);
-        background: var(--accent-primary);
-        color: white;
-        box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
-    }
-
-    .btn-lux.dark {
-        background: transparent;
-        color: var(--text-primary);
-        border: 1px solid var(--border-light);
-    }
-
-    .btn-lux.dark:hover {
-        background: var(--bg-surface);
-        border-color: var(--accent-primary);
-    }
-
-    /* Badges */
-    .badge {
-        position: absolute;
-        top: 1.5rem;
-        left: 1.5rem;
-        padding: 0.5rem 1.25rem;
-        border-radius: 100px;
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        z-index: 20;
-        backdrop-filter: blur(12px);
-        border: 1px solid var(--border-light);
-    }
-
-    .badge-new {
-        background: rgba(124, 58, 237, 0.1);
-        color: var(--accent-primary);
-        border-color: rgba(124, 58, 237, 0.2);
-    }
-
-    .badge-offer {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        border-color: rgba(239, 68, 68, 0.2);
-    }
-
-    .badge-featured {
-        background: rgba(6, 182, 212, 0.1);
-        color: var(--accent-secondary);
-        border-color: rgba(6, 182, 212, 0.2);
-    }
-
-    .badge-last {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-        border-color: rgba(245, 158, 11, 0.2);
-    }
-
-    .badge-soldout {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        border-color: rgba(239, 68, 68, 0.2);
-    }
-
-    /* Animaciones */
-    .fade-in-up {
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s var(--ease-out-expo) forwards;
-    }
-
-    .delay-100 { animation-delay: 0.1s; }
-    .delay-200 { animation-delay: 0.2s; }
-    .delay-300 { animation-delay: 0.3s; }
-    .delay-400 { animation-delay: 0.4s; }
-
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    @keyframes spin-reverse {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(-360deg); }
-    }
-
-    @keyframes ping {
-        75%, 100% { transform: scale(2); opacity: 0; }
-    }
-
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(30px); }
-        to { opacity: 1; transform: translateX(0); }
+    .dynamic-gradient {
+        background: var(--dynamic-gradient) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        transition: all 0.8s var(--ease-out-expo);
     }
 
     /* =========================================
-       3. HERO SECTION - CARRUSEL 5 PRODUCTOS
+       6. BUTTONS
        ========================================= */
-    .hero-section {
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.4s var(--ease-out-expo);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn:hover::before {
+        opacity: 1;
+    }
+
+    .btn-primary {
+        background: var(--dynamic-accent);
+        color: white;
+        box-shadow: 0 4px 20px rgba(var(--dynamic-accent-rgb), 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(var(--dynamic-accent-rgb), 0.4);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border: 1px solid var(--border-medium);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-surface);
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+    }
+
+    .btn-icon {
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border-radius: 50%;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-icon:hover {
+        background: var(--dynamic-accent);
+        color: white;
+        border-color: var(--dynamic-accent);
+        transform: scale(1.1);
+    }
+
+    /* =========================================
+       7. BADGES
+       ========================================= */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-radius: 100px;
+        backdrop-filter: blur(12px);
+    }
+
+    .badge-new {
+        background: rgba(0, 102, 255, 0.1);
+        color: var(--accent-primary);
+        border: 1px solid rgba(0, 102, 255, 0.2);
+    }
+
+    .badge-hot {
+        background: rgba(255, 107, 53, 0.1);
+        color: var(--accent-tertiary);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .badge-featured {
+        background: rgba(0, 212, 170, 0.1);
+        color: var(--accent-secondary);
+        border: 1px solid rgba(0, 212, 170, 0.2);
+    }
+
+    .badge-limited {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* =========================================
+       8. HERO SECTION
+       ========================================= */
+    .hero {
         min-height: 100vh;
         position: relative;
         display: flex;
         align-items: center;
+        padding-top: 100px;
         overflow: hidden;
-        padding-top: 80px;
-        background: var(--bg-deep);
     }
 
-    .hero-content {
+    .hero-inner {
         position: relative;
-        z-index: 2;
+        z-index: 10;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 4rem;
+        gap: clamp(2rem, 5vw, 4rem);
         align-items: center;
         width: 100%;
     }
 
-    .hero-text {
-        padding-left: 3rem;
+    /* Hero Text Side */
+    .hero-content {
         position: relative;
-        min-height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        padding-left: clamp(0, 3vw, 2rem);
     }
 
-    .hero-label {
+    .hero-slides {
+        position: relative;
+        min-height: 420px;
+    }
+
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.8s var(--ease-out-expo);
+    }
+
+    .hero-slide.active {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .hero-eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 1.25rem;
-        border-radius: 100px;
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        font-size: 0.7rem;
-        font-family: var(--font-heading);
-        font-weight: 700;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
+        gap: 0.5rem;
         margin-bottom: 1.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-light);
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
     }
 
-    .hero-label span:first-child {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
+    .hero-eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--dynamic-accent);
         border-radius: 50%;
-        background: #10b981;
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
     }
 
     .hero-title {
         font-family: var(--font-heading);
-        font-size: clamp(3rem, 5vw, 5rem);
-        line-height: 1.1;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
-        color: var(--text-primary);
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        margin-bottom: 1.5rem;
     }
 
-    .hero-title-gradient {
-        background: var(--accent-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        transition: all 0.3s ease;
+    .hero-title-line {
+        display: block;
+        overflow: hidden;
     }
 
-    .hero-desc {
-        font-size: 1.25rem;
+    .hero-title-text {
+        display: inline-block;
+    }
+
+    .hero-description {
+        font-size: clamp(1rem, 1.25vw, 1.125rem);
         color: var(--text-secondary);
-        max-width: 500px;
-        line-height: 1.6;
-        border-left: 2px solid var(--border-light);
-        padding-left: 1.5rem;
+        line-height: 1.7;
+        max-width: 480px;
         margin-bottom: 2.5rem;
+        padding-left: 1.5rem;
+        border-left: 2px solid var(--border-light);
     }
 
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    /* Hero Visual Side */
     .hero-visual {
         position: relative;
         height: 70vh;
+        min-height: 500px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -305,106 +522,219 @@
         align-items: center;
         justify-content: center;
         pointer-events: none;
-        z-index: 0;
     }
 
-    .ring-1 {
-        width: 600px;
-        height: 600px;
-        border: 1px solid var(--border-light);
-        border-radius: 50%;
-        animation: spin 60s linear infinite;
-    }
-
-    .ring-2 {
+    .hero-ring {
         position: absolute;
-        width: 450px;
-        height: 450px;
-        border: 1px dashed var(--border-light);
         border-radius: 50%;
-        animation: spin 40s linear infinite reverse;
+        border: 1px solid var(--border-light);
     }
 
-    .tilt-card {
+    .hero-ring-1 {
+        width: min(550px, 80%);
+        height: min(550px, 80%);
+        animation: rotate-slow 80s linear infinite;
+    }
+
+    .hero-ring-2 {
+        width: min(400px, 60%);
+        height: min(400px, 60%);
+        border-style: dashed;
+        animation: rotate-slow 60s linear infinite reverse;
+    }
+
+    @keyframes rotate-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Product Card in Hero */
+    .hero-product {
         position: relative;
+        z-index: 10;
         width: 100%;
-        max-width: 800px;
-        aspect-ratio: 16/10;
+        max-width: 650px;
+    }
+
+    .hero-product-card {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.95) rotateY(10deg);
+        transition: all 0.8s var(--ease-out-expo);
+    }
+
+    .hero-product-card.active {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) rotateY(0);
+    }
+
+    .hero-product-image {
+        width: 100%;
+        height: auto;
+        filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.15));
+        transition: transform 0.4s var(--ease-out-expo);
+    }
+
+    [data-theme="dark"] .hero-product-image {
+        filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.4));
+    }
+
+    /* Floating Specs Card */
+    .specs-card {
+        position: absolute;
+        left: -2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 20;
+        width: 200px;
+        padding: 1.25rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(20px);
+    }
+
+    [data-theme="dark"] .specs-card {
+        background: rgba(17, 17, 17, 0.8);
+    }
+
+    .specs-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.875rem;
+        margin-bottom: 0.875rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .specs-card-icon {
+        width: 2.25rem;
+        height: 2.25rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 10;
-        transition: transform 0.1s ease-out;
+        background: var(--dynamic-accent);
+        color: white;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: background 0.8s var(--ease-out-expo);
     }
 
-    .tilt-content {
-        position: relative;
-        z-index: 10;
-        transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    .specs-card-title {
+        font-family: var(--font-heading);
+        font-size: 0.875rem;
+        font-weight: 700;
     }
 
-    .hero-image {
-        width: 100%;
-        height: auto;
-        object-fit: contain;
-        filter: drop-shadow(0 50px 100px rgba(0,0,0,0.25));
-        transition: all 0.3s ease;
+    .specs-card-subtitle {
+        font-size: 0.625rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
     }
 
-    [data-theme="dark"] .hero-image {
-        filter: drop-shadow(0 50px 100px rgba(0,0,0,0.5));
+    .specs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
     }
 
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.65);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
+    .spec-item {
+        padding: 0.5rem;
+        background: var(--bg-surface);
+        border-radius: 0.5rem;
+    }
+
+    .spec-label {
+        font-size: 0.5625rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.125rem;
+    }
+
+    .spec-value {
+        font-family: var(--font-heading);
+        font-size: 0.8125rem;
+        font-weight: 700;
+    }
+
+    /* Floating Price Tag */
+    .price-tag {
+        position: absolute;
+        right: -1.5rem;
+        bottom: 20%;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        background: var(--bg-card);
         border: 1px solid var(--border-light);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        border-radius: 100px;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(20px);
     }
 
-    [data-theme="dark"] .glass-panel {
-        background: rgba(10, 10, 10, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    [data-theme="dark"] .price-tag {
+        background: rgba(17, 17, 17, 0.8);
     }
 
-    .spec-card {
-        background: rgba(255, 255, 255, 0.5);
-        padding: 0.75rem;
-        border-radius: 0.75rem;
+    .price-tag-label {
+        font-size: 0.625rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
     }
 
-    [data-theme="dark"] .spec-card {
-        background: rgba(0, 0, 0, 0.2);
+    .price-tag-value {
+        font-family: var(--font-heading);
+        font-size: 1.25rem;
+        font-weight: 800;
     }
 
-    /* Aurora Background */
-    .aurora-container {
-        position: fixed;
+    .price-tag-indicator {
+        position: relative;
+        width: 10px;
+        height: 10px;
+    }
+
+    .price-tag-indicator::before {
+        content: '';
+        position: absolute;
         inset: 0;
-        z-index: -1;
-        overflow: hidden;
-        pointer-events: none;
-    }
-
-    .aurora-blob {
-        position: absolute;
+        background: #10b981;
         border-radius: 50%;
-        filter: blur(100px);
-        opacity: 0.35;
-        transition: background-color 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: ping-indicator 2s infinite;
     }
 
-    /* Carrusel Controls */
-    .carousel-controls {
+    .price-tag-indicator::after {
+        content: '';
         position: absolute;
-        bottom: 2rem;
-        left: 3rem;
-        z-index: 50;
+        inset: 2px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #10b981;
+    }
+
+    @keyframes ping-indicator {
+        0% { transform: scale(1); opacity: 0.75; }
+        100% { transform: scale(2); opacity: 0; }
+    }
+
+    /* =========================================
+       9. CAROUSEL CONTROLS
+       ========================================= */
+    .carousel-controls {
         display: flex;
         align-items: center;
         gap: 1.5rem;
+        margin-top: 3rem;
     }
 
     .carousel-dots {
@@ -413,20 +743,30 @@
     }
 
     .carousel-dot {
+        position: relative;
         width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--text-muted);
-        opacity: 0.3;
+        height: 4px;
+        background: var(--border-medium);
+        border-radius: 100px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        overflow: hidden;
+        transition: all 0.4s var(--ease-out-expo);
     }
 
     .carousel-dot.active {
-        width: 24px;
-        border-radius: 4px;
-        background: var(--accent-primary);
-        opacity: 1;
+        width: 48px;
+        background: var(--border-light);
+    }
+
+    .carousel-dot-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0%;
+        background: var(--dynamic-accent);
+        border-radius: 100px;
+        transition: width 0.1s linear, background 0.8s var(--ease-out-expo);
     }
 
     .carousel-nav {
@@ -437,97 +777,130 @@
     .carousel-btn {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        color: var(--text-primary);
         display: flex;
         align-items: center;
         justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
         cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
+        transition: all 0.3s var(--ease-out-expo);
     }
 
     .carousel-btn:hover {
-        background: var(--accent-primary);
+        background: var(--dynamic-accent);
         color: white;
-        border-color: var(--accent-primary);
+        border-color: var(--dynamic-accent);
         transform: scale(1.1);
     }
 
-    .progress-bar {
+    .carousel-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Lateral Navigation */
+    .lateral-nav {
         position: absolute;
-        bottom: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 30;
+    }
+
+    .lateral-nav-prev { left: 1rem; }
+    .lateral-nav-next { right: 1rem; }
+
+    .lateral-nav-btn {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.4s var(--ease-out-expo);
+        backdrop-filter: blur(10px);
+    }
+
+    .lateral-nav-btn:hover {
+        background: var(--text-primary);
+        color: var(--bg-deep);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .lateral-nav-btn svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.3s var(--ease-out-expo);
+    }
+
+    .lateral-nav-btn:hover svg {
+        transform: translateX(var(--translate-direction));
+    }
+
+    .lateral-nav-prev .lateral-nav-btn { --translate-direction: -3px; }
+    .lateral-nav-next .lateral-nav-btn { --translate-direction: 3px; }
+
+    /* =========================================
+       10. MARQUEE
+       ========================================= */
+    .marquee {
+        position: absolute;
+        bottom: 80px;
         left: 0;
         width: 100%;
-        height: 3px;
-        background: var(--border-light);
         overflow: hidden;
+        pointer-events: none;
+        opacity: 0.02;
     }
 
-    .progress-fill {
-        height: 100%;
-        background: var(--accent-primary);
-        width: 0%;
-        transition: width 0.1s linear;
+    [data-theme="dark"] .marquee {
+        opacity: 0.03;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 2rem;
-        margin-top: 3rem;
-        padding-top: 2rem;
-        border-top: 1px solid var(--border-light);
+    .marquee-track {
+        display: flex;
+        gap: 4rem;
+        white-space: nowrap;
+        animation: marquee 100s linear infinite;
     }
 
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-value {
+    .marquee-text {
         font-family: var(--font-heading);
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
+        font-size: clamp(6rem, 12vw, 10rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: -0.05em;
+        color: transparent;
+        -webkit-text-stroke: 1px var(--text-primary);
     }
 
-    .stat-label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+    @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
     }
 
     /* =========================================
-       4. PRODUCT CARDS (MANTENIENDO TU ESTRUCTURA)
+       11. PRODUCTS SECTION
        ========================================= */
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .product-card {
+        position: relative;
         background: var(--bg-card);
         border: 1px solid var(--border-light);
-        border-radius: 24px;
+        border-radius: 1.5rem;
         padding: 1.5rem;
-        transition: all 0.4s var(--ease-out-expo);
-        position: relative;
+        transition: all 0.5s var(--ease-out-expo);
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        box-shadow: var(--shadow-card);
-    }
-
-    .product-card:hover {
-        border-color: var(--accent-primary);
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px -10px rgba(124, 58, 237, 0.15);
     }
 
     .product-card::before {
@@ -536,236 +909,287 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 2px;
+        height: 3px;
         background: var(--accent-gradient);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s var(--ease-out-expo);
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-xl);
     }
 
     .product-card:hover::before {
-        opacity: 1;
+        transform: scaleX(1);
     }
 
-    .img-container {
-        height: 240px;
-        position: relative;
+    .product-card-badge {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
         z-index: 10;
+    }
+
+    .product-image-container {
+        position: relative;
+        height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1.5rem;
-        background: #ffffff;
-        border-radius: 16px;
+        margin-bottom: 1.25rem;
+        background: var(--bg-surface);
+        border-radius: 1rem;
         overflow: hidden;
     }
 
-    [data-theme="dark"] .img-container {
-        background: #1a1a1a;
-    }
-
-    .product-img {
-        max-width: 90%;
-        height: auto;
+    .product-image {
+        max-width: 85%;
+        max-height: 85%;
         object-fit: contain;
         transition: transform 0.6s var(--ease-out-expo);
     }
 
-    .product-card:hover .product-img {
-        transform: scale(1.08) translateY(-5px);
+    .product-card:hover .product-image {
+        transform: scale(1.08) translateY(-4px);
     }
 
     .product-info {
-        flex-grow: 1;
+        flex: 1;
         display: flex;
         flex-direction: column;
     }
 
-    .product-category {
-        font-size: 0.8rem;
+    .product-brand {
+        font-size: 0.6875rem;
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.375rem;
     }
 
-    .product-title {
+    .product-name {
         font-family: var(--font-heading);
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 1.125rem;
+        font-weight: 700;
         margin-bottom: 1rem;
         line-height: 1.3;
-        color: var(--text-primary);
     }
 
-    /* Especificaciones - Manteniendo tu estructura */
-    .spec-list {
+    .product-specs {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        margin-bottom: 1.5rem;
         padding-top: 1rem;
+        margin-bottom: 1.25rem;
         border-top: 1px solid var(--border-light);
     }
 
-    .spec-item {
+    .product-spec {
         display: flex;
         align-items: center;
         gap: 0.75rem;
         padding: 0.5rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        transition: background 0.3s ease;
     }
 
-    .product-card:hover .spec-item {
+    .product-card:hover .product-spec {
         background: var(--bg-surface);
     }
 
-    .spec-icon-wrapper {
-        width: 32px;
-        height: 32px;
+    .product-spec-icon {
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: var(--bg-surface);
-        border-radius: 8px;
-        font-size: 0.9rem;
-        color: var(--accent-primary);
         border: 1px solid var(--border-light);
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        color: var(--accent-primary);
     }
 
-    .spec-text {
-        font-size: 0.85rem;
+    .product-spec-text {
+        font-size: 0.8125rem;
         font-weight: 500;
         color: var(--text-secondary);
     }
 
     .product-footer {
-        margin-top: auto;
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding-top: 1rem;
+        margin-top: auto;
         border-top: 1px solid var(--border-light);
     }
 
-    .price-block {
+    .product-price {
         display: flex;
         flex-direction: column;
     }
 
-    .price-curr {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        display: flex;
-        align-items: baseline;
-        gap: 0.25rem;
-    }
-
-    .price-curr span {
-        font-size: 0.75rem;
+    .product-price-old {
+        font-size: 0.8125rem;
         color: var(--text-muted);
-        font-weight: 600;
-    }
-
-    .price-old {
-        font-size: 0.85rem;
         text-decoration: line-through;
+    }
+
+    .product-price-current {
+        font-family: var(--font-heading);
+        font-size: 1.375rem;
+        font-weight: 800;
+    }
+
+    .product-price-currency {
+        font-size: 0.75rem;
+        font-weight: 600;
         color: var(--text-muted);
     }
 
-    .btn-premium {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: var(--bg-surface);
-        color: var(--text-primary);
+    .product-action {
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s ease;
+        background: var(--bg-surface);
         border: 1px solid var(--border-light);
-        cursor: pointer;
+        border-radius: 50%;
+        color: var(--text-primary);
         text-decoration: none;
+        transition: all 0.3s var(--ease-out-expo);
     }
 
-    .btn-premium:hover {
-        transform: rotate(45deg);
+    .product-action:hover {
         background: var(--accent-primary);
         color: white;
         border-color: var(--accent-primary);
+        transform: rotate(45deg);
     }
 
     /* =========================================
-       5. FEATURES SECTION
+       12. FEATURES SECTION
        ========================================= */
     .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
     }
 
     .feature-card {
+        position: relative;
+        padding: 2rem;
         background: var(--bg-card);
         border: 1px solid var(--border-light);
-        border-radius: 20px;
-        padding: 2rem;
+        border-radius: 1.5rem;
         text-align: center;
-        transition: all 0.4s var(--ease-out-expo);
+        transition: all 0.5s var(--ease-out-expo);
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--accent-gradient);
+        opacity: 0;
+        transition: opacity 0.5s ease;
     }
 
     .feature-card:hover {
-        border-color: var(--accent-primary);
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        transform: translateY(-6px);
+        border-color: transparent;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .feature-card:hover::before {
+        opacity: 0.03;
     }
 
     .feature-icon {
+        position: relative;
         width: 64px;
         height: 64px;
         margin: 0 auto 1.5rem;
-        background: var(--bg-surface);
-        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-light);
+        border-radius: 1rem;
         font-size: 1.5rem;
         color: var(--accent-primary);
-        border: 1px solid var(--border-light);
+        transition: all 0.4s var(--ease-out-expo);
+    }
+
+    .feature-card:hover .feature-icon {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: scale(1.1);
+    }
+
+    .feature-title {
+        font-family: var(--font-heading);
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .feature-description {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
     }
 
     /* =========================================
-       6. CATEGORIES SECTION
+       13. CATEGORIES SECTION
        ========================================= */
     .categories-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .category-card {
-        height: 320px;
-        border-radius: 24px;
-        overflow: hidden;
         position: relative;
-        transition: all 0.4s var(--ease-out-expo);
-        box-shadow: var(--shadow-card);
+        height: 300px;
+        border-radius: 1.5rem;
+        overflow: hidden;
         text-decoration: none;
-    }
-
-    .category-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        color: white;
+        transition: all 0.5s var(--ease-out-expo);
     }
 
     .category-card::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%);
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
         z-index: 1;
+    }
+
+    .category-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--category-color);
+        opacity: 0.4;
+        transition: opacity 0.5s ease;
+    }
+
+    .category-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .category-card:hover::after {
+        opacity: 0.6;
     }
 
     .category-content {
@@ -776,844 +1200,1187 @@
         flex-direction: column;
         justify-content: flex-end;
         padding: 2rem;
-        color: white;
     }
 
-    /* =========================================
-       7. CTA SECTION
-       ========================================= */
-    .cta-container {
-        background: var(--accent-gradient);
-        border-radius: 32px;
-        padding: 6rem 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid var(--border-light);
-    }
-
-    .cta-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        filter: blur(60px);
-    }
-
-    /* =========================================
-       8. THEME TOGGLE
-       ========================================= */
-    .theme-toggle {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        z-index: 100;
-        width: 60px;
-        height: 60px;
-        border-radius: 30px;
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        color: var(--text-primary);
+    .category-icon {
+        width: 56px;
+        height: 56px;
         display: flex;
         align-items: center;
         justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .category-title {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-subtitle {
+        font-size: 0.9375rem;
+        opacity: 0.85;
+        margin-bottom: 1rem;
+    }
+
+    .category-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: gap 0.3s var(--ease-out-expo);
+    }
+
+    .category-card:hover .category-link {
+        gap: 1rem;
+    }
+
+    /* =========================================
+       14. CTA SECTION
+       ========================================= */
+    .cta {
+        position: relative;
+        padding: clamp(4rem, 10vw, 6rem) 2rem;
+        background: var(--accent-gradient);
+        border-radius: 2rem;
+        text-align: center;
+        color: white;
+        overflow: hidden;
+    }
+
+    .cta::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 60%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .cta-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-title {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .cta-description {
+        font-size: clamp(1rem, 1.5vw, 1.125rem);
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto 2rem;
+    }
+
+    .cta-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .cta-btn-primary {
+        background: white;
+        color: var(--accent-primary);
+    }
+
+    .cta-btn-primary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+    }
+
+    .cta-btn-secondary {
+        background: transparent;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .cta-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .cta-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .cta-stat-value {
+        font-family: var(--font-heading);
+        font-size: clamp(1.5rem, 3vw, 2.5rem);
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .cta-stat-label {
+        font-size: 0.8125rem;
+        opacity: 0.8;
+    }
+
+    /* =========================================
+       15. AI CHAT WIDGET
+       ========================================= */
+    .ai-widget {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        z-index: 1000;
+    }
+
+    .ai-toggle {
+        position: relative;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--accent-primary);
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-card);
-        font-size: 1.25rem;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .ai-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: var(--accent-glow);
+    }
+
+    .ai-toggle-pulse {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: var(--accent-primary);
+        opacity: 0.2;
+        animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+        0% { transform: scale(1); opacity: 0.2; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .ai-toggle-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+    }
+
+    .ai-chat {
+        position: fixed;
+        bottom: 6rem;
+        left: 1.5rem;
+        width: min(380px, calc(100vw - 3rem));
+        height: 450px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform: scale(0);
+        opacity: 0;
+        transform-origin: bottom left;
+        transition: all 0.4s var(--ease-spring);
+    }
+
+    .ai-chat.open {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .ai-chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .ai-chat-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-heading);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .ai-chat-title-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--accent-primary);
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+    }
+
+    .ai-chat-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: color 0.2s ease;
+    }
+
+    .ai-chat-close:hover {
+        color: var(--text-primary);
+    }
+
+    .ai-chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ai-message {
+        display: flex;
+        gap: 0.5rem;
+        max-width: 85%;
+    }
+
+    .ai-message.bot { align-self: flex-start; }
+    .ai-message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .ai-message-avatar {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-primary);
+        color: white;
+        border-radius: 50%;
+        font-size: 0.625rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .ai-message.user .ai-message-avatar {
+        background: var(--text-primary);
+    }
+
+    .ai-message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+    }
+
+    .ai-message.bot .ai-message-bubble {
+        background: var(--bg-surface);
+        border-radius: 1rem 1rem 1rem 0.25rem;
+    }
+
+    .ai-message.user .ai-message-bubble {
+        background: var(--accent-primary);
+        color: white;
+        border-radius: 1rem 1rem 0.25rem 1rem;
+    }
+
+    .ai-typing {
+        display: flex;
+        gap: 4px;
+        padding: 0.75rem 1rem;
+    }
+
+    .ai-typing-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        animation: typing-bounce 1.4s infinite ease-in-out both;
+    }
+
+    .ai-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .ai-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing-bounce {
+        0%, 80%, 100% { transform: scale(0.6); }
+        40% { transform: scale(1); }
+    }
+
+    .ai-chat-input {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid var(--border-light);
+        background: var(--bg-surface);
+    }
+
+    .ai-chat-input input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 100px;
+        color: var(--text-primary);
+        font-size: 0.8125rem;
+        font-family: inherit;
+        transition: border-color 0.2s ease;
+    }
+
+    .ai-chat-input input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+    }
+
+    .ai-chat-input input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .ai-chat-send {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-primary);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ai-chat-send:hover {
+        background: var(--accent-secondary);
+        transform: scale(1.05);
+    }
+
+    .ai-chat-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* =========================================
+       16. THEME TOGGLE
+       ========================================= */
+    .theme-toggle {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 1000;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
+        cursor: pointer;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s var(--ease-out-expo);
     }
 
     .theme-toggle:hover {
         transform: rotate(15deg) scale(1.1);
         border-color: var(--accent-primary);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+
+    .theme-toggle i {
+        font-size: 1.25rem;
+        transition: transform 0.5s var(--ease-spring);
     }
 
     /* =========================================
-       9. RESPONSIVE
+       17. SECTION HEADERS
+       ========================================= */
+    .section-header {
+        text-align: center;
+        margin-bottom: clamp(3rem, 6vw, 4rem);
+    }
+
+    .section-eyebrow {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--accent-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+    }
+
+    .section-description {
+        font-size: clamp(1rem, 1.25vw, 1.125rem);
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* =========================================
+       18. ANIMATIONS
+       ========================================= */
+    .fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s var(--ease-out-expo);
+    }
+
+    .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
+    .stagger-4 { transition-delay: 0.4s; }
+
+    /* =========================================
+       19. RESPONSIVE
        ========================================= */
     @media (max-width: 1200px) {
-        .hero-content {
-            gap: 3rem;
+        .lateral-nav { display: none; }
+
+        .specs-card {
+            left: 0;
+            transform: translateY(-50%) scale(0.9);
         }
 
-        .hero-text {
-            padding-left: 2rem;
+        .price-tag {
+            right: 0;
+            transform: scale(0.9);
         }
     }
 
     @media (max-width: 1024px) {
-        .hero-content {
+        .hero-inner {
             grid-template-columns: 1fr;
             text-align: center;
-            gap: 4rem;
+            gap: 3rem;
         }
 
-        .hero-text {
-            padding-left: 0;
-            padding-right: 0;
-            min-height: auto;
+        .hero-content {
+            padding: 0;
             order: 2;
         }
 
-        .hero-desc {
-            margin: 0 auto 2.5rem;
+        .hero-description {
+            margin: 0 auto 2rem;
+            border-left: none;
+            padding-left: 0;
+            border-top: 2px solid var(--border-light);
+            padding-top: 1.5rem;
         }
 
-        .section-padding {
-            padding: 4rem 0;
-        }
-
-        .container-xl {
-            padding: 0 1.5rem;
+        .hero-actions {
+            justify-content: center;
         }
 
         .hero-visual {
-            height: 50vh;
             order: 1;
+            height: 50vh;
+            min-height: 400px;
         }
 
-        .glass-panel {
-            display: none !important;
-        }
-
-        .ring-1 {
-            width: 400px;
-            height: 400px;
-        }
-
-        .ring-2 {
-            width: 300px;
-            height: 300px;
+        .specs-card,
+        .price-tag {
+            display: none;
         }
 
         .carousel-controls {
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 1rem;
+            justify-content: center;
         }
 
-        .stats-grid {
+        .cta-stats {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
     @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2.5rem;
-        }
-
-        .hero-desc {
-            font-size: 1.1rem;
+        .hero-slides {
+            min-height: 350px;
         }
 
         .hero-visual {
             height: 40vh;
+            min-height: 300px;
         }
 
-        .products-grid {
-            grid-template-columns: 1fr;
+        .hero-ring-1 {
+            width: 300px;
+            height: 300px;
         }
 
+        .hero-ring-2 {
+            width: 220px;
+            height: 220px;
+        }
+
+        .marquee-text {
+            font-size: 5rem;
+        }
+
+        .products-grid,
         .features-grid,
         .categories-grid {
             grid-template-columns: 1fr;
         }
 
-        .section-padding {
-            padding: 3rem 0;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .container-xl {
-            padding: 0 1rem;
+        .ai-chat {
+            width: calc(100vw - 2rem);
+            left: 1rem;
+            height: 400px;
         }
 
-        .hero-title {
-            font-size: 2rem;
-        }
-
-        .hero-desc {
-            font-size: 1rem;
-        }
-
-        .btn-lux {
-            padding: 0.875rem 1.75rem;
-            font-size: 0.875rem;
+        .ai-widget {
+            bottom: 1rem;
+            left: 1rem;
         }
 
         .theme-toggle {
             bottom: 1rem;
             right: 1rem;
-            width: 50px;
-            height: 50px;
-            font-size: 1rem;
+            width: 48px;
+            height: 48px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
         }
 
-        .stats-grid {
-            grid-template-columns: 1fr;
+        .btn {
+            padding: 0.875rem 1.5rem;
+            font-size: 0.8125rem;
+        }
+
+        .marquee-text {
+            font-size: 3.5rem;
+        }
+
+        .cta-stats {
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .ai-toggle,
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
         }
     }
 
     /* =========================================
-       10. UTILITY CLASSES
+       20. UTILITY CLASSES
        ========================================= */
-    .flex { display: flex; }
-    .flex-wrap { flex-wrap: wrap; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .justify-between { justify-content: space-between; }
-    .justify-start { justify-content: flex-start; }
-    .gap-4 { gap: 1rem; }
-    .gap-6 { gap: 1.5rem; }
-    .gap-8 { gap: 2rem; }
-    .mt-12 { margin-top: 3rem; }
-    .mt-8 { margin-top: 2rem; }
-    .mb-4 { margin-bottom: 1rem; }
-    .mb-6 { margin-bottom: 1.5rem; }
-    .mb-8 { margin-bottom: 2rem; }
-    .mb-12 { margin-bottom: 3rem; }
-    .mb-16 { margin-bottom: 4rem; }
-    .pt-8 { padding-top: 2rem; }
-    .pt-12 { padding-top: 3rem; }
-    .pb-8 { padding-bottom: 2rem; }
-    .px-8 { padding-left: 2rem; padding-right: 2rem; }
-    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-    .text-center { text-align: center; }
-    .text-sm { font-size: 0.875rem; }
-    .text-lg { font-size: 1.125rem; }
-    .text-xl { font-size: 1.25rem; }
-    .text-2xl { font-size: 1.5rem; }
-    .text-3xl { font-size: 1.875rem; }
-    .text-4xl { font-size: 2.25rem; }
-    .text-5xl { font-size: 3rem; }
-    .font-bold { font-weight: 700; }
-    .font-semibold { font-weight: 600; }
-    .uppercase { text-transform: uppercase; }
-    .tracking-widest { letter-spacing: 0.1em; }
-    .tracking-wider { letter-spacing: 0.05em; }
-    .max-w-2xl { max-width: 42rem; }
-    .max-w-lg { max-width: 32rem; }
-    .mx-auto { margin-left: auto; margin-right: auto; }
-    .block { display: block; }
-    .inline-block { display: inline-block; }
-    .hidden { display: none !important; }
-    .border-t { border-top: 1px solid var(--border-light); }
-    .border-gray-200 { border-color: rgba(0, 0, 0, 0.1); }
-    .dark\:border-gray-800 { border-color: rgba(255, 255, 255, 0.1); }
-    .text-muted { color: var(--text-muted); }
-    .text-gray-400 { color: #9ca3af; }
-    .text-gray-500 { color: #6b7280; }
-    .text-gray-600 { color: #4b5563; }
-    .text-accent-primary { color: var(--accent-primary); }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
     .bg-surface { background: var(--bg-surface); }
-    .grid { display: grid; }
-    .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-    .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-    .md\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-    .md\:text-5xl { font-size: 3rem; }
-    .lg\:justify-start { justify-content: flex-start; }
-    .sm\:flex-row { flex-direction: row; }
-    .flex-col { flex-direction: column; }
-    .ml-2 { margin-left: 0.5rem; }
-    .mr-2 { margin-right: 0.5rem; }
-    .group-hover\:gap-4:hover { gap: 1rem; }
-    .transition-all { transition: all 0.3s ease; }
-    .group { position: relative; }
-    .opacity-50 { opacity: 0.5; }
-    .opacity-80 { opacity: 0.8; }
-    .text-white { color: white; }
-    .text-white\/80 { color: rgba(255, 255, 255, 0.8); }
-    .bg-white\/20 { background: rgba(255, 255, 255, 0.2); }
-    .backdrop-blur-sm { backdrop-filter: blur(4px); }
-    .rounded-xl { border-radius: 0.75rem; }
-    .w-16 { width: 4rem; }
-    .h-16 { height: 4rem; }
-    .text-2xl { font-size: 1.5rem; }
-    .text-3xl { font-size: 1.875rem; }
-    .inline-flex { display: inline-flex; }
-    .absolute { position: absolute; }
-    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-    .from-purple-600\/20 { --tw-gradient-from: rgba(147, 51, 234, 0.2); }
-    .to-pink-600\/20 { --tw-gradient-to: rgba(219, 39, 119, 0.2); }
-    .from-blue-600\/20 { --tw-gradient-from: rgba(37, 99, 235, 0.2); }
-    .to-indigo-600\/20 { --tw-gradient-to: rgba(79, 70, 229, 0.2); }
-    .from-emerald-600\/20 { --tw-gradient-from: rgba(5, 150, 105, 0.2); }
-    .to-teal-600\/20 { --tw-gradient-to: rgba(13, 148, 136, 0.2); }
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Noise Texture -->
+<div class="noise-overlay" aria-hidden="true"></div>
 
-<!-- Botón de cambio de tema -->
-<button class="theme-toggle" onclick="toggleTheme()" title="Cambiar Tema">
-    <i id="theme-icon" class="fa-solid fa-sun"></i>
+<!-- Grid Pattern -->
+<div class="grid-pattern" aria-hidden="true"></div>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+</div>
+
+<!-- Aurora Background -->
+<div class="aurora-container" aria-hidden="true">
+    <div class="aurora-blob aurora-blob-1" id="aurora-1"></div>
+    <div class="aurora-blob aurora-blob-2" id="aurora-2"></div>
+</div>
+
+<!-- Particles -->
+<div class="particles-container" id="particles" aria-hidden="true"></div>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+    <i class="fa-solid fa-sun" id="theme-icon"></i>
 </button>
 
 <!-- ============================================
-     HERO SECTION - CARRUSEL 5 PRODUCTOS
+     HERO SECTION
      ============================================ -->
-<section class="hero-section">
-    <!-- Aurora Background -->
-    <div class="aurora-container">
-        <div id="aurora-1" class="aurora-blob" style="width: 60vw; height: 60vw; top: -20%; left: -10%; background: rgba(124, 58, 237, 0.15);"></div>
-        <div id="aurora-2" class="aurora-blob" style="width: 50vw; height: 50vw; bottom: -20%; right: -10%; background: rgba(6, 182, 212, 0.15);"></div>
-    </div>
+<section class="hero">
+    <!-- Lateral Navigation -->
+    <nav class="lateral-nav lateral-nav-prev" aria-label="Producto anterior">
+        <button class="lateral-nav-btn" id="hero-prev" aria-label="Ver producto anterior">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+    </nav>
+
+    <nav class="lateral-nav lateral-nav-next" aria-label="Siguiente producto">
+        <button class="lateral-nav-btn" id="hero-next" aria-label="Ver siguiente producto">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+    </nav>
 
     <div class="container-xl">
-        <div class="hero-content">
-            <!-- LEFT CONTENT - Carrusel de texto -->
-            <div class="hero-text fade-in-up">
-                <!-- Contenedor de slides -->
-                <div id="text-slider" style="position: relative; min-height: 500px;">
+        <div class="hero-inner">
+            <!-- Content Side -->
+            <div class="hero-content">
+                <div class="hero-slides" id="hero-slides" role="region" aria-label="Carrusel de productos destacados">
                     {% if featured_laptops and featured_laptops|length > 0 %}
                         {% for laptop in featured_laptops[:5] %}
-                        <div class="text-slide {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" style="display: {% if loop.first %}block{% else %}none{% endif %};">
-                            <!-- Tag -->
-                            <div style="overflow: hidden; margin-bottom: 1.5rem;">
-                                <div class="hero-label">
-                                    <span></span>
-                                    <span class="product-tag">
-                                        {{ laptop.brand.name if laptop.brand else 'SERIE PREMIUM' }}
-                                    </span>
-                                </div>
+                        <article class="hero-slide {% if loop.first %}active{% endif %}"
+                                 data-index="{{ loop.index0 }}"
+                                 role="group"
+                                 aria-roledescription="slide"
+                                 aria-label="Producto {{ loop.index }} de {{ featured_laptops[:5]|length }}">
+
+                            <div class="hero-eyebrow">
+                                <span class="hero-eyebrow-dot"></span>
+                                <span>{{ laptop.brand.name if laptop.brand else 'Premium' }}</span>
                             </div>
 
-                            <!-- Titles -->
-                            <div style="margin-bottom: 2rem;">
-                                <div style="overflow: hidden;">
-                                    <h1 class="hero-title scramble-text product-title-1">
-                                        {% set words = laptop.display_name.split() %}
+                            <h1 class="hero-title">
+                                {% set words = laptop.display_name.split() %}
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text" data-scramble>
                                         {{ words[:2]|join(' ') if words|length >= 2 else laptop.display_name }}
-                                    </h1>
-                                </div>
-                                <div style="overflow: hidden;">
-                                    <h1 class="hero-title hero-title-gradient scramble-text product-title-2">
-                                        {% set words = laptop.display_name.split() %}
-                                        {{ words[2:]|join(' ') if words|length > 2 else 'desafía la realidad' }}
-                                    </h1>
-                                </div>
-                            </div>
+                                    </span>
+                                </span>
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text dynamic-gradient" data-scramble>
+                                        {{ words[2:]|join(' ') if words|length > 2 else 'Premium Edition' }}
+                                    </span>
+                                </span>
+                            </h1>
 
-                            <!-- Description -->
-                            <div style="overflow: hidden; margin-bottom: 2.5rem;">
-                                <p class="hero-desc product-desc">
-                                    {{ laptop.description if laptop.description else 'Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.' }}
-                                </p>
-                            </div>
+                            <p class="hero-description">
+                                {{ laptop.description|truncate(150) if laptop.description else 'Experimenta el máximo rendimiento con tecnología de última generación. Diseño premium, potencia sin límites.' }}
+                            </p>
 
-                            <!-- Buttons -->
-                            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3rem;">
-                                <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="btn-lux" style="background: var(--accent-primary); color: white; border: none;">
+                            <div class="hero-actions">
+                                <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="btn btn-primary">
                                     Comprar Ahora
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </a>
-                                <a href="#featured" class="btn-lux dark">
+                                <a href="#featured" class="btn btn-secondary">
                                     Ver Destacados
                                 </a>
                             </div>
-
-                            <!-- Footer Specs -->
-                            <div class="stats-grid">
-                                <div class="stat-item">
-                                    <p class="stat-value spec-1-val">
-                                        {{ laptop.processor.name if laptop.processor else 'i7' }}
-                                    </p>
-                                    <p class="stat-label spec-1-label">Procesador</p>
-                                </div>
-                                <div class="stat-item">
-                                    <p class="stat-value spec-2-val">
-                                        {{ laptop.ram.name if laptop.ram else '16GB' }}
-                                    </p>
-                                    <p class="stat-label spec-2-label">Memoria</p>
-                                </div>
-                                <div class="stat-item">
-                                    <p class="stat-value spec-3-val">
-                                        {{ laptop.display.refresh_rate if laptop.display and laptop.display.refresh_rate else '120Hz' }}
-                                    </p>
-                                    <p class="stat-label spec-3-label">Pantalla</p>
-                                </div>
-                                <div class="stat-item">
-                                    <p class="stat-value spec-4-val">
-                                        {{ laptop.storage.name if laptop.storage else '1TB' }}
-                                    </p>
-                                    <p class="stat-label spec-4-label">Almacenamiento</p>
-                                </div>
-                            </div>
-                        </div>
+                        </article>
                         {% endfor %}
                     {% else %}
-                        <!-- Placeholder si no hay productos -->
-                        <div class="text-slide active">
-                            <div style="overflow: hidden; margin-bottom: 1.5rem;">
-                                <div class="hero-label">
-                                    <span></span>
-                                    <span>SERIE PREMIUM</span>
-                                </div>
+                        <article class="hero-slide active">
+                            <div class="hero-eyebrow">
+                                <span class="hero-eyebrow-dot"></span>
+                                <span>LuxeraRD</span>
                             </div>
-                            <h1 class="hero-title scramble-text">Potencia que</h1>
-                            <h1 class="hero-title hero-title-gradient scramble-text">desafía la realidad</h1>
-                            <p class="hero-desc">Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.</p>
-                            <div class="stats-grid">
-                                <div class="stat-item"><p class="stat-value">i7</p><p class="stat-label">Procesador</p></div>
-                                <div class="stat-item"><p class="stat-value">16GB</p><p class="stat-label">Memoria</p></div>
-                                <div class="stat-item"><p class="stat-value">120Hz</p><p class="stat-label">Pantalla</p></div>
-                                <div class="stat-item"><p class="stat-value">1TB</p><p class="stat-label">Almacenamiento</p></div>
+                            <h1 class="hero-title">
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text" data-scramble>Potencia que</span>
+                                </span>
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text dynamic-gradient" data-scramble>desafía la realidad</span>
+                                </span>
+                            </h1>
+                            <p class="hero-description">
+                                Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial y soporte técnico especializado.
+                            </p>
+                            <div class="hero-actions">
+                                <a href="{{ url_for('public.catalog') }}" class="btn btn-primary">
+                                    Ver Catálogo
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
                             </div>
-                        </div>
+                        </article>
                     {% endif %}
                 </div>
 
-                <!-- Controles del carrusel -->
+                <!-- Carousel Controls -->
                 <div class="carousel-controls">
-                    <div class="carousel-dots" id="carousel-dots">
-                        {% if featured_laptops and featured_laptops|length > 0 %}
-                            {% for i in range(featured_laptops[:5]|length) %}
-                            <div class="carousel-dot {% if loop.first %}active{% endif %}" data-index="{{ i }}"></div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="carousel-dot active" data-index="0"></div>
-                        {% endif %}
+                    <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Seleccionar producto">
+                        <!-- Generated by JS -->
                     </div>
                     <div class="carousel-nav">
-                        <button class="carousel-btn" id="prev-btn">
-                            <i class="fa-solid fa-chevron-left"></i>
+                        <button class="carousel-btn" id="carousel-prev" aria-label="Producto anterior">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
                         </button>
-                        <button class="carousel-btn" id="next-btn">
-                            <i class="fa-solid fa-chevron-right"></i>
+                        <button class="carousel-btn" id="carousel-next" aria-label="Siguiente producto">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
                         </button>
                     </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
                 </div>
             </div>
 
-            <!-- RIGHT VISUAL - Carrusel de imágenes -->
-            <div class="hero-visual fade-in-up delay-200">
-                <!-- Rings -->
-                <div class="hero-rings">
-                    <div class="ring-1"></div>
-                    <div class="ring-2"></div>
+            <!-- Visual Side -->
+            <div class="hero-visual">
+                <div class="hero-rings" aria-hidden="true">
+                    <div class="hero-ring hero-ring-1"></div>
+                    <div class="hero-ring hero-ring-2"></div>
                 </div>
 
-                <!-- Contenedor de imágenes -->
-                <div id="image-slider" style="position: relative; width: 100%; height: 100%;">
+                <div class="hero-product" id="hero-products">
                     {% if featured_laptops and featured_laptops|length > 0 %}
                         {% for laptop in featured_laptops[:5] %}
-                        <div id="tilt-card-{{ loop.index0 }}" class="tilt-card {% if loop.first %}active{% else %}hidden{% endif %}">
+                        <div class="hero-product-card {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
 
-                            <!-- Tech Specs Card -->
-                            <div class="glass-panel" style="position: absolute; left: -3rem; top: 20%; z-index: 40; padding: 1.5rem; border-radius: 1.5rem; width: 16rem;">
-                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
-                                    <div class="card-icon-bg" style="width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; background: var(--accent-primary); display: flex; align-items: center; justify-content: center; color: white;">
+                            <!-- Specs Card -->
+                            <div class="specs-card">
+                                <div class="specs-card-header">
+                                    <div class="specs-card-icon">
                                         <i class="fa-solid fa-microchip"></i>
                                     </div>
                                     <div>
-                                        <p style="font-size: 0.65rem; font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Sistema</p>
-                                        <p class="card-title" style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">Rendimiento</p>
+                                        <div class="specs-card-subtitle">Sistema</div>
+                                        <div class="specs-card-title">Rendimiento</div>
                                     </div>
                                 </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                                    <div class="spec-card">
-                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">CPU</p>
-                                        <p class="badge-cpu" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
-                                            {{ laptop.processor.name if laptop.processor else 'M4 Max' }}
-                                        </p>
+                                <div class="specs-grid">
+                                    <div class="spec-item">
+                                        <div class="spec-label">CPU</div>
+                                        <div class="spec-value">{{ (laptop.processor.name|truncate(12, True, '')) if laptop.processor else 'Intel i9' }}</div>
                                     </div>
-                                    <div class="spec-card">
-                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">GPU</p>
-                                        <p class="badge-gpu" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
-                                            {{ laptop.graphics_card.name if laptop.graphics_card else 'RTX 4090' }}
-                                        </p>
+                                    <div class="spec-item">
+                                        <div class="spec-label">GPU</div>
+                                        <div class="spec-value">{{ (laptop.graphics_card.name|truncate(12, True, '')) if laptop.graphics_card else 'RTX 4090' }}</div>
                                     </div>
-                                    <div class="spec-card">
-                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">RAM</p>
-                                        <p class="badge-ram" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
-                                            {{ laptop.ram.name if laptop.ram else '64 GB' }}
-                                        </p>
+                                    <div class="spec-item">
+                                        <div class="spec-label">RAM</div>
+                                        <div class="spec-value">{{ laptop.ram.name if laptop.ram else '32 GB' }}</div>
                                     </div>
-                                    <div class="spec-card">
-                                        <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">SSD</p>
-                                        <p class="badge-ssd" style="font-family: var(--font-heading); font-size: 1rem; font-weight: 700;">
-                                            {{ laptop.storage.name if laptop.storage else '2 TB' }}
-                                        </p>
+                                    <div class="spec-item">
+                                        <div class="spec-label">SSD</div>
+                                        <div class="spec-value">{{ laptop.storage.name if laptop.storage else '1 TB' }}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Image -->
-                            <div class="tilt-content">
-                                {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
-                                    {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
-                                    <img
-                                        src="{{ url_for('static', filename=cover.image_path) }}"
-                                        alt="{{ laptop.display_name }}"
-                                        class="hero-image"
-                                        loading="eager"
-                                    >
-                                {% elif laptop.images and laptop.images|length > 0 %}
-                                    <img
-                                        src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
-                                        alt="{{ laptop.display_name }}"
-                                        class="hero-image"
-                                        loading="eager"
-                                    >
-                                {% else %}
-                                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-laptop" style="font-size: 8rem; color: var(--text-muted);"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
+                            <!-- Product Image -->
+                            {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
+                                {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
+                                <img src="{{ url_for('static', filename=cover.image_path) }}"
+                                     alt="{{ laptop.display_name }}"
+                                     class="hero-product-image"
+                                     loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            {% elif laptop.images and laptop.images|length > 0 %}
+                                <img src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
+                                     alt="{{ laptop.display_name }}"
+                                     class="hero-product-image"
+                                     loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            {% else %}
+                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10;">
+                                    <i class="fas fa-laptop" style="font-size: 6rem; color: var(--text-muted);"></i>
+                                </div>
+                            {% endif %}
 
-                            <!-- Price -->
-                            <div class="glass-panel" style="position: absolute; right: -3rem; bottom: 20%; z-index: 40; padding: 1rem 1.5rem; border-radius: 100px; display: flex; align-items: center; gap: 1rem;">
-                                <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                                    <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;">Desde</span>
-                                    <span class="price-tag" style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--text-primary);">
-                                        RD$ {{ "{:,.2f}".format(laptop.sale_price) }}
-                                    </span>
+                            <!-- Price Tag -->
+                            <div class="price-tag">
+                                <div>
+                                    <div class="price-tag-label">Desde</div>
+                                    <div class="price-tag-value">RD$ {{ "{:,.0f}".format(laptop.sale_price) }}</div>
                                 </div>
-                                <div style="position: relative; width: 12px; height: 12px;">
-                                    <div style="position: absolute; inset: 0; background: #10b981; border-radius: 50%; opacity: 0.75; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-                                    <div style="position: relative; width: 12px; height: 12px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></div>
-                                </div>
+                                <div class="price-tag-indicator"></div>
                             </div>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <!-- Placeholder si no hay productos -->
-                        <div id="tilt-card-0" class="tilt-card active">
-                            <div class="tilt-content">
-                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-laptop" style="font-size: 8rem; color: var(--text-muted);"></i>
-                                </div>
+                        <div class="hero-product-card active">
+                            <div style="display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10;">
+                                <i class="fas fa-laptop" style="font-size: 6rem; color: var(--text-muted);"></i>
                             </div>
                         </div>
                     {% endif %}
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Marquee -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track" id="marquee-track">
+            <!-- Generated by JS -->
         </div>
     </div>
 </section>
 
 <!-- ============================================
-     PRODUCTOS DESTACADOS (MANTENIENDO TUS DATOS)
+     PRODUCTOS DESTACADOS
      ============================================ -->
 <section id="featured" class="section-padding bg-surface">
     <div class="container-xl">
-        <div class="text-center mb-16 fade-in-up">
-            <span class="text-accent-primary font-bold uppercase tracking-widest text-sm mb-2 block">Selección Premium</span>
-            <h2 class="text-4xl md:text-5xl font-bold font-heading mb-6">
+        <header class="section-header fade-up">
+            <span class="section-eyebrow">Selección Premium</span>
+            <h2 class="section-title">
                 Lo más <span class="text-gradient">Vendido</span>
             </h2>
-            <p class="text-xl text-secondary max-w-2xl mx-auto">
-                Selección premium de las laptops más vendidas con el mejor rendimiento y precio del mercado.
+            <p class="section-description">
+                Las laptops más vendidas con el mejor rendimiento y precio del mercado dominicano.
             </p>
-        </div>
+        </header>
 
         <div class="products-grid">
             {% if featured_laptops %}
                 {% for laptop in featured_laptops[:4] %}
-                <div class="product-card fade-in-up delay-{{ loop.index * 100 }}">
+                <article class="product-card fade-up stagger-{{ loop.index }}">
                     <!-- Badge -->
-                    {% if loop.index == 1 %}
-                    <div class="badge badge-new">Nuevo Lanzamiento</div>
-                    {% elif loop.index == 2 %}
-                    <div class="badge badge-offer">Oferta Exclusiva</div>
-                    {% elif loop.index == 3 %}
-                    <div class="badge badge-featured">Destacado</div>
-                    {% else %}
-                    <div class="badge badge-featured">Popular</div>
-                    {% endif %}
-
-                    {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
-                    <div class="badge badge-last" style="top: 4.5rem;">¡Últimas unidades!</div>
-                    {% elif laptop.quantity == 0 %}
-                    <div class="badge badge-soldout" style="top: 4.5rem;">Agotado</div>
-                    {% endif %}
-
-                    <!-- Product Image -->
-                    <div class="img-container">
-                        {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
-                            {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
-                            <img
-                                src="{{ url_for('static', filename=cover.image_path) }}"
-                                alt="{{ laptop.display_name }}"
-                                class="product-img"
-                                loading="lazy"
-                            >
-                        {% elif laptop.images and laptop.images|length > 0 %}
-                            <img
-                                src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
-                                alt="{{ laptop.display_name }}"
-                                class="product-img"
-                                loading="lazy"
-                            >
+                    <div class="product-card-badge">
+                        {% if loop.index == 1 %}
+                            <span class="badge badge-new">Nuevo</span>
+                        {% elif loop.index == 2 %}
+                            <span class="badge badge-hot">Oferta</span>
+                        {% elif loop.index == 3 %}
+                            <span class="badge badge-featured">Destacado</span>
                         {% else %}
-                            <div class="flex items-center justify-center h-full">
-                                <i class="fas fa-laptop text-gray-300 text-6xl"></i>
-                            </div>
+                            <span class="badge badge-featured">Popular</span>
                         {% endif %}
                     </div>
 
-                    <!-- Product Info -->
+                    {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
+                        <div class="product-card-badge" style="top: 3.5rem;">
+                            <span class="badge badge-limited">Últimas unidades</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Image -->
+                    <div class="product-image-container">
+                        {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
+                            {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
+                            <img src="{{ url_for('static', filename=cover.image_path) }}"
+                                 alt="{{ laptop.display_name }}"
+                                 class="product-image"
+                                 loading="lazy">
+                        {% elif laptop.images and laptop.images|length > 0 %}
+                            <img src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
+                                 alt="{{ laptop.display_name }}"
+                                 class="product-image"
+                                 loading="lazy">
+                        {% else %}
+                            <i class="fas fa-laptop" style="font-size: 4rem; color: var(--text-muted);"></i>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info -->
                     <div class="product-info">
-                        <span class="product-category">
-                            {{ laptop.brand.name if laptop.brand else 'Marca' }}
-                        </span>
-                        <h3 class="product-title" title="{{ laptop.display_name }}">
-                            {{ laptop.display_name[:30] }}{% if laptop.display_name|length > 30 %}...{% endif %}
-                        </h3>
+                        <span class="product-brand">{{ laptop.brand.name if laptop.brand else 'Premium' }}</span>
+                        <h3 class="product-name">{{ laptop.display_name|truncate(35) }}</h3>
 
-                        <!-- Tech Specs -->
-                        <div class="spec-list">
+                        <!-- Specs -->
+                        <div class="product-specs">
                             {% if laptop.processor %}
-                            <div class="spec-item">
-                                <div class="spec-icon-wrapper"><i class="fa-solid fa-microchip"></i></div>
-                                <span class="spec-text">{{ laptop.processor.name[:25] }}{% if laptop.processor.name|length > 25 %}...{% endif %}</span>
+                            <div class="product-spec">
+                                <span class="product-spec-icon"><i class="fa-solid fa-microchip"></i></span>
+                                <span class="product-spec-text">{{ laptop.processor.name|truncate(28) }}</span>
                             </div>
                             {% endif %}
-
                             {% if laptop.graphics_card %}
-                            <div class="spec-item">
-                                <div class="spec-icon-wrapper"><i class="fa-solid fa-gamepad"></i></div>
-                                <span class="spec-text">{{ laptop.graphics_card.name[:25] }}{% if laptop.graphics_card.name|length > 25 %}...{% endif %}</span>
+                            <div class="product-spec">
+                                <span class="product-spec-icon"><i class="fa-solid fa-gamepad"></i></span>
+                                <span class="product-spec-text">{{ laptop.graphics_card.name|truncate(28) }}</span>
                             </div>
                             {% endif %}
-
-                            {% if laptop.display %}
-                            <div class="spec-item">
-                                <div class="spec-icon-wrapper"><i class="fa-solid fa-display"></i></div>
-                                <span class="spec-text">{{ laptop.display.name[:25] }}{% if laptop.display.name|length > 25 %}...{% endif %}</span>
-                            </div>
-                            {% endif %}
-
                             {% if laptop.ram %}
-                            <div class="spec-item">
-                                <div class="spec-icon-wrapper"><i class="fa-solid fa-memory"></i></div>
-                                <span class="spec-text">{{ laptop.ram.name }}</span>
-                            </div>
-                            {% endif %}
-
-                            {% if laptop.storage %}
-                            <div class="spec-item">
-                                <div class="spec-icon-wrapper"><i class="fa-solid fa-hard-drive"></i></div>
-                                <span class="spec-text">{{ laptop.storage.name }}</span>
+                            <div class="product-spec">
+                                <span class="product-spec-icon"><i class="fa-solid fa-memory"></i></span>
+                                <span class="product-spec-text">{{ laptop.ram.name }}</span>
                             </div>
                             {% endif %}
                         </div>
 
-                        <!-- Price & Action -->
-                        <div class="product-footer">
-                            <div class="price-block">
+                        <!-- Footer -->
+                        <footer class="product-footer">
+                            <div class="product-price">
                                 {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
-                                <span class="price-old">RD$ {{ "{:,.2f}".format(laptop.sale_price) }}</span>
-                                <span class="price-curr">
-                                    <span>RD$</span>
-                                    {{ "{:,.2f}".format(laptop.discount_price) }}
-                                </span>
+                                    <span class="product-price-old">RD$ {{ "{:,.0f}".format(laptop.sale_price) }}</span>
+                                    <span class="product-price-current">
+                                        <span class="product-price-currency">RD$</span> {{ "{:,.0f}".format(laptop.discount_price) }}
+                                    </span>
                                 {% else %}
-                                <span class="price-curr">
-                                    <span>RD$</span>
-                                    {{ "{:,.2f}".format(laptop.sale_price) }}
-                                </span>
+                                    <span class="product-price-current">
+                                        <span class="product-price-currency">RD$</span> {{ "{:,.0f}".format(laptop.sale_price) }}
+                                    </span>
                                 {% endif %}
                             </div>
-                            <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="btn-premium">
+                            <a href="{{ url_for('public.product_detail', id=laptop.id) }}"
+                               class="product-action"
+                               aria-label="Ver detalles de {{ laptop.display_name }}">
                                 <i class="fa-solid fa-arrow-right"></i>
                             </a>
-                        </div>
+                        </footer>
                     </div>
-                </div>
+                </article>
                 {% endfor %}
             {% endif %}
         </div>
 
-        <!-- View All Button -->
-        <div class="text-center mt-12 fade-in-up delay-300">
-            <a href="{{ url_for('public.catalog') }}" class="btn-lux dark text-lg px-8 py-4">
+        <div class="text-center fade-up" style="margin-top: 3rem;">
+            <a href="{{ url_for('public.catalog') }}" class="btn btn-secondary">
                 Ver Todos los Productos
-                <i class="fa-solid fa-arrow-right ml-2"></i>
+                <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
     </div>
 </section>
 
 <!-- ============================================
-     POR QUÉ ELEGIRNOS (REDISEÑADO)
+     POR QUÉ ELEGIRNOS
      ============================================ -->
 <section class="section-padding">
     <div class="container-xl">
-        <div class="text-center mb-16 fade-in-up">
-            <span class="text-accent-primary font-bold uppercase tracking-widest text-sm mb-2 block">Beneficios</span>
-            <h2 class="text-4xl md:text-5xl font-bold font-heading mb-6">
+        <header class="section-header fade-up">
+            <span class="section-eyebrow">Beneficios</span>
+            <h2 class="section-title">
                 ¿Por Qué <span class="text-gradient">Elegirnos?</span>
             </h2>
-            <p class="text-xl text-secondary max-w-2xl mx-auto">
-                Ofrecemos más que solo productos. Te brindamos una experiencia completa de compra con garantías y soporte de primer nivel.
+            <p class="section-description">
+                Más que productos. Una experiencia completa con garantías y soporte de primer nivel.
             </p>
-        </div>
+        </header>
 
         <div class="features-grid">
-            <!-- Feature 1: Garantía Oficial -->
-            <div class="feature-card fade-in-up delay-100">
+            <article class="feature-card fade-up stagger-1">
                 <div class="feature-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
-                <h3 class="text-xl font-semibold font-heading mb-3">Garantía Oficial</h3>
-                <p class="text-secondary">
+                <h3 class="feature-title">Garantía Oficial</h3>
+                <p class="feature-description">
                     Todos nuestros productos incluyen garantía de fábrica de 1 año con cobertura completa.
                 </p>
-            </div>
+            </article>
 
-            <!-- Feature 2: Envío Rápido -->
-            <div class="feature-card fade-in-up delay-200">
+            <article class="feature-card fade-up stagger-2">
                 <div class="feature-icon">
                     <i class="fas fa-shipping-fast"></i>
                 </div>
-                <h3 class="text-xl font-semibold font-heading mb-3">Envío Gratis</h3>
-                <p class="text-secondary">
+                <h3 class="feature-title">Envío Gratis</h3>
+                <p class="feature-description">
                     Entrega rápida y segura en toda República Dominicana sin costo adicional.
                 </p>
-            </div>
+            </article>
 
-            <!-- Feature 3: Soporte Técnico -->
-            <div class="feature-card fade-in-up delay-300">
+            <article class="feature-card fade-up stagger-3">
                 <div class="feature-icon">
                     <i class="fas fa-headset"></i>
                 </div>
-                <h3 class="text-xl font-semibold font-heading mb-3">Soporte 24/7</h3>
-                <p class="text-secondary">
+                <h3 class="feature-title">Soporte 24/7</h3>
+                <p class="feature-description">
                     Equipo técnico especializado disponible para ayudarte en cualquier momento.
                 </p>
-            </div>
+            </article>
 
-            <!-- Feature 4: Precios Competitivos -->
-            <div class="feature-card fade-in-up delay-400">
+            <article class="feature-card fade-up stagger-4">
                 <div class="feature-icon">
                     <i class="fas fa-tags"></i>
                 </div>
-                <h3 class="text-xl font-semibold font-heading mb-3">Mejores Precios</h3>
-                <p class="text-secondary">
+                <h3 class="feature-title">Mejores Precios</h3>
+                <p class="feature-description">
                     Precios competitivos con opciones de financiamiento flexibles para todos.
                 </p>
-            </div>
+            </article>
         </div>
     </div>
 </section>
 
 <!-- ============================================
-     CATEGORÍAS (REDISEÑADO)
+     CATEGORÍAS
      ============================================ -->
 <section class="section-padding bg-surface">
     <div class="container-xl">
-        <div class="text-center mb-16 fade-in-up">
-            <h2 class="text-4xl md:text-5xl font-bold font-heading mb-6">
+        <header class="section-header fade-up">
+            <h2 class="section-title">
                 Compra por <span class="text-gradient">Categoría</span>
             </h2>
-            <p class="text-xl text-secondary max-w-2xl mx-auto">
+            <p class="section-description">
                 Encuentra exactamente lo que necesitas según tu uso y presupuesto.
             </p>
-        </div>
+        </header>
 
         <div class="categories-grid">
-            <!-- Gaming -->
-            <a href="{{ url_for('public.catalog', category='gaming') }}" class="category-card fade-in-up">
+            <a href="{{ url_for('public.catalog', category='gaming') }}"
+               class="category-card fade-up stagger-1"
+               style="--category-color: linear-gradient(135deg, #7c3aed, #ec4899);">
                 <div class="category-content">
-                    <div class="w-16 h-16 mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-xl">
-                        <i class="fas fa-gamepad text-2xl"></i>
+                    <div class="category-icon">
+                        <i class="fas fa-gamepad"></i>
                     </div>
-                    <h3 class="text-3xl font-bold mb-2">Gaming</h3>
-                    <p class="text-white/80">Máximo rendimiento para juegos</p>
-                    <div class="mt-4 inline-flex items-center gap-2 font-semibold group-hover:gap-4 transition-all">
+                    <h3 class="category-title">Gaming</h3>
+                    <p class="category-subtitle">Máximo rendimiento para juegos</p>
+                    <span class="category-link">
                         Explorar <i class="fas fa-chevron-right"></i>
-                    </div>
+                    </span>
                 </div>
-                <div class="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20"></div>
             </a>
 
-            <!-- Profesional -->
-            <a href="{{ url_for('public.catalog', category='workstation') }}" class="category-card fade-in-up delay-100">
+            <a href="{{ url_for('public.catalog', category='workstation') }}"
+               class="category-card fade-up stagger-2"
+               style="--category-color: linear-gradient(135deg, #0066ff, #00d4aa);">
                 <div class="category-content">
-                    <div class="w-16 h-16 mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-xl">
-                        <i class="fas fa-briefcase text-2xl"></i>
+                    <div class="category-icon">
+                        <i class="fas fa-briefcase"></i>
                     </div>
-                    <h3 class="text-3xl font-bold mb-2">Profesional</h3>
-                    <p class="text-white/80">Para trabajo y productividad</p>
-                    <div class="mt-4 inline-flex items-center gap-2 font-semibold group-hover:gap-4 transition-all">
+                    <h3 class="category-title">Profesional</h3>
+                    <p class="category-subtitle">Para trabajo y productividad</p>
+                    <span class="category-link">
                         Explorar <i class="fas fa-chevron-right"></i>
-                    </div>
+                    </span>
                 </div>
-                <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-indigo-600/20"></div>
             </a>
 
-            <!-- Estudiantes -->
-            <a href="{{ url_for('public.catalog', category='laptop') }}" class="category-card fade-in-up delay-200">
+            <a href="{{ url_for('public.catalog', category='laptop') }}"
+               class="category-card fade-up stagger-3"
+               style="--category-color: linear-gradient(135deg, #10b981, #0ea5e9);">
                 <div class="category-content">
-                    <div class="w-16 h-16 mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-xl">
-                        <i class="fas fa-graduation-cap text-2xl"></i>
+                    <div class="category-icon">
+                        <i class="fas fa-graduation-cap"></i>
                     </div>
-                    <h3 class="text-3xl font-bold mb-2">Estudiantes</h3>
-                    <p class="text-white/80">Perfectas para estudio y tareas</p>
-                    <div class="mt-4 inline-flex items-center gap-2 font-semibold group-hover:gap-4 transition-all">
+                    <h3 class="category-title">Estudiantes</h3>
+                    <p class="category-subtitle">Perfectas para estudio y tareas</p>
+                    <span class="category-link">
                         Explorar <i class="fas fa-chevron-right"></i>
-                    </div>
+                    </span>
                 </div>
-                <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-teal-600/20"></div>
             </a>
         </div>
     </div>
 </section>
 
 <!-- ============================================
-     CTA FINAL (REDISEÑADO)
+     CTA
      ============================================ -->
-<div class="container-xl pb-24">
-    <div class="cta-container fade-in-up">
-        <div class="relative z-10">
-            <h2 class="text-4xl md:text-5xl font-heading font-bold mb-6 text-white">
-                ¿Listo para el <span class="text-gradient">Upgrade?</span>
-            </h2>
-            <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                No te conformes con menos. Únete a la élite tecnológica de República Dominicana hoy mismo.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url_for('public.catalog') }}" class="btn-lux bg-white text-purple-700 hover:bg-purple-50">
-                    <i class="fas fa-shopping-bag mr-2"></i>
-                    Ver Catálogo Completo
-                </a>
-                <a href="{{ url_for('main.contact') }}" class="btn-lux dark border-white text-white hover:bg-white/10">
-                    <i class="fas fa-phone mr-2"></i>
-                    Contactar Ahora
-                </a>
-            </div>
+<section class="section-padding">
+    <div class="container-xl">
+        <div class="cta fade-up">
+            <div class="cta-content">
+                <h2 class="cta-title">¿Listo para el Upgrade?</h2>
+                <p class="cta-description">
+                    No te conformes con menos. Únete a la élite tecnológica de República Dominicana.
+                </p>
+                <div class="cta-actions">
+                    <a href="{{ url_for('public.catalog') }}" class="btn cta-btn-primary">
+                        <i class="fas fa-shopping-bag"></i>
+                        Ver Catálogo
+                    </a>
+                    <a href="{{ url_for('main.contact') }}" class="btn cta-btn-secondary">
+                        <i class="fas fa-phone"></i>
+                        Contactar
+                    </a>
+                </div>
 
-            <!-- Trust Indicators -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-12 border-t border-white/20">
-                <div>
-                    <p class="text-4xl font-bold text-white">{{ total_products|default(500) }}+</p>
-                    <p class="text-white/80 text-sm">Productos</p>
-                </div>
-                <div>
-                    <p class="text-4xl font-bold text-white">1,000+</p>
-                    <p class="text-white/80 text-sm">Clientes</p>
-                </div>
-                <div>
-                    <p class="text-4xl font-bold text-white">5★</p>
-                    <p class="text-white/80 text-sm">Calificación</p>
-                </div>
-                <div>
-                    <p class="text-4xl font-bold text-white">24/7</p>
-                    <p class="text-white/80 text-sm">Soporte</p>
+                <div class="cta-stats">
+                    <div>
+                        <div class="cta-stat-value">{{ total_products|default(500) }}+</div>
+                        <div class="cta-stat-label">Productos</div>
+                    </div>
+                    <div>
+                        <div class="cta-stat-value">1,000+</div>
+                        <div class="cta-stat-label">Clientes</div>
+                    </div>
+                    <div>
+                        <div class="cta-stat-value">5★</div>
+                        <div class="cta-stat-label">Calificación</div>
+                    </div>
+                    <div>
+                        <div class="cta-stat-value">24/7</div>
+                        <div class="cta-stat-label">Soporte</div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- ============================================
+     AI CHAT WIDGET
+     ============================================ -->
+<div class="ai-widget">
+    <button class="ai-toggle" id="ai-toggle" aria-label="Abrir asistente AI">
+        <div class="ai-toggle-pulse"></div>
+        <i class="fa-solid fa-bolt"></i>
+        <div class="ai-toggle-status"></div>
+    </button>
+
+    <div class="ai-chat" id="ai-chat" role="dialog" aria-label="Chat con asistente AI">
+        <header class="ai-chat-header">
+            <div class="ai-chat-title">
+                <span class="ai-chat-title-dot"></span>
+                LUXERA AI ✨
+            </div>
+            <button class="ai-chat-close" id="ai-close" aria-label="Cerrar chat">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </header>
+
+        <div class="ai-chat-messages" id="ai-messages">
+            <div class="ai-message bot">
+                <div class="ai-message-avatar">AI</div>
+                <div class="ai-message-bubble">
+                    ¡Hola! Soy LUXERA AI, tu asistente de tecnología premium. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+        </div>
+
+        <form class="ai-chat-input" id="ai-form">
+            <input type="text"
+                   id="ai-input"
+                   placeholder="Pregunta sobre laptops, specs o precios..."
+                   autocomplete="off">
+            <button type="submit" class="ai-chat-send" id="ai-send" aria-label="Enviar mensaje">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
     </div>
 </div>
 
@@ -1621,363 +2388,485 @@
 
 {% block extra_js %}
 <script>
-    // --- 1. TEMA CLARO/OSCURO ---
-    function toggleTheme() {
-        const html = document.documentElement;
-        const icon = document.getElementById('theme-icon');
-        const currentTheme = html.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+(function() {
+    'use strict';
 
-        html.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+    // =========================================
+    // 1. THEME MANAGEMENT
+    // =========================================
+    const ThemeManager = {
+        init() {
+            this.toggle = document.getElementById('theme-toggle');
+            this.icon = document.getElementById('theme-icon');
+            this.html = document.documentElement;
 
-        if (newTheme === 'dark') {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-        } else {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
-    }
+            // Load saved theme
+            const saved = localStorage.getItem('theme') || 'light';
+            this.setTheme(saved, false);
 
-    // --- 2. SCRAMBLE TEXT EFFECT ---
-    class TextScramble {
-        constructor(el) {
-            this.el = el;
-            this.chars = '!<>-_\\/[]{}—=+*^?#________';
-            this.update = this.update.bind(this);
-        }
+            // Event listener
+            this.toggle?.addEventListener('click', () => this.toggleTheme());
+        },
 
-        setText(newText) {
-            const oldText = this.el.innerText;
-            const length = Math.max(oldText.length, newText.length);
-            const promise = new Promise((resolve) => this.resolve = resolve);
-            this.queue = [];
-            for (let i = 0; i < length; i++) {
-                const from = oldText[i] || '';
-                const to = newText[i] || '';
-                const start = Math.floor(Math.random() * 40);
-                const end = start + Math.floor(Math.random() * 40);
-                this.queue.push({ from, to, start, end });
-            }
-            cancelAnimationFrame(this.frameRequest);
-            this.frame = 0;
-            this.update();
-            return promise;
-        }
+        setTheme(theme, animate = true) {
+            this.html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
 
-        update() {
-            let output = '';
-            let complete = 0;
-            for (let i = 0, n = this.queue.length; i < n; i++) {
-                let { from, to, start, end, char } = this.queue[i];
-                if (this.frame >= end) {
-                    complete++;
-                    output += to;
-                } else if (this.frame >= start) {
-                    if (!char || Math.random() < 0.28) {
-                        char = this.randomChar();
-                        this.queue[i].char = char;
-                    }
-                    output += `<span style="opacity: 0.5;">${char}</span>`;
-                } else {
-                    output += from;
+            if (this.icon) {
+                this.icon.className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+                if (animate) {
+                    this.icon.style.transform = 'rotate(360deg)';
+                    setTimeout(() => this.icon.style.transform = '', 500);
                 }
             }
-            this.el.innerHTML = output;
-            if (complete === this.queue.length) {
-                this.resolve();
-            } else {
-                this.frameRequest = requestAnimationFrame(this.update);
-                this.frame++;
+
+            // Update carousel colors if exists
+            if (window.HeroCarousel?.instance) {
+                window.HeroCarousel.instance.updateColors();
+            }
+        },
+
+        toggleTheme() {
+            const current = this.html.getAttribute('data-theme');
+            this.setTheme(current === 'dark' ? 'light' : 'dark');
+        }
+    };
+
+    // =========================================
+    // 2. CUSTOM CURSOR
+    // =========================================
+    const CustomCursor = {
+        init() {
+            this.cursor = document.getElementById('cursor');
+            if (!this.cursor || !window.matchMedia('(hover: hover)').matches) return;
+
+            this.dot = this.cursor.querySelector('.cursor-dot');
+            this.ring = this.cursor.querySelector('.cursor-ring');
+
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            const animate = () => {
+                cursorX += (mouseX - cursorX) * 0.15;
+                cursorY += (mouseY - cursorY) * 0.15;
+
+                this.cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+                requestAnimationFrame(animate);
+            };
+            animate();
+
+            // Hover states
+            const interactives = 'a, button, .btn, .product-card, .feature-card, .category-card';
+            document.querySelectorAll(interactives).forEach(el => {
+                el.addEventListener('mouseenter', () => this.cursor.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => this.cursor.classList.remove('hovering'));
+            });
+        }
+    };
+
+    // =========================================
+    // 3. PARTICLES
+    // =========================================
+    const Particles = {
+        init() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 3 + 1;
+                particle.style.cssText = `
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${Math.random() * 100}vw;
+                    top: ${Math.random() * 100}vh;
+                    --tx: ${(Math.random() - 0.5) * 100}px;
+                    --ty: ${(Math.random() - 0.5) * 100}px;
+                    --duration: ${10 + Math.random() * 20}s;
+                    --delay: ${Math.random() * -20}s;
+                `;
+                container.appendChild(particle);
             }
         }
+    };
 
-        randomChar() {
-            return this.chars[Math.floor(Math.random() * this.chars.length)];
+    // =========================================
+    // 4. MARQUEE
+    // =========================================
+    const Marquee = {
+        init() {
+            const track = document.getElementById('marquee-track');
+            if (!track) return;
+
+            const words = ['LUXERA', 'TECNOLOGÍA', 'INNOVACIÓN', 'PREMIUM', 'CALIDAD'];
+            track.innerHTML = [...words, ...words].map(w =>
+                `<span class="marquee-text">${w}</span>`
+            ).join('');
         }
-    }
+    };
 
-    // --- 3. CARRUSEL DE 5 PRODUCTOS ---
-    class HeroCarousel {
-        constructor() {
-            this.currentIndex = 0;
-            this.totalSlides = 0;
-            this.autoPlayInterval = null;
-            this.progressInterval = null;
-            this.slideDuration = 5000; // 5 segundos por slide
-            this.progressStep = 0;
+    // =========================================
+    // 5. AURORA BACKGROUND
+    // =========================================
+    const Aurora = {
+        init() {
+            this.blob1 = document.getElementById('aurora-1');
+            this.blob2 = document.getElementById('aurora-2');
+            if (!this.blob1 || !this.blob2) return;
 
-            this.textSlides = document.querySelectorAll('.text-slide');
-            this.imageSlides = document.querySelectorAll('.tilt-card');
-            this.dots = document.querySelectorAll('.carousel-dot');
-            this.progressFill = document.getElementById('progress-fill');
+            let mouseX = 0.5, mouseY = 0.5;
 
-            this.totalSlides = Math.min(this.textSlides.length, 5); // Máximo 5 slides
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX / window.innerWidth;
+                mouseY = e.clientY / window.innerHeight;
+            });
 
-            // Scramblers para cada slide
-            this.scramblers = [];
+            const animate = () => {
+                const x1 = (mouseX - 0.5) * 30;
+                const y1 = (mouseY - 0.5) * 30;
 
-            this.init();
+                this.blob1.style.transform = `translate(${x1}px, ${y1}px)`;
+                this.blob2.style.transform = `translate(${-x1 * 0.7}px, ${-y1 * 0.7}px)`;
+
+                requestAnimationFrame(animate);
+            };
+            animate();
         }
+    };
+
+    // =========================================
+    // 6. HERO CAROUSEL
+    // =========================================
+    const HeroCarousel = {
+        instance: null,
 
         init() {
-            // Inicializar scramblers para cada slide
-            this.textSlides.forEach((slide, index) => {
-                const title1 = slide.querySelector('.product-title-1');
-                const title2 = slide.querySelector('.product-title-2');
+            const textSlides = document.querySelectorAll('.hero-slide');
+            const imageCards = document.querySelectorAll('.hero-product-card');
+            const dotsContainer = document.getElementById('carousel-dots');
 
-                if (title1 && title2) {
-                    const scrambler1 = new TextScramble(title1);
-                    const scrambler2 = new TextScramble(title2);
+            if (!textSlides.length || !dotsContainer) return;
 
-                    // Guardar referencias
-                    this.scramblers[index] = { title1: scrambler1, title2: scrambler2 };
+            this.instance = {
+                current: 0,
+                total: Math.min(textSlides.length, 5),
+                textSlides,
+                imageCards,
+                dotsContainer,
+                autoplayInterval: null,
+                progressInterval: null,
+                progress: 0,
+                duration: 6000,
+                isAnimating: false,
+                colorSchemes: {
+                    light: [
+                        { gradient: 'linear-gradient(135deg, #0066ff 0%, #00d4aa 100%)', accent: '#0066ff', rgb: '0, 102, 255' },
+                        { gradient: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)', accent: '#7c3aed', rgb: '124, 58, 237' },
+                        { gradient: 'linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)', accent: '#10b981', rgb: '16, 185, 129' },
+                        { gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)', accent: '#f59e0b', rgb: '245, 158, 11' },
+                        { gradient: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', accent: '#06b6d4', rgb: '6, 182, 212' }
+                    ],
+                    dark: [
+                        { gradient: 'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)', accent: '#3b82f6', rgb: '59, 130, 246' },
+                        { gradient: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)', accent: '#a78bfa', rgb: '167, 139, 250' },
+                        { gradient: 'linear-gradient(135deg, #34d399 0%, #38bdf8 100%)', accent: '#34d399', rgb: '52, 211, 153' },
+                        { gradient: 'linear-gradient(135deg, #fbbf24 0%, #f87171 100%)', accent: '#fbbf24', rgb: '251, 191, 36' },
+                        { gradient: 'linear-gradient(135deg, #22d3ee 0%, #60a5fa 100%)', accent: '#22d3ee', rgb: '34, 211, 238' }
+                    ]
+                },
 
-                    // Animar al cargar
-                    scrambler1.setText(title1.innerText);
-                    scrambler2.setText(title2.innerText);
+                updateColors() {
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    const schemes = isDark ? this.colorSchemes.dark : this.colorSchemes.light;
+                    const scheme = schemes[this.current % schemes.length];
+
+                    document.documentElement.style.setProperty('--dynamic-gradient', scheme.gradient);
+                    document.documentElement.style.setProperty('--dynamic-accent', scheme.accent);
+                    document.documentElement.style.setProperty('--dynamic-accent-rgb', scheme.rgb);
+                },
+
+                goTo(index, skipAnimation = false) {
+                    if (this.isAnimating || index === this.current) return;
+                    if (!skipAnimation) this.isAnimating = true;
+
+                    // Update slides
+                    this.textSlides.forEach((slide, i) => {
+                        slide.classList.toggle('active', i === index);
+                    });
+
+                    this.imageCards.forEach((card, i) => {
+                        card.classList.toggle('active', i === index);
+                    });
+
+                    // Update dots
+                    this.dotsContainer.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                        if (i !== index) {
+                            dot.querySelector('.carousel-dot-fill').style.width = '0%';
+                        }
+                    });
+
+                    this.current = index;
+                    this.updateColors();
+                    this.resetProgress();
+
+                    setTimeout(() => this.isAnimating = false, 800);
+                },
+
+                next() {
+                    this.goTo((this.current + 1) % this.total);
+                },
+
+                prev() {
+                    this.goTo((this.current - 1 + this.total) % this.total);
+                },
+
+                resetProgress() {
+                    this.progress = 0;
+                    this.updateProgressBar(0);
+                },
+
+                updateProgressBar(val) {
+                    const activeDot = this.dotsContainer.querySelector('.carousel-dot.active .carousel-dot-fill');
+                    if (activeDot) activeDot.style.width = `${val}%`;
+                },
+
+                startAutoplay() {
+                    this.stopAutoplay();
+                    this.resetProgress();
+
+                    this.progressInterval = setInterval(() => {
+                        this.progress += 100 / (this.duration / 100);
+                        if (this.progress >= 100) {
+                            this.next();
+                        } else {
+                            this.updateProgressBar(this.progress);
+                        }
+                    }, 100);
+                },
+
+                stopAutoplay() {
+                    clearInterval(this.progressInterval);
                 }
-            });
+            };
 
-            // Inicializar controles
-            document.getElementById('prev-btn').addEventListener('click', () => this.prevSlide());
-            document.getElementById('next-btn').addEventListener('click', () => this.nextSlide());
-
-            // Inicializar dots
-            this.dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => this.goToSlide(index));
-            });
-
-            // Inicializar efecto tilt en todas las imágenes
-            this.imageSlides.forEach(slide => {
-                this.initTiltEffect(slide);
-            });
-
-            // Iniciar autoplay
-            this.startAutoPlay();
-
-            // Pausar autoplay al hacer hover
-            const heroSection = document.querySelector('.hero-section');
-            heroSection.addEventListener('mouseenter', () => this.pauseAutoPlay());
-            heroSection.addEventListener('mouseleave', () => this.startAutoPlay());
-        }
-
-        initTiltEffect(slide) {
-            slide.addEventListener('mousemove', (e) => {
-                const rect = slide.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / 30) * -1;
-                const rotateY = (x - centerX) / 30;
-                slide.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-            });
-
-            slide.addEventListener('mouseleave', () => {
-                slide.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
-            });
-        }
-
-        updateSlide(index) {
-            // Ocultar todos los slides
-            this.textSlides.forEach(slide => slide.style.display = 'none');
-            this.imageSlides.forEach(slide => {
-                slide.classList.remove('active');
-                slide.classList.add('hidden');
-            });
-            this.dots.forEach(dot => dot.classList.remove('active'));
-
-            // Mostrar slide actual
-            this.textSlides[index].style.display = 'block';
-            this.imageSlides[index].classList.remove('hidden');
-            this.imageSlides[index].classList.add('active');
-            this.dots[index].classList.add('active');
-
-            // Actualizar índice actual
-            this.currentIndex = index;
-
-            // Activar efecto scramble en el slide actual
-            this.activateScramble(index);
-
-            // Reiniciar progreso
-            this.resetProgress();
-        }
-
-        activateScramble(index) {
-            // Obtener elementos del slide actual
-            const currentSlide = this.textSlides[index];
-            const title1 = currentSlide.querySelector('.product-title-1');
-            const title2 = currentSlide.querySelector('.product-title-2');
-
-            if (title1 && title2 && this.scramblers[index]) {
-                // Re-animar el efecto scramble
-                this.scramblers[index].title1.setText(title1.innerText);
-                this.scramblers[index].title2.setText(title2.innerText);
-            } else if (title1 && title2) {
-                // Crear nuevos scramblers si no existen
-                const scrambler1 = new TextScramble(title1);
-                const scrambler2 = new TextScramble(title2);
-
-                scrambler1.setText(title1.innerText);
-                scrambler2.setText(title2.innerText);
-
-                // Guardar referencias
-                this.scramblers[index] = { title1: scrambler1, title2: scrambler2 };
+            // Create dots
+            for (let i = 0; i < this.instance.total; i++) {
+                const dot = document.createElement('button');
+                dot.className = `carousel-dot${i === 0 ? ' active' : ''}`;
+                dot.setAttribute('role', 'tab');
+                dot.setAttribute('aria-label', `Producto ${i + 1}`);
+                dot.innerHTML = '<span class="carousel-dot-fill"></span>';
+                dot.addEventListener('click', () => this.instance.goTo(i));
+                dotsContainer.appendChild(dot);
             }
+
+            // Event listeners
+            ['carousel-prev', 'hero-prev'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    this.instance.prev();
+                    this.instance.startAutoplay();
+                });
+            });
+
+            ['carousel-next', 'hero-next'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    this.instance.next();
+                    this.instance.startAutoplay();
+                });
+            });
+
+            // Pause on hover
+            const hero = document.querySelector('.hero');
+            hero?.addEventListener('mouseenter', () => this.instance.stopAutoplay());
+            hero?.addEventListener('mouseleave', () => this.instance.startAutoplay());
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') this.instance.prev();
+                if (e.key === 'ArrowRight') this.instance.next();
+            });
+
+            // Initialize
+            this.instance.updateColors();
+            this.instance.startAutoplay();
+
+            // Make accessible globally
+            window.HeroCarousel = HeroCarousel;
         }
+    };
 
-        nextSlide() {
-            const nextIndex = (this.currentIndex + 1) % this.totalSlides;
-            this.updateSlide(nextIndex);
+    // =========================================
+    // 7. AI CHAT
+    // =========================================
+    const AIChat = {
+        init() {
+            this.toggle = document.getElementById('ai-toggle');
+            this.chat = document.getElementById('ai-chat');
+            this.close = document.getElementById('ai-close');
+            this.form = document.getElementById('ai-form');
+            this.input = document.getElementById('ai-input');
+            this.messages = document.getElementById('ai-messages');
+            this.send = document.getElementById('ai-send');
+
+            if (!this.toggle || !this.chat) return;
+
+            this.toggle.addEventListener('click', () => this.openChat());
+            this.close.addEventListener('click', () => this.closeChat());
+            this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+            // Close on escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') this.closeChat();
+            });
+        },
+
+        openChat() {
+            this.chat.classList.add('open');
+            this.input.focus();
+        },
+
+        closeChat() {
+            this.chat.classList.remove('open');
+        },
+
+        async handleSubmit(e) {
+            e.preventDefault();
+            const text = this.input.value.trim();
+            if (!text) return;
+
+            this.addMessage(text, 'user');
+            this.input.value = '';
+            this.send.disabled = true;
+
+            // Show typing
+            const typingId = this.showTyping();
+
+            // Simulate response
+            setTimeout(() => {
+                this.hideTyping(typingId);
+                const responses = [
+                    "Nuestra serie premium ofrece procesadores de última generación con hasta 64GB de RAM.",
+                    "Todos nuestros productos incluyen garantía oficial de 1 año.",
+                    "Tenemos envío gratis a todo el país. ¿Te interesa algún modelo?",
+                    "Para gaming recomendamos nuestra línea con RTX 40-series.",
+                    "Puedes visitar nuestro catálogo para ver todas las opciones disponibles."
+                ];
+                this.addMessage(responses[Math.floor(Math.random() * responses.length)], 'bot');
+                this.send.disabled = false;
+            }, 1200);
+        },
+
+        addMessage(text, sender) {
+            const msg = document.createElement('div');
+            msg.className = `ai-message ${sender}`;
+            msg.innerHTML = `
+                <div class="ai-message-avatar">${sender === 'bot' ? 'AI' : 'Tú'}</div>
+                <div class="ai-message-bubble">${text}</div>
+            `;
+            this.messages.appendChild(msg);
+            this.messages.scrollTop = this.messages.scrollHeight;
+        },
+
+        showTyping() {
+            const id = `typing-${Date.now()}`;
+            const typing = document.createElement('div');
+            typing.id = id;
+            typing.className = 'ai-message bot';
+            typing.innerHTML = `
+                <div class="ai-message-avatar">AI</div>
+                <div class="ai-message-bubble">
+                    <div class="ai-typing">
+                        <span class="ai-typing-dot"></span>
+                        <span class="ai-typing-dot"></span>
+                        <span class="ai-typing-dot"></span>
+                    </div>
+                </div>
+            `;
+            this.messages.appendChild(typing);
+            this.messages.scrollTop = this.messages.scrollHeight;
+            return id;
+        },
+
+        hideTyping(id) {
+            document.getElementById(id)?.remove();
         }
+    };
 
-        prevSlide() {
-            const prevIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
-            this.updateSlide(prevIndex);
+    // =========================================
+    // 8. SCROLL ANIMATIONS
+    // =========================================
+    const ScrollAnimations = {
+        init() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+            document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
         }
+    };
 
-        goToSlide(index) {
-            if (index >= 0 && index < this.totalSlides) {
-                this.updateSlide(index);
-            }
-        }
+    // =========================================
+    // 9. TEXT SCRAMBLE EFFECT (Optimized)
+    // =========================================
+    const TextScramble = {
+        chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
 
-        startAutoPlay() {
-            this.stopAutoPlay();
+        scramble(element) {
+            const originalText = element.textContent;
+            const length = originalText.length;
+            let iteration = 0;
 
-            // Iniciar progreso
-            this.resetProgress();
-            this.progressInterval = setInterval(() => {
-                this.progressStep += 2; // +2% cada 100ms = 100% en 5000ms
-                if (this.progressStep > 100) {
-                    this.progressStep = 100;
-                    this.nextSlide();
-                }
-                this.progressFill.style.width = `${this.progressStep}%`;
-            }, 100);
+            const interval = setInterval(() => {
+                element.textContent = originalText
+                    .split('')
+                    .map((char, i) => {
+                        if (i < iteration) return originalText[i];
+                        return this.chars[Math.floor(Math.random() * this.chars.length)];
+                    })
+                    .join('');
 
-            // Auto slide cada X segundos
-            this.autoPlayInterval = setInterval(() => {
-                this.nextSlide();
-            }, this.slideDuration);
-        }
+                if (iteration >= length) clearInterval(interval);
+                iteration += 1/2;
+            }, 30);
+        },
 
-        pauseAutoPlay() {
-            clearInterval(this.autoPlayInterval);
-            clearInterval(this.progressInterval);
-        }
-
-        stopAutoPlay() {
-            clearInterval(this.autoPlayInterval);
-            clearInterval(this.progressInterval);
-        }
-
-        resetProgress() {
-            this.progressStep = 0;
-            this.progressFill.style.width = '0%';
-        }
-    }
-
-    // --- 4. ANIMACIÓN AL SCROLL ---
-    function initScrollAnimations() {
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animation = 'fadeInUp 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards';
-                    observer.unobserve(entry.target);
+        init() {
+            document.querySelectorAll('[data-scramble]').forEach(el => {
+                // Scramble on load for visible elements
+                if (el.closest('.hero-slide.active')) {
+                    setTimeout(() => this.scramble(el), 300);
                 }
             });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in-up').forEach((el) => {
-            el.style.opacity = '0';
-            observer.observe(el);
-        });
-    }
-
-    // --- 5. AURORA BACKGROUND ANIMATION ---
-    function initAuroraBackground() {
-        const aurora1 = document.getElementById('aurora-1');
-        const aurora2 = document.getElementById('aurora-2');
-
-        if (!aurora1 || !aurora2) return;
-
-        let mouseX = 0;
-        let mouseY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX / window.innerWidth;
-            mouseY = e.clientY / window.innerHeight;
-        });
-
-        function animateAurora() {
-            const moveX = (mouseX - 0.5) * 40;
-            const moveY = (mouseY - 0.5) * 40;
-
-            aurora1.style.transform = `translate(${moveX}px, ${moveY}px)`;
-            aurora2.style.transform = `translate(${-moveX * 0.7}px, ${-moveY * 0.7}px)`;
-
-            requestAnimationFrame(animateAurora);
         }
+    };
 
-        animateAurora();
-    }
-
-    // --- 6. INITIALIZE EVERYTHING ---
+    // =========================================
+    // INITIALIZE ALL
+    // =========================================
     document.addEventListener('DOMContentLoaded', () => {
-        // Cargar tema guardado
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        const html = document.documentElement;
-        const icon = document.getElementById('theme-icon');
-
-        html.setAttribute('data-theme', savedTheme);
-
-        if (savedTheme === 'dark') {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-        } else {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
-
-        // Inicializar carrusel
-        const carousel = new HeroCarousel();
-
-        // Inicializar efectos
-        initScrollAnimations();
-        initAuroraBackground();
-
-        // Actualizar colores de aurora según el tema
-        function updateAuroraColors() {
-            const aurora1 = document.getElementById('aurora-1');
-            const aurora2 = document.getElementById('aurora-2');
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-            if (aurora1 && aurora2) {
-                if (isDark) {
-                    aurora1.style.background = 'rgba(191, 90, 242, 0.15)';
-                    aurora2.style.background = 'rgba(100, 210, 255, 0.15)';
-                } else {
-                    aurora1.style.background = 'rgba(124, 58, 237, 0.15)';
-                    aurora2.style.background = 'rgba(6, 182, 212, 0.15)';
-                }
-            }
-        }
-
-        // Observar cambios en el tema
-        const observer = new MutationObserver(updateAuroraColors);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-        // Inicializar colores
-        updateAuroraColors();
+        ThemeManager.init();
+        CustomCursor.init();
+        Particles.init();
+        Marquee.init();
+        Aurora.init();
+        HeroCarousel.init();
+        AIChat.init();
+        ScrollAnimations.init();
+        TextScramble.init();
     });
+
+})();
 </script>
 {% endblock %}

@@ -1,3010 +1,2872 @@
-{% extends "base.html" %}
+{% extends "landing/base_landing.html" %}
 
-{% block title %}Dashboard Premium - LuxeraRD{% endblock %}
+{% block title %}LuxeraRD | Redefiniendo la Excelencia Tecnológica{% endblock %}
+
+{% block meta_description %}Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial, soporte técnico especializado y las mejores marcas del mercado.{% endblock %}
 
 {% block extra_css %}
+<!-- Fuentes Premium: Satoshi (Moderna) y Clash Display (Bold) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-    /* ========================================
-       VARIABLES Y ANIMACIONES MEJORADAS
-       ======================================== */
-
+    /* =========================================
+       1. VARIABLES & CORE SETTINGS (Mejorado)
+       ========================================= */
     :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #5a67d8 30%, #764ba2 100%);
-        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        --orange-gradient: linear-gradient(135deg, #fa8231 0%, #fdb850 100%);
-        --pink-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        --teal-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        /* Paleta refinada - Evitando el púrpura genérico */
+        --bg-deep: #fafafa;
+        --bg-surface: #f0f0f0;
+        --bg-card: #ffffff;
+        --bg-elevated: #ffffff;
 
-        --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        --card-shadow-hover: 0 50px 100px -20px rgba(0, 0, 0, 0.35);
-        --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        --text-primary: #0a0a0a;
+        --text-secondary: #3d3d3d;
+        --text-muted: #737373;
+        --text-subtle: #a3a3a3;
 
-        --glass-bg: rgba(255, 255, 255, 0.1);
-        --glass-border: rgba(255, 255, 255, 0.2);
-        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        /* Colores de acento más sofisticados */
+        --accent-primary: #0066ff;
+        --accent-secondary: #00d4aa;
+        --accent-tertiary: #ff6b35;
+        --accent-gradient: linear-gradient(135deg, #0066ff 0%, #00d4aa 100%);
+        --accent-glow: 0 0 60px rgba(0, 102, 255, 0.15);
+
+        --border-light: rgba(0, 0, 0, 0.06);
+        --border-medium: rgba(0, 0, 0, 0.1);
+        --border-hover: rgba(0, 0, 0, 0.15);
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+        --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.12);
+
+        /* Tipografía distintiva */
+        --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-heading: 'Syne', sans-serif;
+
+        /* Easing functions */
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+        --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* Variables dinámicas para el carrusel */
+        --dynamic-gradient: linear-gradient(135deg, #0066ff 0%, #00d4aa 100%);
+        --dynamic-accent: #0066ff;
+        --dynamic-accent-rgb: 0, 102, 255;
+        --dynamic-aurora1: rgba(0, 102, 255, 0.08);
+        --dynamic-aurora2: rgba(0, 212, 170, 0.08);
     }
 
-    @keyframes professionalAppear {
-        0% {
-            opacity: 0;
-            transform: translateY(40px) scale(0.95);
-            filter: blur(10px);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0);
-        }
+    [data-theme="dark"] {
+        --bg-deep: #050505;
+        --bg-surface: #0a0a0a;
+        --bg-card: #111111;
+        --bg-elevated: #181818;
+
+        --text-primary: #fafafa;
+        --text-secondary: #d4d4d4;
+        --text-muted: #737373;
+        --text-subtle: #525252;
+
+        --accent-primary: #3b82f6;
+        --accent-secondary: #10b981;
+        --accent-tertiary: #f97316;
+        --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        --accent-glow: 0 0 80px rgba(59, 130, 246, 0.25);
+
+        --border-light: rgba(255, 255, 255, 0.06);
+        --border-medium: rgba(255, 255, 255, 0.1);
+        --border-hover: rgba(255, 255, 255, 0.18);
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+        --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.5);
+
+        --dynamic-gradient: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        --dynamic-accent: #3b82f6;
+        --dynamic-accent-rgb: 59, 130, 246;
+        --dynamic-aurora1: rgba(59, 130, 246, 0.12);
+        --dynamic-aurora2: rgba(16, 185, 129, 0.1);
     }
 
-    @keyframes floatSubtle {
-        0%, 100% {
-            transform: translateY(0px) rotate(0deg);
-        }
-        50% {
-            transform: translateY(-15px) rotate(1deg);
-        }
+    /* =========================================
+       2. BASE STYLES
+       ========================================= */
+    *, *::before, *::after {
+        box-sizing: border-box;
     }
 
-    @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    html {
+        scroll-behavior: smooth;
     }
 
-    @keyframes shimmer {
-        0% { background-position: -1000px 0; }
-        100% { background-position: 1000px 0; }
+    body {
+        font-family: var(--font-body);
+        background-color: var(--bg-deep);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.5s var(--ease-out-expo), color 0.5s var(--ease-out-expo);
+        overflow-x: hidden;
+        line-height: 1.6;
     }
 
-    @keyframes glow {
-        0%, 100% {
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3),
-                        0 0 40px rgba(102, 126, 234, 0.1);
-        }
-        50% {
-            box-shadow: 0 0 40px rgba(102, 126, 234, 0.5),
-                        0 0 60px rgba(102, 126, 234, 0.2);
-        }
-    }
+    /* =========================================
+       3. VISUAL EFFECTS & BACKGROUNDS
+       ========================================= */
 
-    @keyframes borderGlow {
-        0%, 100% { border-color: rgba(102, 126, 234, 0.3); }
-        50% { border-color: rgba(102, 126, 234, 0.8); }
-    }
-
-    .professional-animation {
-        animation: professionalAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    .gradient-animate {
-        background-size: 200% 200%;
-        animation: gradientShift 3s ease infinite;
-    }
-
-    .animate-delay-1 { animation-delay: 0.1s; }
-    .animate-delay-2 { animation-delay: 0.2s; }
-    .animate-delay-3 { animation-delay: 0.3s; }
-    .animate-delay-4 { animation-delay: 0.4s; }
-    .animate-delay-5 { animation-delay: 0.5s; }
-
-    /* ========================================
-       DASHBOARD HEADER - REDISEÑO PREMIUM
-       ======================================== */
-
-    .dashboard-header {
-        background: linear-gradient(135deg,
-            #667eea 0%,
-            #5a67d8 30%,
-            #764ba2 100%);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        background-size: 200% 200%;
-        animation: gradientShift 10s ease infinite;
-    }
-
-    .dashboard-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(
-            circle at 30% 30%,
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0.08) 40%,
-            transparent 70%
-        );
-        animation: floatSubtle 8s ease-in-out infinite;
-    }
-
-    .dashboard-header::after {
-        content: '';
-        position: absolute;
-        bottom: -40%;
-        left: -10%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(
-            circle at 70% 70%,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.05) 40%,
-            transparent 70%
-        );
-        animation: floatSubtle 10s ease-in-out infinite reverse;
-    }
-
-    .header-content {
-        position: relative;
-        z-index: 2;
-        backdrop-filter: blur(10px);
-    }
-
-    .welcome-text {
-        font-size: 2.25rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: -0.025em;
-        position: relative;
-        display: inline-block;
-        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .welcome-text::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 0;
-        width: 60px;
-        height: 4px;
-        background: linear-gradient(90deg, #38ef7d, #11998e);
-        border-radius: 2px;
-        box-shadow: 0 2px 10px rgba(56, 239, 125, 0.4);
-    }
-
-    .welcome-subtitle {
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 1rem;
-        font-weight: 500;
-        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
-        margin-top: 0.5rem;
-    }
-
-    .welcome-subtitle strong {
-        font-weight: 700;
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    /* ========================================
-       SISTEMA DE GRID AVANZADO
-       ======================================== */
-
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        gap: 24px;
-        padding: 24px;
-        max-width: 1920px;
-        margin: 0 auto;
-    }
-
-    .grid-col-4 { grid-column: span 4; }
-    .grid-col-6 { grid-column: span 6; }
-    .grid-col-8 { grid-column: span 8; }
-    .grid-col-12 { grid-column: span 12; }
-
-    @media (max-width: 1400px) {
-        .grid-col-4 { grid-column: span 6; }
-        .grid-col-8 { grid-column: span 12; }
-    }
-
-    @media (max-width: 768px) {
-        .grid-col-4, .grid-col-6, .grid-col-8 {
-            grid-column: span 12;
-        }
-        .dashboard-grid {
-            gap: 16px;
-            padding: 16px;
-        }
-    }
-
-    /* ========================================
-       METRIC CARDS - DISEÑO GLASSMORPHISM
-       ======================================== */
-
-    .metric-card {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(255, 255, 255, 0.85) 100%);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        padding: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.6);
-        transition: var(--transition-smooth);
-        position: relative;
-        overflow: hidden;
-        will-change: transform, opacity;
-        backface-visibility: hidden;
-        transform: translateZ(0);
-    }
-
-    .dark .metric-card {
-        background: linear-gradient(135deg,
-            rgba(30, 41, 59, 0.95) 0%,
-            rgba(15, 23, 42, 0.85) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
-    .metric-card::before {
-        content: '';
-        position: absolute;
-        inset: 1px;
-        border-radius: 23px;
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.4),
-            rgba(255, 255, 255, 0.1));
-        z-index: -1;
-    }
-
-    .dark .metric-card::before {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.1),
-            rgba(255, 255, 255, 0.05));
-    }
-
-    .metric-card::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(
-            circle,
-            rgba(102, 126, 234, 0.1) 0%,
-            transparent 70%
-        );
-        opacity: 0;
-        transition: opacity 0.6s;
-    }
-
-    .metric-card:hover {
-        transform: translateY(-12px) scale(1.03);
-        box-shadow: var(--card-shadow-hover);
-        border-color: rgba(102, 126, 234, 0.5);
-        animation: borderGlow 2s ease-in-out infinite;
-    }
-
-    .metric-card:hover::after {
-        opacity: 1;
-    }
-
-    .metric-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2rem;
-        position: relative;
-        z-index: 2;
-    }
-
-    .metric-icon-wrapper {
-        position: relative;
-        width: 80px;
-        height: 80px;
-    }
-
-    .metric-icon {
-        width: 100%;
-        height: 100%;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        position: relative;
-        transition: var(--transition-smooth);
-        box-shadow:
-            0 15px 30px rgba(0, 0, 0, 0.2),
-            inset 0 -3px 0 rgba(0, 0, 0, 0.2),
-            inset 0 3px 0 rgba(255, 255, 255, 0.3);
-        z-index: 1;
-        overflow: hidden;
-    }
-
-    .metric-icon::before {
-        content: '';
-        position: absolute;
+    /* Noise texture overlay */
+    .noise-overlay {
+        position: fixed;
         inset: 0;
-        background: inherit;
-        opacity: 0.9;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.02;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Grid pattern */
+    .grid-pattern {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.03;
+        background-image:
+            linear-gradient(var(--text-primary) 1px, transparent 1px),
+            linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
+        background-size: 100px 100px;
+        z-index: 0;
+        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+
+    [data-theme="dark"] .grid-pattern {
+        opacity: 0.04;
+    }
+
+    /* Aurora container */
+    .aurora-container {
+        position: fixed;
+        inset: 0;
         z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
     }
 
-    .metric-card:hover .metric-icon {
-        transform: rotateY(180deg) scale(1.1);
-        animation: glow 2s ease-in-out infinite;
-    }
-
-    .metric-icon-badge {
+    .aurora-blob {
         position: absolute;
-        top: -8px;
-        right: -8px;
-        width: 32px;
-        height: 32px;
-        background: white;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 2;
-        border: 2px solid #fff;
+        filter: blur(120px);
+        opacity: 0.5;
+        transition: all 1.5s var(--ease-out-expo);
+        will-change: transform, background;
     }
 
-    .dark .metric-icon-badge {
-        background: #1f2937;
-        border-color: #374151;
+    .aurora-blob-1 {
+        width: 50vw;
+        height: 50vw;
+        top: -15%;
+        left: -10%;
+        background: var(--dynamic-aurora1);
     }
 
-    .metric-value {
-        font-size: 3rem;
-        font-weight: 900;
-        line-height: 1.1;
-        margin: 1rem 0;
-        background: linear-gradient(135deg,
-            #111827 0%,
-            #374151 50%,
-            #6b7280 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        position: relative;
-        display: inline-block;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    .aurora-blob-2 {
+        width: 40vw;
+        height: 40vw;
+        bottom: -15%;
+        right: -5%;
+        background: var(--dynamic-aurora2);
     }
 
-    .metric-value::after {
-        content: '';
+    /* Floating particles */
+    .particles-container {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .particle {
         position: absolute;
-        bottom: -5px;
-        left: 0;
-        width: 40px;
-        height: 3px;
-        background: var(--primary-gradient);
-        border-radius: 2px;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        background: var(--text-primary);
+        border-radius: 50%;
+        opacity: 0.06;
+        animation: float-particle var(--duration) var(--delay) infinite ease-in-out;
     }
 
-    .dark .metric-value {
-        background: linear-gradient(135deg,
-            rgba(249, 250, 251, 0.95) 0%,
-            rgba(209, 213, 219, 0.9) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+    @keyframes float-particle {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.06;
+        }
+        50% {
+            transform: translate(var(--tx), var(--ty)) scale(1.2);
+            opacity: 0.12;
+        }
     }
 
-    .metric-label {
-        font-size: 0.9rem;
-        color: #6b7280;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    /* =========================================
+       4. CUSTOM CURSOR
+       ========================================= */
+    .cursor {
+        position: fixed;
+        pointer-events: none;
+        z-index: 10001;
+        mix-blend-mode: difference;
     }
 
-    .dark .metric-label {
-        color: #9ca3af;
-    }
-
-    .metric-label::before {
-        content: '';
+    .cursor-dot {
         width: 8px;
         height: 8px;
+        background: white;
         border-radius: 50%;
-        background: currentColor;
-        opacity: 0.6;
+        transform: translate(-50%, -50%);
+        transition: transform 0.15s var(--ease-out-expo);
     }
 
-    .metric-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 2px solid rgba(243, 244, 246, 0.5);
-        position: relative;
-        z-index: 2;
-    }
-
-    .dark .metric-footer {
-        border-top-color: rgba(55, 65, 81, 0.5);
-    }
-
-    .metric-change {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 800;
-        padding: 0.75rem 1rem;
-        border-radius: 16px;
-        backdrop-filter: blur(10px);
-        border: 1px solid transparent;
-        transition: var(--transition-smooth);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .metric-change::before {
-        content: '';
+    .cursor-ring {
         position: absolute;
-        inset: 0;
-        background: currentColor;
-        opacity: 0.1;
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.2s var(--ease-out-expo);
     }
 
-    .metric-change.positive {
-        color: #059669;
-        border-color: rgba(5, 150, 105, 0.3);
+    .cursor.hovering .cursor-dot {
+        transform: translate(-50%, -50%) scale(2);
     }
 
-    .metric-change.negative {
-        color: #dc2626;
-        border-color: rgba(220, 38, 38, 0.3);
-    }
-
-    .metric-change.neutral {
-        color: #6b7280;
-        border-color: rgba(107, 114, 128, 0.3);
-    }
-
-    .metric-change:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .metric-info {
-        font-size: 0.8rem;
-        color: #6b7280;
-        font-weight: 600;
-        background: rgba(243, 244, 246, 0.5);
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-    }
-
-    .dark .metric-info {
-        color: #9ca3af;
-        background: rgba(55, 65, 81, 0.5);
-    }
-
-    /* ========================================
-       SISTEMA DE TENDENCIAS AVANZADO
-       ======================================== */
-
-    .trend-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 700;
-        position: relative;
-        overflow: hidden;
-        transition: var(--transition-smooth);
-    }
-
-    .trend-indicator::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: currentColor;
-        opacity: 0.1;
-    }
-
-    .trend-indicator.positive {
-        color: #059669;
-        background: linear-gradient(135deg,
-            rgba(209, 250, 229, 0.8),
-            rgba(167, 243, 208, 0.8));
-        border: 1px solid rgba(5, 150, 105, 0.2);
-    }
-
-    .trend-indicator.negative {
-        color: #dc2626;
-        background: linear-gradient(135deg,
-            rgba(254, 226, 226, 0.8),
-            rgba(252, 165, 165, 0.8));
-        border: 1px solid rgba(220, 38, 38, 0.2);
-    }
-
-    .trend-sparkline {
-        width: 60px;
-        height: 24px;
-        position: relative;
-        margin-left: 8px;
-    }
-
-    .trend-sparkline svg {
-        width: 100%;
-        height: 100%;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-
-    .trend-sparkline.positive svg path {
-        stroke: #059669;
-        stroke-width: 2;
-        fill: none;
-    }
-
-    .trend-sparkline.negative svg path {
-        stroke: #dc2626;
-        stroke-width: 2;
-        fill: none;
-    }
-
-    /* ========================================
-       ALERTAS PREMIUM REDISEÑADAS
-       ======================================== */
-
-    .alert-card {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0.85));
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 24px;
-        border-left: 8px solid;
-        box-shadow:
-            0 10px 30px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        transition: var(--transition-smooth);
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .dark .alert-card {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.95),
-            rgba(17, 24, 39, 0.85));
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .alert-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg,
-            var(--alert-color) 0%,
-            rgba(255, 255, 255, 0.8) 100%);
-    }
-
-    .alert-card.alert-danger {
-        --alert-color: #ef4444;
-        border-left-color: #ef4444;
-        background: linear-gradient(135deg,
-            rgba(254, 226, 226, 0.95),
-            rgba(254, 202, 202, 0.85));
-    }
-
-    .alert-card.alert-warning {
-        --alert-color: #f59e0b;
-        border-left-color: #f59e0b;
-        background: linear-gradient(135deg,
-            rgba(254, 243, 199, 0.95),
-            rgba(253, 230, 138, 0.85));
-    }
-
-    .alert-card.alert-info {
-        --alert-color: #3b82f6;
-        border-left-color: #3b82f6;
-        background: linear-gradient(135deg,
-            rgba(219, 234, 254, 0.95),
-            rgba(191, 219, 254, 0.85));
-    }
-
-    .alert-card:hover {
-        transform: translateX(12px) translateY(-5px);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.15),
-            0 0 0 1px var(--alert-color, rgba(102, 126, 234, 0.2));
-    }
-
-    .alert-icon-wrapper {
-        flex-shrink: 0;
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        background: white;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        transition: var(--transition-smooth);
-    }
-
-    .alert-card:hover .alert-icon-wrapper {
-        transform: rotate(15deg) scale(1.1);
-    }
-
-    .alert-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .alert-title {
-        font-weight: 800;
-        font-size: 1.125rem;
-        color: #111827;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .dark .alert-title {
-        color: #f9fafb;
-    }
-
-    .alert-message {
-        font-size: 0.95rem;
-        color: #6b7280;
-        line-height: 1.6;
-    }
-
-    .dark .alert-message {
-        color: #9ca3af;
-    }
-
-    .alert-action {
-        flex-shrink: 0;
-        padding: 0.75rem 1.5rem;
-        background: white;
-        border: 2px solid #e5e7eb;
-        border-radius: 14px;
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: #374151;
-        transition: var(--transition-smooth);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .dark .alert-action {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f9fafb;
-    }
-
-    .alert-action::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: var(--alert-color, #667eea);
+    .cursor.hovering .cursor-ring {
+        transform: translate(-50%, -50%) scale(1.5);
         opacity: 0;
-        transition: opacity 0.3s;
     }
 
-    .alert-action:hover {
-        transform: translateX(5px) scale(1.05);
-        color: white;
-        border-color: var(--alert-color, #667eea);
+    @media (hover: none) {
+        .cursor { display: none; }
     }
 
-    .alert-action:hover::before {
-        opacity: 1;
+    /* =========================================
+       5. CONTAINERS & UTILITIES
+       ========================================= */
+    .container-xl {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 clamp(1rem, 4vw, 3rem);
     }
 
-    .alert-action span {
-        position: relative;
-        z-index: 1;
+    .section-padding {
+        padding: clamp(4rem, 10vw, 8rem) 0;
     }
 
-    /* ========================================
-       CHART CONTAINERS PREMIUM
-       ======================================== */
-
-    .chart-container {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0.85));
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        padding: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.08),
-            0 0 0 1px rgba(255, 255, 255, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.6);
-        transition: var(--transition-smooth);
-        position: relative;
-        overflow: hidden;
-        will-change: transform;
+    .text-gradient {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .chart-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg,
-            #667eea,
-            #764ba2,
-            #667eea);
-        background-size: 200% 100%;
-        animation: gradientShift 3s ease infinite;
+    .dynamic-gradient {
+        background: var(--dynamic-gradient) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        transition: all 0.8s var(--ease-out-expo);
     }
 
-    .dark .chart-container {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.95),
-            rgba(17, 24, 39, 0.85));
-        border-color: rgba(255, 255, 255, 0.1);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
-    .chart-container:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .chart-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2.5rem;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        position: relative;
-        z-index: 2;
-    }
-
-    .chart-title {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #111827;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        position: relative;
-        padding-left: 16px;
-    }
-
-    .chart-title::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 8px;
-        height: 32px;
-        background: linear-gradient(180deg, #667eea, #764ba2);
-        border-radius: 4px;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-
-    .dark .chart-title {
-        color: #f9fafb;
-    }
-
-    .chart-subtitle {
-        font-size: 0.95rem;
-        color: #6b7280;
-        margin-top: 0.5rem;
-        font-weight: 500;
-    }
-
-    .dark .chart-subtitle {
-        color: #9ca3af;
-    }
-
-    .chart-legend {
-        display: flex;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #6b7280;
-        padding: 0.5rem 1rem;
-        background: rgba(243, 244, 246, 0.5);
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-        transition: var(--transition-smooth);
-    }
-
-    .legend-item:hover {
-        transform: translateY(-2px);
-        background: rgba(243, 244, 246, 0.8);
-    }
-
-    .dark .legend-item {
-        color: #9ca3af;
-        background: rgba(55, 65, 81, 0.5);
-    }
-
-    .dark .legend-item:hover {
-        background: rgba(55, 65, 81, 0.8);
-    }
-
-    .legend-dot {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        position: relative;
-    }
-
-    .legend-dot::after {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        border: 2px solid currentColor;
-        opacity: 0.3;
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    /* ========================================
-       INSIGHTS CARDS PREMIUM
-       ======================================== */
-
-    .insight-card {
-        border-radius: 24px;
-        padding: 2rem;
-        color: white;
-        position: relative;
-        overflow: hidden;
-        transition: var(--transition-smooth);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .insight-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: inherit;
-        opacity: 0.9;
-        z-index: -1;
-    }
-
-    .insight-card::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -30%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.2) 0%,
-            transparent 60%
-        );
-        animation: floatSubtle 8s ease-in-out infinite;
-    }
-
-    .insight-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-    }
-
-    .insight-content {
-        position: relative;
-        z-index: 1;
-    }
-
-    .insight-icon {
-        width: 72px;
-        height: 72px;
-        background: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        display: flex;
+    /* =========================================
+       6. BUTTONS
+       ========================================= */
+    .btn {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1.5rem;
-        font-size: 2rem;
-        box-shadow:
-            0 15px 30px rgba(0, 0, 0, 0.2),
-            inset 0 -2px 0 rgba(0, 0, 0, 0.2),
-            inset 0 2px 0 rgba(255, 255, 255, 0.2);
-        transition: var(--transition-smooth);
-    }
-
-    .insight-card:hover .insight-icon {
-        transform: rotateY(180deg) scale(1.1);
-    }
-
-    .insight-title {
-        font-size: 0.95rem;
-        font-weight: 800;
-        margin-bottom: 1rem;
-        opacity: 0.95;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 0.875rem;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .insight-title::before {
-        content: '💡';
-        font-size: 1.2rem;
-    }
-
-    .insight-message {
-        font-size: 1.5rem;
-        font-weight: 900;
-        margin-bottom: 1rem;
-        line-height: 1.3;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .insight-suggestion {
-        font-size: 0.95rem;
-        opacity: 0.9;
-        line-height: 1.6;
-        font-weight: 500;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    /* ========================================
-       PERIOD SELECTOR PREMIUM
-       ======================================== */
-
-    .period-selector {
-        display: inline-flex;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(20px);
-        border-radius: 18px;
-        padding: 0.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        box-shadow:
-            0 8px 24px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-
-    .period-btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 14px;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: rgba(255, 255, 255, 0.9);
-        background: transparent;
+        letter-spacing: 0.05em;
+        border-radius: 100px;
         border: none;
         cursor: pointer;
-        transition: var(--transition-smooth);
+        text-decoration: none;
+        transition: all 0.4s var(--ease-out-expo);
         position: relative;
         overflow: hidden;
-        min-width: 80px;
-        text-align: center;
     }
 
-    .period-btn::before {
+    .btn::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: white;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .period-btn:hover {
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .period-btn:hover::before {
-        opacity: 0.1;
-    }
-
-    .period-btn.active {
-        color: #667eea;
-        background: white;
-        box-shadow:
-            0 8px 20px rgba(0, 0, 0, 0.2),
-            0 0 0 1px rgba(255, 255, 255, 0.3);
-    }
-
-    .period-btn.active::before {
-        opacity: 0;
-    }
-
-    /* ========================================
-       TABLAS PREMIUM
-       ======================================== */
-
-    .data-table-wrapper {
-        overflow: hidden;
-        border-radius: 16px;
-        background: rgba(243, 244, 246, 0.3);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .dark .data-table-wrapper {
-        background: rgba(31, 41, 55, 0.3);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        background: transparent;
-    }
-
-    .data-table thead th {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.9),
-            rgba(255, 255, 255, 0.8));
-        padding: 1.25rem 1.5rem;
-        text-align: left;
-        font-weight: 800;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #6b7280;
-        border-bottom: 2px solid #e5e7eb;
-        white-space: nowrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        backdrop-filter: blur(10px);
-    }
-
-    .dark .data-table thead th {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.9),
-            rgba(17, 24, 39, 0.8));
-        color: #9ca3af;
-        border-bottom-color: #374151;
-    }
-
-    .data-table tbody tr {
-        transition: var(--transition-smooth);
-        position: relative;
-    }
-
-    .data-table tbody tr::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(90deg,
-            transparent,
-            rgba(102, 126, 234, 0.05),
-            transparent);
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
         opacity: 0;
         transition: opacity 0.3s ease;
     }
 
-    .data-table tbody tr:hover {
-        transform: translateX(8px);
-        background: linear-gradient(90deg,
-            rgba(102, 126, 234, 0.03),
-            transparent);
-    }
-
-    .data-table tbody tr:hover::before {
+    .btn:hover::before {
         opacity: 1;
     }
 
-    .data-table tbody tr:hover td:first-child {
-        border-left: 4px solid #667eea;
-        padding-left: 20px;
+    .btn-primary {
+        background: var(--dynamic-accent);
+        color: white;
+        box-shadow: 0 4px 20px rgba(var(--dynamic-accent-rgb), 0.3);
     }
 
-    .data-table tbody td {
-        padding: 1.5rem 1.5rem;
-        border-bottom: 1px solid rgba(243, 244, 246, 0.5);
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(var(--dynamic-accent-rgb), 0.4);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border: 1px solid var(--border-medium);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-surface);
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+    }
+
+    .btn-icon {
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border-radius: 50%;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-icon:hover {
+        background: var(--dynamic-accent);
+        color: white;
+        border-color: var(--dynamic-accent);
+        transform: scale(1.1);
+    }
+
+    /* =========================================
+       7. BADGES
+       ========================================= */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-radius: 100px;
+        backdrop-filter: blur(12px);
+    }
+
+    .badge-new {
+        background: rgba(0, 102, 255, 0.1);
+        color: var(--accent-primary);
+        border: 1px solid rgba(0, 102, 255, 0.2);
+    }
+
+    .badge-hot {
+        background: rgba(255, 107, 53, 0.1);
+        color: var(--accent-tertiary);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .badge-featured {
+        background: rgba(0, 212, 170, 0.1);
+        color: var(--accent-secondary);
+        border: 1px solid rgba(0, 212, 170, 0.2);
+    }
+
+    .badge-limited {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* =========================================
+       8. HERO SECTION
+       ========================================= */
+    .hero {
+        min-height: 100vh;
         position: relative;
+        display: flex;
+        align-items: center;
+        padding-top: 100px;
+        overflow: hidden;
     }
 
-    .dark .data-table tbody td {
-        border-bottom-color: rgba(31, 41, 55, 0.5);
+    .hero-inner {
+        position: relative;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(2rem, 5vw, 4rem);
+        align-items: center;
+        width: 100%;
     }
 
-    .data-table tbody tr:last-child td {
-        border-bottom: none;
+    /* Hero Text Side */
+    .hero-content {
+        position: relative;
+        padding-left: clamp(0, 3vw, 2rem);
     }
 
-    /* ========================================
-       STATUS BADGES PREMIUM
-       ======================================== */
+    .hero-slides {
+        position: relative;
+        min-height: 420px;
+    }
 
-    .status-badge {
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.8s var(--ease-out-expo);
+    }
+
+    .hero-slide.active {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .hero-eyebrow {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
+        margin-bottom: 1.5rem;
         padding: 0.5rem 1rem;
-        border-radius: 14px;
-        font-size: 0.8rem;
-        font-weight: 800;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-light);
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        border: 2px solid;
-        transition: var(--transition-smooth);
-        backdrop-filter: blur(10px);
-        position: relative;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+    }
+
+    .hero-eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--dynamic-accent);
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .hero-title {
+        font-family: var(--font-heading);
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-title-line {
+        display: block;
         overflow: hidden;
     }
 
-    .status-badge::before {
+    .hero-title-text {
+        display: inline-block;
+    }
+
+    .hero-description {
+        font-size: clamp(1rem, 1.25vw, 1.125rem);
+        color: var(--text-secondary);
+        line-height: 1.7;
+        max-width: 480px;
+        margin-bottom: 2.5rem;
+        padding-left: 1.5rem;
+        border-left: 2px solid var(--border-light);
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    /* Hero Visual Side */
+    .hero-visual {
+        position: relative;
+        height: 70vh;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 2000px;
+    }
+
+    .hero-rings {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .hero-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 1px solid var(--border-light);
+    }
+
+    .hero-ring-1 {
+        width: min(550px, 80%);
+        height: min(550px, 80%);
+        animation: rotate-slow 80s linear infinite;
+    }
+
+    .hero-ring-2 {
+        width: min(400px, 60%);
+        height: min(400px, 60%);
+        border-style: dashed;
+        animation: rotate-slow 60s linear infinite reverse;
+    }
+
+    @keyframes rotate-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Product Card in Hero */
+    .hero-product {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 650px;
+    }
+
+    .hero-product-card {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.95) rotateY(10deg);
+        transition: all 0.8s var(--ease-out-expo);
+    }
+
+    .hero-product-card.active {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) rotateY(0);
+    }
+
+    .hero-product-image {
+        width: 100%;
+        height: auto;
+        filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.15));
+        transition: transform 0.4s var(--ease-out-expo);
+    }
+
+    [data-theme="dark"] .hero-product-image {
+        filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.4));
+    }
+
+    /* Floating Specs Card */
+    .specs-card {
+        position: absolute;
+        left: -2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 20;
+        width: 200px;
+        padding: 1.25rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(20px);
+    }
+
+    [data-theme="dark"] .specs-card {
+        background: rgba(17, 17, 17, 0.8);
+    }
+
+    .specs-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.875rem;
+        margin-bottom: 0.875rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .specs-card-icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--dynamic-accent);
+        color: white;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: background 0.8s var(--ease-out-expo);
+    }
+
+    .specs-card-title {
+        font-family: var(--font-heading);
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .specs-card-subtitle {
+        font-size: 0.625rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .specs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .spec-item {
+        padding: 0.5rem;
+        background: var(--bg-surface);
+        border-radius: 0.5rem;
+    }
+
+    .spec-label {
+        font-size: 0.5625rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.125rem;
+    }
+
+    .spec-value {
+        font-family: var(--font-heading);
+        font-size: 0.8125rem;
+        font-weight: 700;
+    }
+
+    /* Floating Price Tag */
+    .price-tag {
+        position: absolute;
+        right: -1.5rem;
+        bottom: 20%;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 100px;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(20px);
+    }
+
+    [data-theme="dark"] .price-tag {
+        background: rgba(17, 17, 17, 0.8);
+    }
+
+    .price-tag-label {
+        font-size: 0.625rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .price-tag-value {
+        font-family: var(--font-heading);
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .price-tag-indicator {
+        position: relative;
+        width: 10px;
+        height: 10px;
+    }
+
+    .price-tag-indicator::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: currentColor;
-        opacity: 0.1;
-    }
-
-    .status-badge::after {
-        content: '';
-        width: 8px;
-        height: 8px;
+        background: #10b981;
         border-radius: 50%;
-        animation: pulse 2s ease-in-out infinite;
+        animation: ping-indicator 2s infinite;
     }
 
-    .status-badge.success {
-        color: #059669;
-        border-color: rgba(5, 150, 105, 0.4);
-        background: linear-gradient(135deg,
-            rgba(209, 250, 229, 0.8),
-            rgba(167, 243, 208, 0.8));
+    .price-tag-indicator::after {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #10b981;
     }
 
-    .status-badge.success::after {
-        background: #059669;
+    @keyframes ping-indicator {
+        0% { transform: scale(1); opacity: 0.75; }
+        100% { transform: scale(2); opacity: 0; }
     }
 
-    .status-badge.warning {
-        color: #d97706;
-        border-color: rgba(217, 119, 6, 0.4);
-        background: linear-gradient(135deg,
-            rgba(254, 243, 199, 0.8),
-            rgba(253, 230, 138, 0.8));
+    /* =========================================
+       9. CAROUSEL CONTROLS
+       ========================================= */
+    .carousel-controls {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 3rem;
     }
 
-    .status-badge.warning::after {
-        background: #d97706;
+    .carousel-dots {
+        display: flex;
+        gap: 0.5rem;
     }
 
-    .status-badge.danger {
-        color: #dc2626;
-        border-color: rgba(220, 38, 38, 0.4);
-        background: linear-gradient(135deg,
-            rgba(254, 226, 226, 0.8),
-            rgba(252, 165, 165, 0.8));
-    }
-
-    .status-badge.danger::after {
-        background: #dc2626;
-    }
-
-    .status-badge.info {
-        color: #2563eb;
-        border-color: rgba(37, 99, 235, 0.4);
-        background: linear-gradient(135deg,
-            rgba(219, 234, 254, 0.8),
-            rgba(191, 219, 254, 0.8));
-    }
-
-    .status-badge.info::after {
-        background: #2563eb;
-    }
-
-    .status-badge:hover {
-        transform: scale(1.1);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    /* ========================================
-       PROGRESS BARS PREMIUM
-       ======================================== */
-
-    .progress-container {
-        width: 100%;
-        height: 12px;
-        background: rgba(243, 244, 236, 0.5);
-        border-radius: 12px;
-        overflow: hidden;
+    .carousel-dot {
         position: relative;
-        box-shadow:
-            inset 0 2px 4px rgba(0, 0, 0, 0.06),
-            0 1px 0 rgba(255, 255, 255, 0.5);
+        width: 8px;
+        height: 4px;
+        background: var(--border-medium);
+        border-radius: 100px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.4s var(--ease-out-expo);
+    }
+
+    .carousel-dot.active {
+        width: 48px;
+        background: var(--border-light);
+    }
+
+    .carousel-dot-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0%;
+        background: var(--dynamic-accent);
+        border-radius: 100px;
+        transition: width 0.1s linear, background 0.8s var(--ease-out-expo);
+    }
+
+    .carousel-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .carousel-btn:hover {
+        background: var(--dynamic-accent);
+        color: white;
+        border-color: var(--dynamic-accent);
+        transform: scale(1.1);
+    }
+
+    .carousel-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Lateral Navigation */
+    .lateral-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 30;
+    }
+
+    .lateral-nav-prev { left: 1rem; }
+    .lateral-nav-next { right: 1rem; }
+
+    .lateral-nav-btn {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.4s var(--ease-out-expo);
         backdrop-filter: blur(10px);
     }
 
-    .dark .progress-container {
-        background: rgba(55, 65, 81, 0.5);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    .lateral-nav-btn:hover {
+        background: var(--text-primary);
+        color: var(--bg-deep);
+        transform: translateY(-50%) scale(1.1);
     }
 
-    .progress-bar {
-        height: 100%;
-        border-radius: 12px;
-        transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        position: relative;
+    .lateral-nav-btn svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.3s var(--ease-out-expo);
+    }
+
+    .lateral-nav-btn:hover svg {
+        transform: translateX(var(--translate-direction));
+    }
+
+    .lateral-nav-prev .lateral-nav-btn { --translate-direction: -3px; }
+    .lateral-nav-next .lateral-nav-btn { --translate-direction: 3px; }
+
+    /* =========================================
+       10. MARQUEE
+       ========================================= */
+    .marquee {
+        position: absolute;
+        bottom: 80px;
+        left: 0;
+        width: 100%;
         overflow: hidden;
-        box-shadow:
-            0 2px 8px rgba(0, 0, 0, 0.2),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        pointer-events: none;
+        opacity: 0.02;
     }
 
-    .progress-bar::after {
+    [data-theme="dark"] .marquee {
+        opacity: 0.03;
+    }
+
+    .marquee-track {
+        display: flex;
+        gap: 4rem;
+        white-space: nowrap;
+        animation: marquee 100s linear infinite;
+    }
+
+    .marquee-text {
+        font-family: var(--font-heading);
+        font-size: clamp(6rem, 12vw, 10rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: -0.05em;
+        color: transparent;
+        -webkit-text-stroke: 1px var(--text-primary);
+    }
+
+    @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+
+    /* =========================================
+       11. PRODUCTS SECTION
+       ========================================= */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .product-card {
+        position: relative;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        transition: all 0.5s var(--ease-out-expo);
+        overflow: hidden;
+    }
+
+    .product-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.4),
-            transparent
-        );
-        animation: shimmer 2.5s infinite;
+        height: 3px;
+        background: var(--accent-gradient);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s var(--ease-out-expo);
     }
 
-    /* ========================================
-       INVENTORY STATUS CARDS REDISEÑADAS
-       ======================================== */
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-xl);
+    }
 
-    .inventory-status-card {
-        padding: 2rem;
-        border-radius: 20px;
+    .product-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .product-card-badge {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        z-index: 10;
+    }
+
+    .product-image-container {
+        position: relative;
+        height: 200px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        transition: var(--transition-smooth);
-        position: relative;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+        background: var(--bg-surface);
+        border-radius: 1rem;
         overflow: hidden;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow:
-            0 10px 20px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
-    .inventory-status-card::before {
+    .product-image {
+        max-width: 85%;
+        max-height: 85%;
+        object-fit: contain;
+        transition: transform 0.6s var(--ease-out-expo);
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.08) translateY(-4px);
+    }
+
+    .product-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-brand {
+        font-size: 0.6875rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.375rem;
+    }
+
+    .product-name {
+        font-family: var(--font-heading);
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.3;
+    }
+
+    .product-specs {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        margin-bottom: 1.25rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .product-spec {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: background 0.3s ease;
+    }
+
+    .product-card:hover .product-spec {
+        background: var(--bg-surface);
+    }
+
+    .product-spec-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-light);
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        color: var(--accent-primary);
+    }
+
+    .product-spec-text {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        margin-top: auto;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .product-price {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-price-old {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        text-decoration: line-through;
+    }
+
+    .product-price-current {
+        font-family: var(--font-heading);
+        font-size: 1.375rem;
+        font-weight: 800;
+    }
+
+    .product-price-currency {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .product-action {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .product-action:hover {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        transform: rotate(45deg);
+    }
+
+    /* =========================================
+       12. FEATURES SECTION
+       ========================================= */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .feature-card {
+        position: relative;
+        padding: 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 1.5rem;
+        text-align: center;
+        transition: all 0.5s var(--ease-out-expo);
+        overflow: hidden;
+    }
+
+    .feature-card::before {
         content: '';
         position: absolute;
         inset: 0;
-        opacity: 0.8;
-        transition: opacity 0.3s;
+        background: var(--accent-gradient);
+        opacity: 0;
+        transition: opacity 0.5s ease;
     }
 
-    .inventory-status-card:hover {
-        transform: translateX(10px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    .feature-card:hover {
+        transform: translateY(-6px);
+        border-color: transparent;
+        box-shadow: var(--shadow-lg);
     }
 
-    .inventory-status-card:hover::before {
-        opacity: 0.9;
+    .feature-card:hover::before {
+        opacity: 0.03;
     }
 
-    .inventory-status-card.available {
-        background: linear-gradient(135deg,
-            rgba(209, 250, 229, 0.9),
-            rgba(167, 243, 208, 0.8));
-    }
-
-    .inventory-status-card.available::before {
-        background: var(--success-gradient);
-    }
-
-    .inventory-status-card.low-stock {
-        background: linear-gradient(135deg,
-            rgba(254, 243, 199, 0.9),
-            rgba(253, 230, 138, 0.8));
-    }
-
-    .inventory-status-card.low-stock::before {
-        background: var(--warning-gradient);
-    }
-
-    .inventory-status-card.out-of-stock {
-        background: linear-gradient(135deg,
-            rgba(254, 226, 226, 0.9),
-            rgba(252, 165, 165, 0.8));
-    }
-
-    .inventory-status-card.out-of-stock::before {
-        background: var(--danger-gradient);
-    }
-
-    .inventory-status-icon {
-        font-size: 3.5rem;
-        opacity: 0.9;
-        transition: var(--transition-smooth);
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-    }
-
-    .inventory-status-card:hover .inventory-status-icon {
-        transform: scale(1.3) rotate(15deg);
-    }
-
-    /* ========================================
-       QUICK ACTIONS PREMIUM
-       ======================================== */
-
-    .quick-actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 20px;
-    }
-
-    .quick-action {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0.85));
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 2rem 1.5rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        transition: var(--transition-smooth);
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        cursor: pointer;
-        text-decoration: none;
+    .feature-icon {
         position: relative;
-        overflow: hidden;
-        box-shadow:
-            0 10px 20px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    }
-
-    .dark .quick-action {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.95),
-            rgba(17, 24, 39, 0.85));
-        border-color: rgba(255, 255, 255, 0.1);
-        box-shadow:
-            0 10px 20px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
-    .quick-action::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(102, 126, 234, 0.15);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .quick-action:hover::before {
-        width: 300px;
-        height: 300px;
-    }
-
-    .quick-action:hover {
-        transform: translateY(-10px) scale(1.05);
-        border-color: #667eea;
-        box-shadow:
-            0 25px 50px rgba(102, 126, 234, 0.25),
-            0 0 0 1px rgba(102, 126, 234, 0.1);
-    }
-
-    .quick-action-icon {
-        width: 72px;
-        height: 72px;
-        border-radius: 20px;
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-light);
+        border-radius: 1rem;
+        font-size: 1.5rem;
+        color: var(--accent-primary);
+        transition: all 0.4s var(--ease-out-expo);
+    }
+
+    .feature-card:hover .feature-icon {
+        background: var(--accent-primary);
         color: white;
-        position: relative;
-        z-index: 1;
-        transition: var(--transition-smooth);
-        box-shadow:
-            0 15px 30px rgba(0, 0, 0, 0.2),
-            inset 0 -3px 0 rgba(0, 0, 0, 0.2),
-            inset 0 3px 0 rgba(255, 255, 255, 0.3);
+        border-color: var(--accent-primary);
+        transform: scale(1.1);
     }
 
-    .quick-action:hover .quick-action-icon {
-        transform: rotateY(180deg) scale(1.1);
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.3),
-            inset 0 -3px 0 rgba(0, 0, 0, 0.2),
-            inset 0 3px 0 rgba(255, 255, 255, 0.4);
+    .feature-title {
+        font-family: var(--font-heading);
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
     }
 
-    .quick-action-text {
-        font-weight: 800;
-        color: #111827;
-        font-size: 0.95rem;
-        position: relative;
-        z-index: 1;
-        transition: var(--transition-smooth);
+    .feature-description {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
     }
 
-    .dark .quick-action-text {
-        color: #f9fafb;
+    /* =========================================
+       13. CATEGORIES SECTION
+       ========================================= */
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
     }
-
-    .quick-action:hover .quick-action-text {
-        color: #667eea;
-    }
-
-    /* ========================================
-       CATEGORY CARDS REDISEÑADAS
-       ======================================== */
 
     .category-card {
-        padding: 1.75rem;
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0.85));
-        border-radius: 20px;
-        border: 2px solid rgba(229, 231, 235, 0.5);
-        transition: var(--transition-smooth);
-        backdrop-filter: blur(10px);
         position: relative;
+        height: 300px;
+        border-radius: 1.5rem;
         overflow: hidden;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .dark .category-card {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.95),
-            rgba(17, 24, 39, 0.85));
-        border-color: rgba(55, 65, 81, 0.5);
+        text-decoration: none;
+        color: white;
+        transition: all 0.5s var(--ease-out-expo);
     }
 
     .category-card::before {
         content: '';
         position: absolute;
-        top: 0;
-        right: 0;
-        width: 120px;
-        height: 120px;
-        background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.3s;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+        z-index: 1;
     }
 
-    .category-card:hover {
-        border-color: #667eea;
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .category-card:hover::before {
-        opacity: 1;
-    }
-
-    /* ========================================
-       FILTROS AVANZADOS
-       ======================================== */
-
-    .advanced-filters {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0.85));
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    }
-
-    .dark .advanced-filters {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.95),
-            rgba(17, 24, 39, 0.85));
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .filter-label {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-weight: 700;
-        color: #374151;
-        font-size: 0.95rem;
-    }
-
-    .dark .filter-label {
-        color: #f3f4f6;
-    }
-
-    .filter-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .filter-select {
-        position: relative;
-        min-width: 200px;
-    }
-
-    .custom-select {
-        appearance: none;
-        background: rgba(243, 244, 236, 0.5);
-        border: 2px solid rgba(229, 231, 235, 0.5);
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-        padding-right: 3rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-        width: 100%;
-        cursor: pointer;
-        transition: var(--transition-smooth);
-        backdrop-filter: blur(10px);
-    }
-
-    .custom-select:hover {
-        border-color: #667eea;
-        background: rgba(243, 244, 236, 0.8);
-    }
-
-    .filter-select i {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6b7280;
-        pointer-events: none;
-    }
-
-    .date-range-picker {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: rgba(243, 244, 236, 0.5);
-        padding: 0.75rem 1rem;
-        border-radius: 12px;
-        border: 2px solid rgba(229, 231, 235, 0.5);
-        backdrop-filter: blur(10px);
-        transition: var(--transition-smooth);
-    }
-
-    .date-range-picker:hover {
-        border-color: #667eea;
-        background: rgba(243, 244, 236, 0.8);
-    }
-
-    .date-input {
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-        min-width: 200px;
-    }
-
-    .filter-apply {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background: var(--primary-gradient);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: var(--transition-smooth);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    .filter-apply:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .filter-reset {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background: rgba(243, 244, 236, 0.5);
-        color: #6b7280;
-        border: 2px solid rgba(229, 231, 235, 0.5);
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: var(--transition-smooth);
-        backdrop-filter: blur(10px);
-    }
-
-    .filter-reset:hover {
-        background: rgba(243, 244, 236, 0.8);
-        border-color: #6b7280;
-        color: #374151;
-    }
-
-    /* ========================================
-       REFRESH BUTTON PREMIUM
-       ======================================== */
-
-    .refresh-btn {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1.5rem;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 14px;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: white;
-        cursor: pointer;
-        transition: var(--transition-smooth);
-        box-shadow:
-            0 8px 20px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .refresh-btn::before {
+    .category-card::after {
         content: '';
         position: absolute;
         inset: 0;
-        background: white;
-        opacity: 0;
-        transition: opacity 0.3s;
+        background: var(--category-color);
+        opacity: 0.4;
+        transition: opacity 0.5s ease;
     }
 
-    .refresh-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(1.05);
-        box-shadow:
-            0 12px 25px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    .category-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-xl);
     }
 
-    .refresh-btn:hover::before {
-        opacity: 0.1;
+    .category-card:hover::after {
+        opacity: 0.6;
     }
 
-    .refresh-btn i {
-        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .refresh-btn:active i {
-        transform: rotate(360deg);
-    }
-
-    /* ========================================
-       LOADING STATES MEJORADOS
-       ======================================== */
-
-    .skeleton-wrapper {
+    .category-content {
         position: relative;
-        overflow: hidden;
-        border-radius: 20px;
-    }
-
-    .skeleton-card {
-        background: linear-gradient(135deg,
-            rgba(243, 244, 236, 0.8),
-            rgba(229, 231, 235, 0.6));
-        border-radius: 20px;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
         padding: 2rem;
+    }
+
+    .category-icon {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .category-title {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-subtitle {
+        font-size: 0.9375rem;
+        opacity: 0.85;
+        margin-bottom: 1rem;
+    }
+
+    .category-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: gap 0.3s var(--ease-out-expo);
+    }
+
+    .category-card:hover .category-link {
+        gap: 1rem;
+    }
+
+    /* =========================================
+       14. CTA SECTION
+       ========================================= */
+    .cta {
         position: relative;
+        padding: clamp(4rem, 10vw, 6rem) 2rem;
+        background: var(--accent-gradient);
+        border-radius: 2rem;
+        text-align: center;
+        color: white;
         overflow: hidden;
     }
 
-    .dark .skeleton-card {
-        background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.8),
-            rgba(17, 24, 39, 0.6));
+    .cta::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 60%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
     }
 
-    .skeleton {
-        background: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.4) 50%,
-            rgba(255, 255, 255, 0) 100%
-        );
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
+    .cta-content {
+        position: relative;
+        z-index: 1;
     }
 
-    .skeleton-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    .cta-title {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
     }
 
-    /* ========================================
-       RESPONSIVE DESIGN
-       ======================================== */
+    .cta-description {
+        font-size: clamp(1rem, 1.5vw, 1.125rem);
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto 2rem;
+    }
 
+    .cta-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .cta-btn-primary {
+        background: white;
+        color: var(--accent-primary);
+    }
+
+    .cta-btn-primary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+    }
+
+    .cta-btn-secondary {
+        background: transparent;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .cta-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .cta-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .cta-stat-value {
+        font-family: var(--font-heading);
+        font-size: clamp(1.5rem, 3vw, 2.5rem);
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .cta-stat-label {
+        font-size: 0.8125rem;
+        opacity: 0.8;
+    }
+
+    /* =========================================
+       15. AI CHAT WIDGET
+       ========================================= */
+    .ai-widget {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        z-index: 1000;
+    }
+
+    .ai-toggle {
+        position: relative;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--accent-primary);
+        cursor: pointer;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .ai-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: var(--accent-glow);
+    }
+
+    .ai-toggle-pulse {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: var(--accent-primary);
+        opacity: 0.2;
+        animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+        0% { transform: scale(1); opacity: 0.2; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .ai-toggle-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+    }
+
+    .ai-chat {
+        position: fixed;
+        bottom: 6rem;
+        left: 1.5rem;
+        width: min(380px, calc(100vw - 3rem));
+        height: 450px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform: scale(0);
+        opacity: 0;
+        transform-origin: bottom left;
+        transition: all 0.4s var(--ease-spring);
+    }
+
+    .ai-chat.open {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .ai-chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .ai-chat-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-heading);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .ai-chat-title-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--accent-primary);
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+    }
+
+    .ai-chat-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: color 0.2s ease;
+    }
+
+    .ai-chat-close:hover {
+        color: var(--text-primary);
+    }
+
+    .ai-chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ai-message {
+        display: flex;
+        gap: 0.5rem;
+        max-width: 85%;
+    }
+
+    .ai-message.bot { align-self: flex-start; }
+    .ai-message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .ai-message-avatar {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-primary);
+        color: white;
+        border-radius: 50%;
+        font-size: 0.625rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .ai-message.user .ai-message-avatar {
+        background: var(--text-primary);
+    }
+
+    .ai-message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+    }
+
+    .ai-message.bot .ai-message-bubble {
+        background: var(--bg-surface);
+        border-radius: 1rem 1rem 1rem 0.25rem;
+    }
+
+    .ai-message.user .ai-message-bubble {
+        background: var(--accent-primary);
+        color: white;
+        border-radius: 1rem 1rem 0.25rem 1rem;
+    }
+
+    .ai-typing {
+        display: flex;
+        gap: 4px;
+        padding: 0.75rem 1rem;
+    }
+
+    .ai-typing-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        animation: typing-bounce 1.4s infinite ease-in-out both;
+    }
+
+    .ai-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .ai-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing-bounce {
+        0%, 80%, 100% { transform: scale(0.6); }
+        40% { transform: scale(1); }
+    }
+
+    .ai-chat-input {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid var(--border-light);
+        background: var(--bg-surface);
+    }
+
+    .ai-chat-input input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 100px;
+        color: var(--text-primary);
+        font-size: 0.8125rem;
+        font-family: inherit;
+        transition: border-color 0.2s ease;
+    }
+
+    .ai-chat-input input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+    }
+
+    .ai-chat-input input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .ai-chat-send {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-primary);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ai-chat-send:hover {
+        background: var(--accent-secondary);
+        transform: scale(1.05);
+    }
+
+    .ai-chat-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* =========================================
+       16. THEME TOGGLE
+       ========================================= */
+    .theme-toggle {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 1000;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 50%;
+        color: var(--text-primary);
+        cursor: pointer;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .theme-toggle:hover {
+        transform: rotate(15deg) scale(1.1);
+        border-color: var(--accent-primary);
+    }
+
+    .theme-toggle i {
+        font-size: 1.25rem;
+        transition: transform 0.5s var(--ease-spring);
+    }
+
+    /* =========================================
+       17. SECTION HEADERS
+       ========================================= */
+    .section-header {
+        text-align: center;
+        margin-bottom: clamp(3rem, 6vw, 4rem);
+    }
+
+    .section-eyebrow {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--accent-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+    }
+
+    .section-description {
+        font-size: clamp(1rem, 1.25vw, 1.125rem);
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* =========================================
+       18. ANIMATIONS
+       ========================================= */
+    .fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s var(--ease-out-expo);
+    }
+
+    .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
+    .stagger-4 { transition-delay: 0.4s; }
+
+    /* =========================================
+       19. RESPONSIVE
+       ========================================= */
     @media (max-width: 1200px) {
-        .metric-value {
-            font-size: 2.5rem;
+        .lateral-nav { display: none; }
+
+        .specs-card {
+            left: 0;
+            transform: translateY(-50%) scale(0.9);
         }
 
-        .metric-icon-wrapper {
-            width: 70px;
-            height: 70px;
-        }
-
-        .chart-container {
-            padding: 1.5rem;
+        .price-tag {
+            right: 0;
+            transform: scale(0.9);
         }
     }
 
-    @media (max-width: 768px) {
-        .dashboard-header {
-            padding: 1.5rem;
-        }
-
-        .welcome-text {
-            font-size: 1.75rem;
-        }
-
-        .metric-card {
-            padding: 1.5rem;
-        }
-
-        .metric-value {
-            font-size: 2rem;
-        }
-
-        .metric-icon-wrapper {
-            width: 60px;
-            height: 60px;
-        }
-
-        .metric-icon {
-            font-size: 1.5rem;
-        }
-
-        .filter-group {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .filter-controls {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .filter-select,
-        .date-range-picker,
-        .filter-apply,
-        .filter-reset {
-            width: 100%;
-        }
-
-        .period-selector {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .period-btn {
-            min-width: 60px;
-            padding: 0.5rem 1rem;
-            font-size: 0.8rem;
-        }
-
-        .alert-card {
-            flex-direction: column;
+    @media (max-width: 1024px) {
+        .hero-inner {
+            grid-template-columns: 1fr;
             text-align: center;
-            gap: 1rem;
+            gap: 3rem;
         }
 
-        .alert-action {
-            align-self: stretch;
+        .hero-content {
+            padding: 0;
+            order: 2;
+        }
+
+        .hero-description {
+            margin: 0 auto 2rem;
+            border-left: none;
+            padding-left: 0;
+            border-top: 2px solid var(--border-light);
+            padding-top: 1.5rem;
+        }
+
+        .hero-actions {
             justify-content: center;
         }
 
-        .quick-actions-grid {
+        .hero-visual {
+            order: 1;
+            height: 50vh;
+            min-height: 400px;
+        }
+
+        .specs-card,
+        .price-tag {
+            display: none;
+        }
+
+        .carousel-controls {
+            justify-content: center;
+        }
+
+        .cta-stats {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
-    @media (max-width: 480px) {
-        .quick-actions-grid {
+    @media (max-width: 768px) {
+        .hero-slides {
+            min-height: 350px;
+        }
+
+        .hero-visual {
+            height: 40vh;
+            min-height: 300px;
+        }
+
+        .hero-ring-1 {
+            width: 300px;
+            height: 300px;
+        }
+
+        .hero-ring-2 {
+            width: 220px;
+            height: 220px;
+        }
+
+        .marquee-text {
+            font-size: 5rem;
+        }
+
+        .products-grid,
+        .features-grid,
+        .categories-grid {
             grid-template-columns: 1fr;
         }
 
-        .metric-change {
-            flex-direction: column;
-            gap: 0.25rem;
-            text-align: center;
-            padding: 0.5rem;
+        .ai-chat {
+            width: calc(100vw - 2rem);
+            left: 1rem;
+            height: 400px;
         }
 
-        .metric-footer {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
+        .ai-widget {
+            bottom: 1rem;
+            left: 1rem;
         }
-    }
 
-    /* ========================================
-       ACCESSIBILITY
-       ======================================== */
-
-    @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
+        .theme-toggle {
+            bottom: 1rem;
+            right: 1rem;
+            width: 48px;
+            height: 48px;
         }
     }
 
-    .focus-visible:focus {
-        outline: 3px solid #667eea;
-        outline-offset: 2px;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            font-size: 0.8125rem;
+        }
+
+        .marquee-text {
+            font-size: 3.5rem;
+        }
+
+        .cta-stats {
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .ai-toggle,
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+        }
     }
 
-    /* ========================================
-       DARK MODE TRANSITIONS
-       ======================================== */
-
-    .dark-mode-transition {
-        transition: background-color 0.3s ease,
-                    border-color 0.3s ease,
-                    color 0.3s ease,
-                    box-shadow 0.3s ease;
+    /* =========================================
+       20. UTILITY CLASSES
+       ========================================= */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
     }
+
+    .bg-surface { background: var(--bg-surface); }
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Dashboard Header Premium -->
-<div class="dashboard-header px-6 py-8 sticky top-0 z-30">
-    <div class="header-content">
-        <div class="flex items-center justify-between flex-wrap gap-6">
-            <div class="professional-animation">
-                <h1 class="welcome-text">Dashboard Premium</h1>
-                <p class="welcome-subtitle mt-3">
-                    Bienvenido de nuevo, <strong>{{ current_user.username }}</strong> 👋
-                    <span class="mx-2">•</span>
-                    Última actualización: <span id="current-time">Cargando...</span>
-                </p>
-            </div>
+<!-- Noise Texture -->
+<div class="noise-overlay" aria-hidden="true"></div>
 
-            <div class="flex items-center gap-4 professional-animation animate-delay-1">
-                <!-- Period Selector Premium -->
-                <div class="period-selector">
-                    <button class="period-btn {% if current_period == 'today' %}active{% endif %}"
-                            onclick="window.location.href='?period=today'">
-                        <i class="fas fa-calendar-day mr-2"></i>
-                        Hoy
-                    </button>
-                    <button class="period-btn {% if current_period == 'week' %}active{% endif %}"
-                            onclick="window.location.href='?period=week'">
-                        <i class="fas fa-calendar-week mr-2"></i>
-                        Semana
-                    </button>
-                    <button class="period-btn {% if current_period == 'month' or not current_period %}active{% endif %}"
-                            onclick="window.location.href='?period=month'">
-                        <i class="fas fa-calendar-alt mr-2"></i>
-                        Mes
-                    </button>
-                    <button class="period-btn {% if current_period == 'quarter' %}active{% endif %}"
-                            onclick="window.location.href='?period=quarter'">
-                        <i class="fas fa-chart-bar mr-2"></i>
-                        Trimestre
-                    </button>
-                    <button class="period-btn {% if current_period == 'year' %}active{% endif %}"
-                            onclick="window.location.href='?period=year'">
-                        <i class="fas fa-calendar-star mr-2"></i>
-                        Año
-                    </button>
-                </div>
+<!-- Grid Pattern -->
+<div class="grid-pattern" aria-hidden="true"></div>
 
-                <!-- Refresh Button Premium -->
-                <button onclick="window.location.reload()" class="refresh-btn">
-                    <i class="fas fa-sync-alt"></i>
-                    Actualizar
-                </button>
-            </div>
-        </div>
-    </div>
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
 </div>
 
-<!-- Advanced Filters -->
-<div class="advanced-filters mx-6 mt-6 professional-animation animate-delay-2">
-    <div class="filter-group">
-        <div class="filter-label">
-            <i class="fas fa-filter text-indigo-600"></i>
-            Filtros Avanzados
-        </div>
-        <div class="filter-controls">
-            <div class="filter-select">
-                <select class="custom-select focus-visible">
-                    <option value="all">Todos los Productos</option>
-                    <option value="category">Por Categoría</option>
-                    <option value="brand">Por Marca</option>
-                    <option value="price">Por Rango de Precio</option>
-                </select>
-                <i class="fas fa-chevron-down"></i>
-            </div>
-
-            <div class="date-range-picker">
-                <i class="fas fa-calendar-alt text-indigo-600"></i>
-                <input type="text" class="date-input focus-visible"
-                       placeholder="Seleccionar rango de fechas"
-                       id="date-range-picker">
-            </div>
-
-            <button class="filter-apply focus-visible">
-                <i class="fas fa-check"></i>
-                Aplicar Filtros
-            </button>
-
-            <button class="filter-reset focus-visible" onclick="resetFilters()">
-                <i class="fas fa-redo"></i>
-                Limpiar Filtros
-            </button>
-        </div>
-    </div>
+<!-- Aurora Background -->
+<div class="aurora-container" aria-hidden="true">
+    <div class="aurora-blob aurora-blob-1" id="aurora-1"></div>
+    <div class="aurora-blob aurora-blob-2" id="aurora-2"></div>
 </div>
 
-<!-- Main Content Grid -->
-<div class="dashboard-grid">
+<!-- Particles -->
+<div class="particles-container" id="particles" aria-hidden="true"></div>
 
-    <!-- Primary Metrics Grid -->
-    <div class="grid-col-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Ventas / Revenue -->
-            <div class="metric-card professional-animation animate-delay-1">
-                <div class="metric-header">
-                    <div class="metric-icon-wrapper">
-                        <div class="metric-icon" style="background: var(--primary-gradient);">
-                            <i class="fas fa-dollar-sign text-white"></i>
-                        </div>
-                        <div class="metric-icon-badge">
-                            <i class="fas fa-chart-line text-indigo-600"></i>
-                        </div>
-                    </div>
-                    <div class="trend-indicator positive">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>+12.5%</span>
-                        <div class="trend-sparkline positive">
-                            <svg viewBox="0 0 60 24">
-                                <path d="M0,20 L15,12 L30,16 L45,8 L60,14" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="metric-label">Ventas Totales</div>
-                <div class="metric-value">
-                    ${{ "{:,.2f}".format(revenue_current) }}
-                </div>
-                <div class="metric-footer">
-                    {% if growth_indicators.revenue.color == 'green' %}
-                    <div class="metric-change positive">
-                    {% elif growth_indicators.revenue.color == 'red' %}
-                    <div class="metric-change negative">
-                    {% else %}
-                    <div class="metric-change neutral">
-                    {% endif %}
-                        <i class="fas fa-{{ growth_indicators.revenue.icon }}"></i>
-                        {{ growth_indicators.revenue.text }}
-                    </div>
-                    <span class="metric-info">vs período anterior</span>
-                </div>
-            </div>
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+    <i class="fa-solid fa-sun" id="theme-icon"></i>
+</button>
 
-            <!-- Órdenes -->
-            <div class="metric-card professional-animation animate-delay-2">
-                <div class="metric-header">
-                    <div class="metric-icon-wrapper">
-                        <div class="metric-icon" style="background: var(--success-gradient);">
-                            <i class="fas fa-shopping-cart text-white"></i>
-                        </div>
-                        <div class="metric-icon-badge">
-                            <i class="fas fa-arrow-up text-green-600"></i>
-                        </div>
-                    </div>
-                    <div class="trend-indicator positive">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>+8.3%</span>
-                    </div>
-                </div>
-                <div class="metric-label">Órdenes Procesadas</div>
-                <div class="metric-value">
-                    {{ orders_current }}
-                </div>
-                <div class="metric-footer">
-                    {% if growth_indicators.orders.color == 'green' %}
-                    <div class="metric-change positive">
-                    {% elif growth_indicators.orders.color == 'red' %}
-                    <div class="metric-change negative">
-                    {% else %}
-                    <div class="metric-change neutral">
-                    {% endif %}
-                        <i class="fas fa-{{ growth_indicators.orders.icon }}"></i>
-                        {{ growth_indicators.orders.text }}
-                    </div>
-                    <span class="metric-info">AOV: ${{ "{:,.2f}".format(aov_current) }}</span>
-                </div>
-            </div>
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="hero">
+    <!-- Lateral Navigation -->
+    <nav class="lateral-nav lateral-nav-prev" aria-label="Producto anterior">
+        <button class="lateral-nav-btn" id="hero-prev" aria-label="Ver producto anterior">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+    </nav>
 
-            <!-- Ganancia Bruta -->
-            <div class="metric-card professional-animation animate-delay-3">
-                <div class="metric-header">
-                    <div class="metric-icon-wrapper">
-                        <div class="metric-icon" style="background: var(--warning-gradient);">
-                            <i class="fas fa-chart-line text-white"></i>
-                        </div>
-                        <div class="metric-icon-badge">
-                            <i class="fas fa-percentage text-pink-600"></i>
-                        </div>
-                    </div>
-                    <div class="trend-indicator positive">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>+15.2%</span>
-                    </div>
-                </div>
-                <div class="metric-label">Ganancia Bruta</div>
-                <div class="metric-value">
-                    ${{ "{:,.2f}".format(gross_profit_current) }}
-                </div>
-                <div class="metric-footer">
-                    {% if growth_indicators.profit.color == 'green' %}
-                    <div class="metric-change positive">
-                    {% elif growth_indicators.profit.color == 'red' %}
-                    <div class="metric-change negative">
-                    {% else %}
-                    <div class="metric-change neutral">
-                    {% endif %}
-                        <i class="fas fa-{{ growth_indicators.profit.icon }}"></i>
-                        {{ growth_indicators.profit.text }}
-                    </div>
-                    <span class="metric-info">Margen: {{ "{:.1f}".format(gross_margin_current) }}%</span>
-                </div>
-            </div>
+    <nav class="lateral-nav lateral-nav-next" aria-label="Siguiente producto">
+        <button class="lateral-nav-btn" id="hero-next" aria-label="Ver siguiente producto">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+    </nav>
 
-            <!-- Clientes Activos -->
-            <div class="metric-card professional-animation animate-delay-4">
-                <div class="metric-header">
-                    <div class="metric-icon-wrapper">
-                        <div class="metric-icon" style="background: var(--info-gradient);">
-                            <i class="fas fa-users text-white"></i>
-                        </div>
-                        <div class="metric-icon-badge">
-                            <i class="fas fa-user-plus text-blue-600"></i>
-                        </div>
-                    </div>
-                    <div class="trend-indicator positive">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>+5.7%</span>
-                    </div>
-                </div>
-                <div class="metric-label">Clientes Activos</div>
-                <div class="metric-value">
-                    {{ active_customers }}
-                </div>
-                <div class="metric-footer">
-                    {% if growth_indicators.customers.color == 'green' %}
-                    <div class="metric-change positive">
-                    {% elif growth_indicators.customers.color == 'red' %}
-                    <div class="metric-change negative">
-                    {% else %}
-                    <div class="metric-change neutral">
-                    {% endif %}
-                        <i class="fas fa-{{ growth_indicators.customers.icon }}"></i>
-                        +{{ new_customers_current }} nuevos
-                    </div>
-                    <span class="metric-info">Conversión: {{ "{:.1f}".format(conversion_rate) }}%</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="container-xl">
+        <div class="hero-inner">
+            <!-- Content Side -->
+            <div class="hero-content">
+                <div class="hero-slides" id="hero-slides" role="region" aria-label="Carrusel de productos destacados">
+                    {% if featured_laptops and featured_laptops|length > 0 %}
+                        {% for laptop in featured_laptops[:5] %}
+                        <article class="hero-slide {% if loop.first %}active{% endif %}"
+                                 data-index="{{ loop.index0 }}"
+                                 role="group"
+                                 aria-roledescription="slide"
+                                 aria-label="Producto {{ loop.index }} de {{ featured_laptops[:5]|length }}">
 
-    <!-- Alertas Prioritarias -->
-    {% if alerts %}
-    <div class="grid-col-12">
-        <div class="space-y-4">
-            {% for alert in alerts[:3] %}
-            <div class="alert-card alert-{{ alert.type }} professional-animation animate-delay-{{ loop.index }}">
-                <div class="alert-icon-wrapper">
-                    <i class="fas fa-{{ alert.icon }}"></i>
-                </div>
-                <div class="alert-content">
-                    <h4 class="alert-title">{{ alert.title }}</h4>
-                    <p class="alert-message">{{ alert.message }}</p>
-                </div>
-                <a href="{{ url_for(alert.link) }}{{ alert.filters or '' }}" class="alert-action">
-                    <span>{{ alert.action }}</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
+                            <div class="hero-eyebrow">
+                                <span class="hero-eyebrow-dot"></span>
+                                <span>{{ laptop.brand.name if laptop.brand else 'Premium' }}</span>
+                            </div>
 
-    <!-- Insights Section -->
-    {% if insights %}
-    <div class="grid-col-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for insight in insights[:3] %}
-            <div class="insight-card professional-animation animate-delay-{{ loop.index }} gradient-animate"
-                 style="background: {% if insight.type == 'success' %}var(--success-gradient){% elif insight.type == 'warning' %}var(--warning-gradient){% else %}var(--info-gradient){% endif %};">
-                <div class="insight-content">
-                    <div class="insight-icon">
-                        <i class="fas fa-{{ insight.icon }}"></i>
-                    </div>
-                    <div class="insight-title">{{ insight.title }}</div>
-                    <div class="insight-message">{{ insight.message }}</div>
-                    <div class="insight-suggestion">💡 {{ insight.suggestion }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Charts Section -->
-    <div class="grid-col-8">
-        <div class="chart-container professional-animation">
-            <div class="chart-header">
-                <div>
-                    <h3 class="chart-title">
-                        <i class="fas fa-chart-area text-indigo-600"></i>
-                        Tendencia de Ventas
-                    </h3>
-                    <p class="chart-subtitle">
-                        Últimos 30 días - Promedio diario: ${{ "{:,.2f}".format(avg_daily_sales) }}
-                    </p>
-                </div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: var(--primary-gradient);"></div>
-                        <span>Ventas ($)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: #9ca3af;"></div>
-                        <span>Órdenes</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: var(--success-gradient);"></div>
-                        <span>Clientes</span>
-                    </div>
-                </div>
-            </div>
-            <div style="height: 360px; position: relative;">
-                <canvas id="salesChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Inventory Status -->
-    <div class="grid-col-4">
-        <div class="chart-container professional-animation">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-boxes text-indigo-600"></i>
-                    Estado del Inventario
-                </h3>
-            </div>
-            <div class="space-y-5">
-                <div class="inventory-status-card available">
-                    <div>
-                        <div class="text-sm font-black text-green-900 uppercase tracking-wider mb-2">Disponibles</div>
-                        <div class="text-4xl font-black text-green-800">{{ total_available }}</div>
-                        <div class="text-xs font-semibold text-green-700 mt-1">
-                            {{ ((total_available/(total_available+low_stock_count+out_of_stock_count))*100)|round|int if (total_available+low_stock_count+out_of_stock_count) > 0 else 0 }}% del total
-                        </div>
-                    </div>
-                    <i class="fas fa-check-circle inventory-status-icon text-green-700"></i>
-                </div>
-
-                <div class="inventory-status-card low-stock">
-                    <div>
-                        <div class="text-sm font-black text-yellow-900 uppercase tracking-wider mb-2">Stock Bajo</div>
-                        <div class="text-4xl font-black text-yellow-800">{{ low_stock_count }}</div>
-                        <div class="text-xs font-semibold text-yellow-700 mt-1">
-                            Requiere atención inmediata
-                        </div>
-                    </div>
-                    <i class="fas fa-exclamation-triangle inventory-status-icon text-yellow-700"></i>
-                </div>
-
-                <div class="inventory-status-card out-of-stock">
-                    <div>
-                        <div class="text-sm font-black text-red-900 uppercase tracking-wider mb-2">Sin Stock</div>
-                        <div class="text-4xl font-black text-red-800">{{ out_of_stock_count }}</div>
-                        <div class="text-xs font-semibold text-red-700 mt-1">
-                            Pérdida de ventas potencial
-                        </div>
-                    </div>
-                    <i class="fas fa-times-circle inventory-status-icon text-red-700"></i>
-                </div>
-
-                <div class="pt-5 border-t-2 border-gray-300 dark:border-gray-700">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-sm font-bold text-gray-700 dark:text-gray-400 uppercase tracking-wide">Valor Total del Inventario</span>
-                        <i class="fas fa-wallet text-gray-500"></i>
-                    </div>
-                    <div class="text-3xl font-black text-gray-900 dark:text-white mb-3">
-                        ${{ "{:,.2f}".format(inventory_value) }}
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm font-bold text-green-600 dark:text-green-400">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                            Ganancia potencial: ${{ "{:,.2f}".format(potential_profit) }}
-                        </div>
-                        <div class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full">
-                            {{ "{:.1f}".format((potential_profit/inventory_value)*100) if inventory_value > 0 else 0 }}% ROI
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Products and Orders Section -->
-    <div class="grid-col-6">
-        <div class="chart-container professional-animation">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-trophy text-indigo-600"></i>
-                    Productos Más Vendidos
-                </h3>
-                <a href="{{ url_for('inventory.laptops_list') }}"
-                   class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 focus-visible">
-                    Ver todos
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="data-table-wrapper mt-4">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-laptop mr-2"></i>Producto</th>
-                            <th><i class="fas fa-shopping-bag mr-2"></i>Vendidos</th>
-                            <th><i class="fas fa-dollar-sign mr-2"></i>Ingresos</th>
-                            <th><i class="fas fa-percentage mr-2"></i>Margen</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in top_products[:5] %}
-                        <tr class="focus-visible">
-                            <td>
-                                <div class="font-black text-gray-900 dark:text-white">{{ product.name }}</div>
-                                <div class="text-xs text-gray-500 font-mono mt-1">{{ product.sku }}</div>
-                            </td>
-                            <td class="font-black text-lg">{{ product.units_sold }}</td>
-                            <td class="font-black text-green-600 dark:text-green-400 text-lg">
-                                ${{ "{:,.0f}".format(product.revenue) }}
-                            </td>
-                            <td>
-                                <span class="status-badge {{ 'success' if product.margin > 30 else 'warning' if product.margin > 15 else 'danger' }}">
-                                    {{ "{:.0f}".format(product.margin) }}%
+                            <h1 class="hero-title">
+                                {% set words = laptop.display_name.split() %}
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text" data-scramble>
+                                        {{ words[:2]|join(' ') if words|length >= 2 else laptop.display_name }}
+                                    </span>
                                 </span>
-                            </td>
-                        </tr>
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text dynamic-gradient" data-scramble>
+                                        {{ words[2:]|join(' ') if words|length > 2 else 'Premium Edition' }}
+                                    </span>
+                                </span>
+                            </h1>
+
+                            <p class="hero-description">
+                                {{ laptop.description|truncate(150) if laptop.description else 'Experimenta el máximo rendimiento con tecnología de última generación. Diseño premium, potencia sin límites.' }}
+                            </p>
+
+                            <div class="hero-actions">
+                                <a href="{{ url_for('public.product_detail', id=laptop.id) }}" class="btn btn-primary">
+                                    Comprar Ahora
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                                <a href="#featured" class="btn btn-secondary">
+                                    Ver Destacados
+                                </a>
+                            </div>
+                        </article>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Orders -->
-    <div class="grid-col-6">
-        <div class="chart-container professional-animation">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
-                    Órdenes Recientes
-                </h3>
-                <a href="{{ url_for('invoices.invoices_list') }}"
-                   class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 focus-visible">
-                    Ver todas
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="space-y-4 mt-4">
-                {% for invoice in recent_invoices[:5] %}
-                <div class="order-card bg-white dark:bg-gray-900 rounded-2xl p-4 border-2 border-gray-200 dark:border-gray-800 hover:border-indigo-500 transition-all duration-300 hover:shadow-xl">
-                    <div class="flex items-center gap-4">
-                        <div class="order-icon-wrapper bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-600 dark:text-blue-400">
-                            <i class="fas fa-file-invoice"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="order-number font-black text-gray-900 dark:text-white truncate">
-                                {{ invoice.invoice_number }}
+                    {% else %}
+                        <article class="hero-slide active">
+                            <div class="hero-eyebrow">
+                                <span class="hero-eyebrow-dot"></span>
+                                <span>LuxeraRD</span>
                             </div>
-                            <div class="order-customer text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                {{ invoice.customer_name }}
-                                <span class="mx-2">•</span>
-                                {{ invoice.created_at.strftime('%b %d') if invoice.created_at else 'N/A' }}
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="order-amount font-black text-gray-900 dark:text-white">
-                                ${{ "{:,.2f}".format(invoice.total) }}
-                            </div>
-                            <div class="mt-2">
-                                <span class="status-badge {{ 'success' if invoice.status == 'paid' or invoice.status == 'completed' else 'warning' if invoice.status == 'issued' else 'info' }}">
-                                    {{ invoice.status|title if invoice.status else 'N/A' }}
+                            <h1 class="hero-title">
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text" data-scramble>Potencia que</span>
                                 </span>
+                                <span class="hero-title-line">
+                                    <span class="hero-title-text dynamic-gradient" data-scramble>desafía la realidad</span>
+                                </span>
+                            </h1>
+                            <p class="hero-description">
+                                Descubre las mejores laptops y equipos de computación en República Dominicana. Garantía oficial y soporte técnico especializado.
+                            </p>
+                            <div class="hero-actions">
+                                <a href="{{ url_for('public.catalog') }}" class="btn btn-primary">
+                                    Ver Catálogo
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
                             </div>
-                        </div>
+                        </article>
+                    {% endif %}
+                </div>
+
+                <!-- Carousel Controls -->
+                <div class="carousel-controls">
+                    <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Seleccionar producto">
+                        <!-- Generated by JS -->
+                    </div>
+                    <div class="carousel-nav">
+                        <button class="carousel-btn" id="carousel-prev" aria-label="Producto anterior">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button class="carousel-btn" id="carousel-next" aria-label="Siguiente producto">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-        </div>
-    </div>
 
-    <!-- Category Distribution -->
-    <div class="grid-col-12">
-        <div class="chart-container professional-animation">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-layer-group text-indigo-600"></i>
-                    Rendimiento por Categoría
-                </h3>
-                <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold">
-                    Distribución de ingresos por categoría
+            <!-- Visual Side -->
+            <div class="hero-visual">
+                <div class="hero-rings" aria-hidden="true">
+                    <div class="hero-ring hero-ring-1"></div>
+                    <div class="hero-ring hero-ring-2"></div>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {% for category in category_distribution %}
-                <div class="category-card">
-                    <div class="category-header mb-6">
-                        <span class="category-name">
-                            <i class="fas fa-tag mr-3 text-indigo-600 text-lg"></i>
-                            {{ category.category|title if category.category else 'Sin categoría' }}
-                        </span>
-                        <span class="category-count">{{ category.products if category.products else 0 }} productos</span>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="category-stat-label">Unidades vendidas</span>
-                            <span class="category-stat-value font-black">{{ category.units_sold if category.units_sold else 0 }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="category-stat-label">Ingresos totales</span>
-                            <span class="category-stat-value category-revenue font-black">
-                                ${{ "{:,.0f}".format(category.revenue if category.revenue else 0) }}
-                            </span>
-                        </div>
-                        <div class="pt-4">
-                            <div class="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                                <span>Porcentaje de participación</span>
-                                <span>
-                                    {% set total_revenue = category_distribution|sum(attribute='revenue') %}
-                                    {{ "%.1f"|format((category.revenue/total_revenue)*100) if total_revenue > 0 and category.revenue else 0 }}%
-                                </span>
-                            </div>
-                            <div class="progress-container">
-                                <div class="progress-bar progress-primary"
-                                     style="width: {% if category_distribution and category_distribution[0].revenue and category_distribution[0].revenue > 0 %}{{ (category.revenue / category_distribution[0].revenue * 100) if category.revenue else 0 }}{% else %}0{% endif %}%">
+
+                <div class="hero-product" id="hero-products">
+                    {% if featured_laptops and featured_laptops|length > 0 %}
+                        {% for laptop in featured_laptops[:5] %}
+                        <div class="hero-product-card {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+
+                            <!-- Specs Card -->
+                            <div class="specs-card">
+                                <div class="specs-card-header">
+                                    <div class="specs-card-icon">
+                                        <i class="fa-solid fa-microchip"></i>
+                                    </div>
+                                    <div>
+                                        <div class="specs-card-subtitle">Sistema</div>
+                                        <div class="specs-card-title">Rendimiento</div>
+                                    </div>
+                                </div>
+                                <div class="specs-grid">
+                                    <div class="spec-item">
+                                        <div class="spec-label">CPU</div>
+                                        <div class="spec-value">{{ (laptop.processor.name|truncate(12, True, '')) if laptop.processor else 'Intel i9' }}</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">GPU</div>
+                                        <div class="spec-value">{{ (laptop.graphics_card.name|truncate(12, True, '')) if laptop.graphics_card else 'RTX 4090' }}</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">RAM</div>
+                                        <div class="spec-value">{{ laptop.ram.name if laptop.ram else '32 GB' }}</div>
+                                    </div>
+                                    <div class="spec-item">
+                                        <div class="spec-label">SSD</div>
+                                        <div class="spec-value">{{ laptop.storage.name if laptop.storage else '1 TB' }}</div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Product Image -->
+                            {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
+                                {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
+                                <img src="{{ url_for('static', filename=cover.image_path) }}"
+                                     alt="{{ laptop.display_name }}"
+                                     class="hero-product-image"
+                                     loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            {% elif laptop.images and laptop.images|length > 0 %}
+                                <img src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
+                                     alt="{{ laptop.display_name }}"
+                                     class="hero-product-image"
+                                     loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            {% else %}
+                                <div style="display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10;">
+                                    <i class="fas fa-laptop" style="font-size: 6rem; color: var(--text-muted);"></i>
+                                </div>
+                            {% endif %}
+
+                            <!-- Price Tag -->
+                            <div class="price-tag">
+                                <div>
+                                    <div class="price-tag-label">Desde</div>
+                                    <div class="price-tag-value">RD$ {{ "{:,.0f}".format(laptop.sale_price) }}</div>
+                                </div>
+                                <div class="price-tag-indicator"></div>
+                            </div>
                         </div>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="hero-product-card active">
+                            <div style="display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16/10;">
+                                <i class="fas fa-laptop" style="font-size: 6rem; color: var(--text-muted);"></i>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marquee -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track" id="marquee-track">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     PRODUCTOS DESTACADOS
+     ============================================ -->
+<section id="featured" class="section-padding bg-surface">
+    <div class="container-xl">
+        <header class="section-header fade-up">
+            <span class="section-eyebrow">Selección Premium</span>
+            <h2 class="section-title">
+                Lo más <span class="text-gradient">Vendido</span>
+            </h2>
+            <p class="section-description">
+                Las laptops más vendidas con el mejor rendimiento y precio del mercado dominicano.
+            </p>
+        </header>
+
+        <div class="products-grid">
+            {% if featured_laptops %}
+                {% for laptop in featured_laptops[:4] %}
+                <article class="product-card fade-up stagger-{{ loop.index }}">
+                    <!-- Badge -->
+                    <div class="product-card-badge">
+                        {% if loop.index == 1 %}
+                            <span class="badge badge-new">Nuevo</span>
+                        {% elif loop.index == 2 %}
+                            <span class="badge badge-hot">Oferta</span>
+                        {% elif loop.index == 3 %}
+                            <span class="badge badge-featured">Destacado</span>
+                        {% else %}
+                            <span class="badge badge-featured">Popular</span>
+                        {% endif %}
+                    </div>
+
+                    {% if laptop.quantity <= 5 and laptop.quantity > 0 %}
+                        <div class="product-card-badge" style="top: 3.5rem;">
+                            <span class="badge badge-limited">Últimas unidades</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Image -->
+                    <div class="product-image-container">
+                        {% if laptop.images and laptop.images|selectattr('is_cover', 'equalto', True)|list|length > 0 %}
+                            {% set cover = laptop.images|selectattr('is_cover', 'equalto', True)|first %}
+                            <img src="{{ url_for('static', filename=cover.image_path) }}"
+                                 alt="{{ laptop.display_name }}"
+                                 class="product-image"
+                                 loading="lazy">
+                        {% elif laptop.images and laptop.images|length > 0 %}
+                            <img src="{{ url_for('static', filename=laptop.images[0].image_path) }}"
+                                 alt="{{ laptop.display_name }}"
+                                 class="product-image"
+                                 loading="lazy">
+                        {% else %}
+                            <i class="fas fa-laptop" style="font-size: 4rem; color: var(--text-muted);"></i>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info -->
+                    <div class="product-info">
+                        <span class="product-brand">{{ laptop.brand.name if laptop.brand else 'Premium' }}</span>
+                        <h3 class="product-name">{{ laptop.display_name|truncate(35) }}</h3>
+
+                        <!-- Specs -->
+                        <div class="product-specs">
+                            {% if laptop.processor %}
+                            <div class="product-spec">
+                                <span class="product-spec-icon"><i class="fa-solid fa-microchip"></i></span>
+                                <span class="product-spec-text">{{ laptop.processor.name|truncate(28) }}</span>
+                            </div>
+                            {% endif %}
+                            {% if laptop.graphics_card %}
+                            <div class="product-spec">
+                                <span class="product-spec-icon"><i class="fa-solid fa-gamepad"></i></span>
+                                <span class="product-spec-text">{{ laptop.graphics_card.name|truncate(28) }}</span>
+                            </div>
+                            {% endif %}
+                            {% if laptop.ram %}
+                            <div class="product-spec">
+                                <span class="product-spec-icon"><i class="fa-solid fa-memory"></i></span>
+                                <span class="product-spec-text">{{ laptop.ram.name }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Footer -->
+                        <footer class="product-footer">
+                            <div class="product-price">
+                                {% if laptop.discount_price and laptop.discount_price < laptop.sale_price %}
+                                    <span class="product-price-old">RD$ {{ "{:,.0f}".format(laptop.sale_price) }}</span>
+                                    <span class="product-price-current">
+                                        <span class="product-price-currency">RD$</span> {{ "{:,.0f}".format(laptop.discount_price) }}
+                                    </span>
+                                {% else %}
+                                    <span class="product-price-current">
+                                        <span class="product-price-currency">RD$</span> {{ "{:,.0f}".format(laptop.sale_price) }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('public.product_detail', id=laptop.id) }}"
+                               class="product-action"
+                               aria-label="Ver detalles de {{ laptop.display_name }}">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </footer>
+                    </div>
+                </article>
                 {% endfor %}
-            </div>
+            {% endif %}
+        </div>
+
+        <div class="text-center fade-up" style="margin-top: 3rem;">
+            <a href="{{ url_for('public.catalog') }}" class="btn btn-secondary">
+                Ver Todos los Productos
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
         </div>
     </div>
+</section>
 
-    <!-- Quick Actions -->
-    <div class="grid-col-12">
-        <div class="chart-container professional-animation">
-            <div class="chart-header">
-                <h3 class="chart-title">
-                    <i class="fas fa-bolt text-indigo-600"></i>
-                    Acciones Rápidas
-                </h3>
-                <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold">
-                    Acciones frecuentes para optimizar tu flujo de trabajo
+<!-- ============================================
+     POR QUÉ ELEGIRNOS
+     ============================================ -->
+<section class="section-padding">
+    <div class="container-xl">
+        <header class="section-header fade-up">
+            <span class="section-eyebrow">Beneficios</span>
+            <h2 class="section-title">
+                ¿Por Qué <span class="text-gradient">Elegirnos?</span>
+            </h2>
+            <p class="section-description">
+                Más que productos. Una experiencia completa con garantías y soporte de primer nivel.
+            </p>
+        </header>
+
+        <div class="features-grid">
+            <article class="feature-card fade-up stagger-1">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Garantía Oficial</h3>
+                <p class="feature-description">
+                    Todos nuestros productos incluyen garantía de fábrica de 1 año con cobertura completa.
+                </p>
+            </article>
+
+            <article class="feature-card fade-up stagger-2">
+                <div class="feature-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+                <h3 class="feature-title">Envío Gratis</h3>
+                <p class="feature-description">
+                    Entrega rápida y segura en toda República Dominicana sin costo adicional.
+                </p>
+            </article>
+
+            <article class="feature-card fade-up stagger-3">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3 class="feature-title">Soporte 24/7</h3>
+                <p class="feature-description">
+                    Equipo técnico especializado disponible para ayudarte en cualquier momento.
+                </p>
+            </article>
+
+            <article class="feature-card fade-up stagger-4">
+                <div class="feature-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3 class="feature-title">Mejores Precios</h3>
+                <p class="feature-description">
+                    Precios competitivos con opciones de financiamiento flexibles para todos.
+                </p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     CATEGORÍAS
+     ============================================ -->
+<section class="section-padding bg-surface">
+    <div class="container-xl">
+        <header class="section-header fade-up">
+            <h2 class="section-title">
+                Compra por <span class="text-gradient">Categoría</span>
+            </h2>
+            <p class="section-description">
+                Encuentra exactamente lo que necesitas según tu uso y presupuesto.
+            </p>
+        </header>
+
+        <div class="categories-grid">
+            <a href="{{ url_for('public.catalog', category='gaming') }}"
+               class="category-card fade-up stagger-1"
+               style="--category-color: linear-gradient(135deg, #7c3aed, #ec4899);">
+                <div class="category-content">
+                    <div class="category-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3 class="category-title">Gaming</h3>
+                    <p class="category-subtitle">Máximo rendimiento para juegos</p>
+                    <span class="category-link">
+                        Explorar <i class="fas fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('public.catalog', category='workstation') }}"
+               class="category-card fade-up stagger-2"
+               style="--category-color: linear-gradient(135deg, #0066ff, #00d4aa);">
+                <div class="category-content">
+                    <div class="category-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="category-title">Profesional</h3>
+                    <p class="category-subtitle">Para trabajo y productividad</p>
+                    <span class="category-link">
+                        Explorar <i class="fas fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('public.catalog', category='laptop') }}"
+               class="category-card fade-up stagger-3"
+               style="--category-color: linear-gradient(135deg, #10b981, #0ea5e9);">
+                <div class="category-content">
+                    <div class="category-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="category-title">Estudiantes</h3>
+                    <p class="category-subtitle">Perfectas para estudio y tareas</p>
+                    <span class="category-link">
+                        Explorar <i class="fas fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     CTA
+     ============================================ -->
+<section class="section-padding">
+    <div class="container-xl">
+        <div class="cta fade-up">
+            <div class="cta-content">
+                <h2 class="cta-title">¿Listo para el Upgrade?</h2>
+                <p class="cta-description">
+                    No te conformes con menos. Únete a la élite tecnológica de República Dominicana.
+                </p>
+                <div class="cta-actions">
+                    <a href="{{ url_for('public.catalog') }}" class="btn cta-btn-primary">
+                        <i class="fas fa-shopping-bag"></i>
+                        Ver Catálogo
+                    </a>
+                    <a href="{{ url_for('main.contact') }}" class="btn cta-btn-secondary">
+                        <i class="fas fa-phone"></i>
+                        Contactar
+                    </a>
+                </div>
+
+                <div class="cta-stats">
+                    <div>
+                        <div class="cta-stat-value">{{ total_products|default(500) }}+</div>
+                        <div class="cta-stat-label">Productos</div>
+                    </div>
+                    <div>
+                        <div class="cta-stat-value">1,000+</div>
+                        <div class="cta-stat-label">Clientes</div>
+                    </div>
+                    <div>
+                        <div class="cta-stat-value">5★</div>
+                        <div class="cta-stat-label">Calificación</div>
+                    </div>
+                    <div>
+                        <div class="cta-stat-value">24/7</div>
+                        <div class="cta-stat-label">Soporte</div>
+                    </div>
                 </div>
             </div>
-            <div class="quick-actions-grid mt-8">
-                <a href="{{ url_for('inventory.laptop_add') }}" class="quick-action focus-visible">
-                    <div class="quick-action-icon" style="background: var(--primary-gradient);">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="quick-action-text">Nueva Laptop</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Agregar nuevo producto
-                    </div>
-                </a>
-
-                <a href="{{ url_for('invoices.invoice_new') }}" class="quick-action focus-visible">
-                    <div class="quick-action-icon" style="background: var(--success-gradient);">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                    </div>
-                    <div class="quick-action-text">Nueva Factura</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Crear nueva venta
-                    </div>
-                </a>
-
-                <a href="{{ url_for('customers.customer_add') }}" class="quick-action focus-visible">
-                    <div class="quick-action-icon" style="background: var(--info-gradient);">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="quick-action-text">Nuevo Cliente</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Registrar cliente
-                    </div>
-                </a>
-
-                <a href="{{ url_for('inventory.laptops_list') }}" class="quick-action focus-visible">
-                    <div class="quick-action-icon" style="background: var(--warning-gradient);">
-                        <i class="fas fa-laptop"></i>
-                    </div>
-                    <div class="quick-action-text">Ver Inventario</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Gestionar productos
-                    </div>
-                </a>
-
-                <a href="{{ url_for('invoices.invoices_list') }}" class="quick-action focus-visible">
-                    <div class="quick-action-icon" style="background: var(--pink-gradient);">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="quick-action-text">Ver Facturas</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Historial de ventas
-                    </div>
-                </a>
-
-                <a href="{{ url_for('customers.customers_list') }}" class="quick-action focus-visible">
-                    <div class="quick-action-icon" style="background: var(--teal-gradient);">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="quick-action-text">Ver Clientes</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Base de datos
-                    </div>
-                </a>
-            </div>
         </div>
     </div>
+</section>
 
+<!-- ============================================
+     AI CHAT WIDGET
+     ============================================ -->
+<div class="ai-widget">
+    <button class="ai-toggle" id="ai-toggle" aria-label="Abrir asistente AI">
+        <div class="ai-toggle-pulse"></div>
+        <i class="fa-solid fa-bolt"></i>
+        <div class="ai-toggle-status"></div>
+    </button>
+
+    <div class="ai-chat" id="ai-chat" role="dialog" aria-label="Chat con asistente AI">
+        <header class="ai-chat-header">
+            <div class="ai-chat-title">
+                <span class="ai-chat-title-dot"></span>
+                LUXERA AI ✨
+            </div>
+            <button class="ai-chat-close" id="ai-close" aria-label="Cerrar chat">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </header>
+
+        <div class="ai-chat-messages" id="ai-messages">
+            <div class="ai-message bot">
+                <div class="ai-message-avatar">AI</div>
+                <div class="ai-message-bubble">
+                    ¡Hola! Soy LUXERA AI, tu asistente de tecnología premium. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+        </div>
+
+        <form class="ai-chat-input" id="ai-form">
+            <input type="text"
+                   id="ai-input"
+                   placeholder="Pregunta sobre laptops, specs o precios..."
+                   autocomplete="off">
+            <button type="submit" class="ai-chat-send" id="ai-send" aria-label="Enviar mensaje">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<!-- Flatpickr for Date Range Picker -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <script>
-    // Initialize date range picker
-    flatpickr("#date-range-picker", {
-        mode: "range",
-        dateFormat: "Y-m-d",
-        locale: {
-            firstDayOfWeek: 1
+(function() {
+    'use strict';
+
+    // =========================================
+    // 1. THEME MANAGEMENT
+    // =========================================
+    const ThemeManager = {
+        init() {
+            this.toggle = document.getElementById('theme-toggle');
+            this.icon = document.getElementById('theme-icon');
+            this.html = document.documentElement;
+
+            // Load saved theme
+            const saved = localStorage.getItem('theme') || 'light';
+            this.setTheme(saved, false);
+
+            // Event listener
+            this.toggle?.addEventListener('click', () => this.toggleTheme());
         },
-        theme: "material_blue"
-    });
 
-    // Update current time function
-    function updateCurrentTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-        const dateString = now.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        });
-        document.getElementById('current-time').textContent = `${timeString} (${dateString})`;
-    }
+        setTheme(theme, animate = true) {
+            this.html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
 
-    // Update time every minute
-    setInterval(updateCurrentTime, 60000);
-    updateCurrentTime(); // Call immediately on load
+            if (this.icon) {
+                this.icon.className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+                if (animate) {
+                    this.icon.style.transform = 'rotate(360deg)';
+                    setTimeout(() => this.icon.style.transform = '', 500);
+                }
+            }
 
-    // Dashboard Effects Class
-    class DashboardEffects {
-        constructor() {
-            this.initParallax();
-            this.initScrollAnimations();
-            this.initIntersectionObservers();
-            this.bindEvents();
+            // Update carousel colors if exists
+            if (window.HeroCarousel?.instance) {
+                window.HeroCarousel.instance.updateColors();
+            }
+        },
+
+        toggleTheme() {
+            const current = this.html.getAttribute('data-theme');
+            this.setTheme(current === 'dark' ? 'light' : 'dark');
         }
+    };
 
-        initParallax() {
-            const header = document.querySelector('.dashboard-header');
-            if (header) {
-                window.addEventListener('scroll', () => {
-                    const scrolled = window.pageYOffset;
-                    const speed = 0.5;
-                    header.style.transform = `translateY(${scrolled * speed}px)`;
-                });
+    // =========================================
+    // 2. CUSTOM CURSOR
+    // =========================================
+    const CustomCursor = {
+        init() {
+            this.cursor = document.getElementById('cursor');
+            if (!this.cursor || !window.matchMedia('(hover: hover)').matches) return;
+
+            this.dot = this.cursor.querySelector('.cursor-dot');
+            this.ring = this.cursor.querySelector('.cursor-ring');
+
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            const animate = () => {
+                cursorX += (mouseX - cursorX) * 0.15;
+                cursorY += (mouseY - cursorY) * 0.15;
+
+                this.cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+                requestAnimationFrame(animate);
+            };
+            animate();
+
+            // Hover states
+            const interactives = 'a, button, .btn, .product-card, .feature-card, .category-card';
+            document.querySelectorAll(interactives).forEach(el => {
+                el.addEventListener('mouseenter', () => this.cursor.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => this.cursor.classList.remove('hovering'));
+            });
+        }
+    };
+
+    // =========================================
+    // 3. PARTICLES
+    // =========================================
+    const Particles = {
+        init() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 3 + 1;
+                particle.style.cssText = `
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${Math.random() * 100}vw;
+                    top: ${Math.random() * 100}vh;
+                    --tx: ${(Math.random() - 0.5) * 100}px;
+                    --ty: ${(Math.random() - 0.5) * 100}px;
+                    --duration: ${10 + Math.random() * 20}s;
+                    --delay: ${Math.random() * -20}s;
+                `;
+                container.appendChild(particle);
             }
         }
+    };
 
-        initScrollAnimations() {
+    // =========================================
+    // 4. MARQUEE
+    // =========================================
+    const Marquee = {
+        init() {
+            const track = document.getElementById('marquee-track');
+            if (!track) return;
+
+            const words = ['LUXERA', 'TECNOLOGÍA', 'INNOVACIÓN', 'PREMIUM', 'CALIDAD'];
+            track.innerHTML = [...words, ...words].map(w =>
+                `<span class="marquee-text">${w}</span>`
+            ).join('');
+        }
+    };
+
+    // =========================================
+    // 5. AURORA BACKGROUND
+    // =========================================
+    const Aurora = {
+        init() {
+            this.blob1 = document.getElementById('aurora-1');
+            this.blob2 = document.getElementById('aurora-2');
+            if (!this.blob1 || !this.blob2) return;
+
+            let mouseX = 0.5, mouseY = 0.5;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX / window.innerWidth;
+                mouseY = e.clientY / window.innerHeight;
+            });
+
+            const animate = () => {
+                const x1 = (mouseX - 0.5) * 30;
+                const y1 = (mouseY - 0.5) * 30;
+
+                this.blob1.style.transform = `translate(${x1}px, ${y1}px)`;
+                this.blob2.style.transform = `translate(${-x1 * 0.7}px, ${-y1 * 0.7}px)`;
+
+                requestAnimationFrame(animate);
+            };
+            animate();
+        }
+    };
+
+    // =========================================
+    // 6. HERO CAROUSEL
+    // =========================================
+    const HeroCarousel = {
+        instance: null,
+
+        init() {
+            const textSlides = document.querySelectorAll('.hero-slide');
+            const imageCards = document.querySelectorAll('.hero-product-card');
+            const dotsContainer = document.getElementById('carousel-dots');
+
+            if (!textSlides.length || !dotsContainer) return;
+
+            this.instance = {
+                current: 0,
+                total: Math.min(textSlides.length, 5),
+                textSlides,
+                imageCards,
+                dotsContainer,
+                autoplayInterval: null,
+                progressInterval: null,
+                progress: 0,
+                duration: 6000,
+                isAnimating: false,
+                colorSchemes: {
+                    light: [
+                        { gradient: 'linear-gradient(135deg, #0066ff 0%, #00d4aa 100%)', accent: '#0066ff', rgb: '0, 102, 255' },
+                        { gradient: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)', accent: '#7c3aed', rgb: '124, 58, 237' },
+                        { gradient: 'linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)', accent: '#10b981', rgb: '16, 185, 129' },
+                        { gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)', accent: '#f59e0b', rgb: '245, 158, 11' },
+                        { gradient: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', accent: '#06b6d4', rgb: '6, 182, 212' }
+                    ],
+                    dark: [
+                        { gradient: 'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)', accent: '#3b82f6', rgb: '59, 130, 246' },
+                        { gradient: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)', accent: '#a78bfa', rgb: '167, 139, 250' },
+                        { gradient: 'linear-gradient(135deg, #34d399 0%, #38bdf8 100%)', accent: '#34d399', rgb: '52, 211, 153' },
+                        { gradient: 'linear-gradient(135deg, #fbbf24 0%, #f87171 100%)', accent: '#fbbf24', rgb: '251, 191, 36' },
+                        { gradient: 'linear-gradient(135deg, #22d3ee 0%, #60a5fa 100%)', accent: '#22d3ee', rgb: '34, 211, 238' }
+                    ]
+                },
+
+                updateColors() {
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    const schemes = isDark ? this.colorSchemes.dark : this.colorSchemes.light;
+                    const scheme = schemes[this.current % schemes.length];
+
+                    document.documentElement.style.setProperty('--dynamic-gradient', scheme.gradient);
+                    document.documentElement.style.setProperty('--dynamic-accent', scheme.accent);
+                    document.documentElement.style.setProperty('--dynamic-accent-rgb', scheme.rgb);
+                },
+
+                goTo(index, skipAnimation = false) {
+                    if (this.isAnimating || index === this.current) return;
+                    if (!skipAnimation) this.isAnimating = true;
+
+                    // Update slides
+                    this.textSlides.forEach((slide, i) => {
+                        slide.classList.toggle('active', i === index);
+                    });
+
+                    this.imageCards.forEach((card, i) => {
+                        card.classList.toggle('active', i === index);
+                    });
+
+                    // Update dots
+                    this.dotsContainer.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                        if (i !== index) {
+                            dot.querySelector('.carousel-dot-fill').style.width = '0%';
+                        }
+                    });
+
+                    this.current = index;
+                    this.updateColors();
+                    this.resetProgress();
+
+                    setTimeout(() => this.isAnimating = false, 800);
+                },
+
+                next() {
+                    this.goTo((this.current + 1) % this.total);
+                },
+
+                prev() {
+                    this.goTo((this.current - 1 + this.total) % this.total);
+                },
+
+                resetProgress() {
+                    this.progress = 0;
+                    this.updateProgressBar(0);
+                },
+
+                updateProgressBar(val) {
+                    const activeDot = this.dotsContainer.querySelector('.carousel-dot.active .carousel-dot-fill');
+                    if (activeDot) activeDot.style.width = `${val}%`;
+                },
+
+                startAutoplay() {
+                    this.stopAutoplay();
+                    this.resetProgress();
+
+                    this.progressInterval = setInterval(() => {
+                        this.progress += 100 / (this.duration / 100);
+                        if (this.progress >= 100) {
+                            this.next();
+                        } else {
+                            this.updateProgressBar(this.progress);
+                        }
+                    }, 100);
+                },
+
+                stopAutoplay() {
+                    clearInterval(this.progressInterval);
+                }
+            };
+
+            // Create dots
+            for (let i = 0; i < this.instance.total; i++) {
+                const dot = document.createElement('button');
+                dot.className = `carousel-dot${i === 0 ? ' active' : ''}`;
+                dot.setAttribute('role', 'tab');
+                dot.setAttribute('aria-label', `Producto ${i + 1}`);
+                dot.innerHTML = '<span class="carousel-dot-fill"></span>';
+                dot.addEventListener('click', () => this.instance.goTo(i));
+                dotsContainer.appendChild(dot);
+            }
+
+            // Event listeners
+            ['carousel-prev', 'hero-prev'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    this.instance.prev();
+                    this.instance.startAutoplay();
+                });
+            });
+
+            ['carousel-next', 'hero-next'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    this.instance.next();
+                    this.instance.startAutoplay();
+                });
+            });
+
+            // Pause on hover
+            const hero = document.querySelector('.hero');
+            hero?.addEventListener('mouseenter', () => this.instance.stopAutoplay());
+            hero?.addEventListener('mouseleave', () => this.instance.startAutoplay());
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') this.instance.prev();
+                if (e.key === 'ArrowRight') this.instance.next();
+            });
+
+            // Initialize
+            this.instance.updateColors();
+            this.instance.startAutoplay();
+
+            // Make accessible globally
+            window.HeroCarousel = HeroCarousel;
+        }
+    };
+
+    // =========================================
+    // 7. AI CHAT
+    // =========================================
+    const AIChat = {
+        init() {
+            this.toggle = document.getElementById('ai-toggle');
+            this.chat = document.getElementById('ai-chat');
+            this.close = document.getElementById('ai-close');
+            this.form = document.getElementById('ai-form');
+            this.input = document.getElementById('ai-input');
+            this.messages = document.getElementById('ai-messages');
+            this.send = document.getElementById('ai-send');
+
+            if (!this.toggle || !this.chat) return;
+
+            this.toggle.addEventListener('click', () => this.openChat());
+            this.close.addEventListener('click', () => this.closeChat());
+            this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+            // Close on escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') this.closeChat();
+            });
+        },
+
+        openChat() {
+            this.chat.classList.add('open');
+            this.input.focus();
+        },
+
+        closeChat() {
+            this.chat.classList.remove('open');
+        },
+
+        async handleSubmit(e) {
+            e.preventDefault();
+            const text = this.input.value.trim();
+            if (!text) return;
+
+            this.addMessage(text, 'user');
+            this.input.value = '';
+            this.send.disabled = true;
+
+            // Show typing
+            const typingId = this.showTyping();
+
+            // Simulate response
+            setTimeout(() => {
+                this.hideTyping(typingId);
+                const responses = [
+                    "Nuestra serie premium ofrece procesadores de última generación con hasta 64GB de RAM.",
+                    "Todos nuestros productos incluyen garantía oficial de 1 año.",
+                    "Tenemos envío gratis a todo el país. ¿Te interesa algún modelo?",
+                    "Para gaming recomendamos nuestra línea con RTX 40-series.",
+                    "Puedes visitar nuestro catálogo para ver todas las opciones disponibles."
+                ];
+                this.addMessage(responses[Math.floor(Math.random() * responses.length)], 'bot');
+                this.send.disabled = false;
+            }, 1200);
+        },
+
+        addMessage(text, sender) {
+            const msg = document.createElement('div');
+            msg.className = `ai-message ${sender}`;
+            msg.innerHTML = `
+                <div class="ai-message-avatar">${sender === 'bot' ? 'AI' : 'Tú'}</div>
+                <div class="ai-message-bubble">${text}</div>
+            `;
+            this.messages.appendChild(msg);
+            this.messages.scrollTop = this.messages.scrollHeight;
+        },
+
+        showTyping() {
+            const id = `typing-${Date.now()}`;
+            const typing = document.createElement('div');
+            typing.id = id;
+            typing.className = 'ai-message bot';
+            typing.innerHTML = `
+                <div class="ai-message-avatar">AI</div>
+                <div class="ai-message-bubble">
+                    <div class="ai-typing">
+                        <span class="ai-typing-dot"></span>
+                        <span class="ai-typing-dot"></span>
+                        <span class="ai-typing-dot"></span>
+                    </div>
+                </div>
+            `;
+            this.messages.appendChild(typing);
+            this.messages.scrollTop = this.messages.scrollHeight;
+            return id;
+        },
+
+        hideTyping(id) {
+            document.getElementById(id)?.remove();
+        }
+    };
+
+    // =========================================
+    // 8. SCROLL ANIMATIONS
+    // =========================================
+    const ScrollAnimations = {
+        init() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-in');
+                        entry.target.classList.add('visible');
                         observer.unobserve(entry.target);
                     }
                 });
-            }, {
-                threshold: 0.1,
-                rootMargin: '50px'
-            });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-            document.querySelectorAll('.professional-animation').forEach(el => {
-                observer.observe(el);
-            });
+            document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
         }
+    };
 
-        initIntersectionObservers() {
-            const cards = document.querySelectorAll('.metric-card, .chart-container, .alert-card');
+    // =========================================
+    // 9. TEXT SCRAMBLE EFFECT (Optimized)
+    // =========================================
+    const TextScramble = {
+        chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
 
-            const cardObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0) scale(1)';
-                    }
-                });
-            }, {
-                threshold: 0.1
-            });
+        scramble(element) {
+            const originalText = element.textContent;
+            const length = originalText.length;
+            let iteration = 0;
 
-            cards.forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px) scale(0.95)';
-                card.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                cardObserver.observe(card);
-            });
-        }
+            const interval = setInterval(() => {
+                element.textContent = originalText
+                    .split('')
+                    .map((char, i) => {
+                        if (i < iteration) return originalText[i];
+                        return this.chars[Math.floor(Math.random() * this.chars.length)];
+                    })
+                    .join('');
 
-        bindEvents() {
-            // Quick action hover effects
-            document.querySelectorAll('.quick-action').forEach(action => {
-                action.addEventListener('mouseenter', (e) => {
-                    const icon = e.currentTarget.querySelector('.quick-action-icon');
-                    if (icon) {
-                        icon.style.transform = 'rotateY(180deg) scale(1.1)';
-                    }
-                });
+                if (iteration >= length) clearInterval(interval);
+                iteration += 1/2;
+            }, 30);
+        },
 
-                action.addEventListener('mouseleave', (e) => {
-                    const icon = e.currentTarget.querySelector('.quick-action-icon');
-                    if (icon) {
-                        icon.style.transform = '';
-                    }
-                });
-            });
-
-            // Metric card hover effects
-            document.querySelectorAll('.metric-card').forEach(card => {
-                card.addEventListener('mouseenter', (e) => {
-                    const icon = e.currentTarget.querySelector('.metric-icon');
-                    if (icon) {
-                        icon.style.animation = 'glow 2s ease-in-out infinite';
-                    }
-                });
-
-                card.addEventListener('mouseleave', (e) => {
-                    const icon = e.currentTarget.querySelector('.metric-icon');
-                    if (icon) {
-                        icon.style.animation = '';
-                    }
-                });
-            });
-        }
-    }
-
-    // Initialize dashboard effects
-    new DashboardEffects();
-
-    // Filter functions
-    function resetFilters() {
-        document.querySelector('.custom-select').value = 'all';
-        document.getElementById('date-range-picker').value = '';
-
-        // Show notification
-        showNotification('Filtros reiniciados correctamente', 'success');
-    }
-
-    function showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-2xl shadow-xl backdrop-filter backdrop-blur-lg border-2 ${
-            type === 'success'
-                ? 'bg-green-50/90 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300'
-                : 'bg-blue-50/90 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300'
-        }`;
-        notification.innerHTML = `
-            <div class="flex items-center gap-3">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} text-lg"></i>
-                <span class="font-bold">${message}</span>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
-        // Remove notification after 3 seconds
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Chart.js Configuration
-    const salesData = {{ daily_sales|tojson|safe }};
-    const isDarkMode = document.documentElement.classList.contains('dark');
-
-    // Get chart context
-    const ctx = document.getElementById('salesChart');
-
-    if (ctx) {
-        const chartCtx = ctx.getContext('2d');
-
-        // Create gradients
-        const gradientSales = chartCtx.createLinearGradient(0, 0, 0, 400);
-        gradientSales.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
-        gradientSales.addColorStop(0.7, 'rgba(102, 126, 234, 0.1)');
-        gradientSales.addColorStop(1, 'rgba(102, 126, 234, 0.01)');
-
-        const gradientOrders = chartCtx.createLinearGradient(0, 0, 0, 400);
-        gradientOrders.addColorStop(0, 'rgba(156, 163, 175, 0.2)');
-        gradientOrders.addColorStop(0.7, 'rgba(156, 163, 175, 0.08)');
-        gradientOrders.addColorStop(1, 'rgba(156, 163, 175, 0.01)');
-
-        // Enhanced chart configuration
-        const salesChart = new Chart(chartCtx, {
-            type: 'line',
-            data: {
-                labels: salesData.map(d => d.date),
-                datasets: [{
-                    label: 'Ventas ($)',
-                    data: salesData.map(d => d.amount || 0),
-                    borderColor: '#667eea',
-                    backgroundColor: gradientSales,
-                    borderWidth: 4,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 10,
-                    pointBackgroundColor: '#667eea',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 3,
-                    pointHoverBackgroundColor: '#667eea',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 3,
-                    yAxisID: 'y',
-                    cubicInterpolationMode: 'monotone'
-                }, {
-                    label: 'Órdenes',
-                    data: salesData.map(d => d.orders || 0),
-                    borderColor: '#9ca3af',
-                    backgroundColor: gradientOrders,
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: '#9ca3af',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    yAxisID: 'y1',
-                    borderDash: [5, 5]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                        titleColor: isDarkMode ? '#f9fafb' : '#111827',
-                        bodyColor: isDarkMode ? '#f9fafb' : '#111827',
-                        borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-                        borderWidth: 2,
-                        padding: 16,
-                        cornerRadius: 12,
-                        displayColors: false,
-                        titleFont: {
-                            size: 14,
-                            weight: 'bold',
-                            family: "'Inter', sans-serif"
-                        },
-                        bodyFont: {
-                            size: 13,
-                            weight: '600',
-                            family: "'Inter', sans-serif"
-                        },
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.datasetIndex === 0) {
-                                    label += '$' + context.parsed.y.toLocaleString('en-US', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
-                                    });
-                                } else {
-                                    label += context.parsed.y + ' órdenes';
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        beginAtZero: true,
-                        grid: {
-                            color: isDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.8)',
-                            drawBorder: false,
-                            lineWidth: 2
-                        },
-                        ticks: {
-                            color: isDarkMode ? '#9ca3af' : '#6b7280',
-                            font: {
-                                size: 12,
-                                weight: '600'
-                            },
-                            padding: 10,
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        beginAtZero: true,
-                        grid: {
-                            drawOnChartArea: false
-                        },
-                        ticks: {
-                            color: isDarkMode ? '#9ca3af' : '#6b7280',
-                            font: {
-                                size: 12,
-                                weight: '600'
-                            },
-                            padding: 10
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: isDarkMode ? '#9ca3af' : '#6b7280',
-                            font: {
-                                size: 11,
-                                weight: '600'
-                            },
-                            padding: 8,
-                            maxRotation: 0,
-                            autoSkip: true,
-                            maxTicksLimit: 10
-                        }
-                    }
-                },
-                animation: {
-                    duration: 2000,
-                    easing: 'easeOutQuart'
-                }
-            }
-        });
-
-        // Update chart when dark mode changes
-        window.addEventListener('darkModeToggled', function() {
-            const newIsDarkMode = document.documentElement.classList.contains('dark');
-
-            // Update tooltip colors
-            salesChart.options.plugins.tooltip.backgroundColor = newIsDarkMode
-                ? 'rgba(31, 41, 55, 0.95)'
-                : 'rgba(255, 255, 255, 0.95)';
-            salesChart.options.plugins.tooltip.titleColor = newIsDarkMode ? '#f9fafb' : '#111827';
-            salesChart.options.plugins.tooltip.bodyColor = newIsDarkMode ? '#f9fafb' : '#111827';
-            salesChart.options.plugins.tooltip.borderColor = newIsDarkMode ? '#374151' : '#e5e7eb';
-
-            // Update axis colors
-            salesChart.options.scales.y.grid.color = newIsDarkMode
-                ? 'rgba(55, 65, 81, 0.5)'
-                : 'rgba(243, 244, 246, 0.8)';
-            salesChart.options.scales.y.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
-            salesChart.options.scales.y1.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
-            salesChart.options.scales.x.ticks.color = newIsDarkMode ? '#9ca3af' : '#6b7280';
-
-            salesChart.update();
-        });
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        // Ctrl/Cmd + R to refresh
-        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-            e.preventDefault();
-            window.location.reload();
-        }
-
-        // Ctrl/Cmd + F to focus filters
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            e.preventDefault();
-            const filterSelect = document.querySelector('.custom-select');
-            if (filterSelect) {
-                filterSelect.focus();
-            }
-        }
-    });
-
-    // Performance optimization
-    window.addEventListener('load', () => {
-        // Lazy load non-critical images
-        const lazyImages = document.querySelectorAll('img[data-src]');
-        const imageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
+        init() {
+            document.querySelectorAll('[data-scramble]').forEach(el => {
+                // Scramble on load for visible elements
+                if (el.closest('.hero-slide.active')) {
+                    setTimeout(() => this.scramble(el), 300);
                 }
             });
-        });
-
-        lazyImages.forEach(img => imageObserver.observe(img));
-    });
-
-    // Error handling
-    window.addEventListener('error', (e) => {
-        console.error('Dashboard error:', e.error);
-
-        // Show user-friendly error message
-        if (e.target.tagName === 'IMG') {
-            e.target.style.display = 'none';
         }
-    });
+    };
 
-    // Export dashboard data
-    function exportDashboardData() {
-        const data = {
-            metrics: {
-                revenue: {{ revenue_current|default(0) }},
-                orders: {{ orders_current|default(0) }},
-                profit: {{ gross_profit_current|default(0) }},
-                customers: {{ active_customers|default(0) }}
-            },
-            timestamp: new Date().toISOString()
-        };
-
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `luxera-dashboard-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        showNotification('Datos exportados exitosamente', 'success');
-    }
-
-    // Add export button functionality
+    // =========================================
+    // INITIALIZE ALL
+    // =========================================
     document.addEventListener('DOMContentLoaded', () => {
-        const exportBtn = document.createElement('button');
-        exportBtn.className = 'refresh-btn ml-2';
-        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Exportar';
-        exportBtn.onclick = exportDashboardData;
-
-        const headerActions = document.querySelector('.header-content .flex.items-center.gap-4');
-        if (headerActions) {
-            headerActions.appendChild(exportBtn);
-        }
+        ThemeManager.init();
+        CustomCursor.init();
+        Particles.init();
+        Marquee.init();
+        Aurora.init();
+        HeroCarousel.init();
+        AIChat.init();
+        ScrollAnimations.init();
+        TextScramble.init();
     });
+
+})();
 </script>
 {% endblock %}

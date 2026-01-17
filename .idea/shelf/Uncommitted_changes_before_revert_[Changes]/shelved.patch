@@ -1,0 +1,1207 @@
+Index: app/services/image_background_service.py
+===================================================================
+diff --git a/app/services/image_background_service.py b/app/services/image_background_service.py
+deleted file mode 100644
+--- a/app/services/image_background_service.py	(revision 63867b0451060cd65b5c83f0f1d5b85e8607c85a)
++++ /dev/null	(revision 63867b0451060cd65b5c83f0f1d5b85e8607c85a)
+@@ -1,379 +0,0 @@
+-# ============================================
+-# IMAGE BACKGROUND SERVICE - Eliminación automática de fondo
+-# ============================================
+-# Responsabilidad: Procesamiento de imágenes con IA para remover fondos
+-# Dependencias: rembg, Pillow
+-
+-import os
+-import logging
+-from datetime import datetime
+-from pathlib import Path
+-from PIL import Image
+-import tempfile
+-
+-# Configurar logging
+-logger = logging.getLogger(__name__)
+-
+-# Intento de importar rembg (dependencia opcional)
+-try:
+-    from rembg import remove
+-
+-    REMBG_AVAILABLE = True
+-    logger.info("✅ rembg disponible para eliminación de fondos")
+-except ImportError:
+-    REMBG_AVAILABLE = False
+-    logger.warning("⚠️  rembg no está instalado. La eliminación de fondos no estará disponible.")
+-
+-
+-class ImageBackgroundService:
+-    """
+-    Servicio para procesamiento automático de eliminación de fondos en imágenes
+-    Usa la librería rembg con modelo U^2-Net
+-    """
+-
+-    # Configuraciones
+-    MAX_IMAGE_SIZE_MB = 10  # Rechazar imágenes > 10MB
+-    PROCESSING_TIMEOUT = 30  # Segundos máximos de procesamiento
+-    SUPPORTED_INPUT_FORMATS = {'jpg', 'jpeg', 'png', 'webp', 'bmp'}
+-    OUTPUT_FORMAT = 'PNG'  # Siempre PNG para transparencia
+-
+-    @classmethod
+-    def is_available(cls):
+-        """
+-        Verifica si el servicio está disponible (rembg instalado)
+-
+-        Returns:
+-            bool: True si rembg está disponible
+-        """
+-        return REMBG_AVAILABLE
+-
+-    @classmethod
+-    def remove_background(cls, image_path, backup_original=True):
+-        """
+-        Elimina el fondo de una imagen usando IA
+-
+-        Args:
+-            image_path (str): Ruta absoluta al archivo de imagen
+-            backup_original (bool): Si True, crea backup de la original
+-
+-        Returns:
+-            tuple: (success, processed_path, backup_path, error_message)
+-        """
+-        # Verificar disponibilidad
+-        if not cls.is_available():
+-            return False, None, None, "rembg no está instalado"
+-
+-        # Validar ruta
+-        if not os.path.exists(image_path):
+-            return False, None, None, f"Archivo no encontrado: {image_path}"
+-
+-        # Validar tamaño
+-        file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
+-        if file_size_mb > cls.MAX_IMAGE_SIZE_MB:
+-            return False, None, None, f"Imagen muy grande ({file_size_mb:.1f}MB). Máximo: {cls.MAX_IMAGE_SIZE_MB}MB"
+-
+-        # Validar formato
+-        file_ext = Path(image_path).suffix.lower()[1:]  # Sin el punto
+-        if file_ext not in cls.SUPPORTED_INPUT_FORMATS:
+-            return False, None, None, f"Formato no soportado: .{file_ext}"
+-
+-        try:
+-            logger.info(f"🎨 Procesando eliminación de fondo: {image_path}")
+-            start_time = datetime.now()
+-
+-            # 1. Crear backup de la imagen original si se solicita
+-            backup_path = None
+-            if backup_original:
+-                backup_path = cls._create_backup(image_path)
+-                logger.info(f"💾 Backup creado: {backup_path}")
+-
+-            # 2. Leer imagen
+-            with open(image_path, 'rb') as input_file:
+-                input_image = input_file.read()
+-
+-            # 3. Procesar con rembg
+-            logger.info("🔄 Eliminando fondo con IA...")
+-            output_image = remove(input_image)
+-
+-            # 4. Guardar imagen procesada (sobrescribir original)
+-            processed_path = image_path
+-            with open(processed_path, 'wb') as output_file:
+-                output_file.write(output_image)
+-
+-            # 5. Convertir a PNG si no lo es ya
+-            if not processed_path.lower().endswith('.png'):
+-                png_path = cls._convert_to_png(processed_path)
+-                if png_path:
+-                    # Reemplazar archivo original con PNG
+-                    os.remove(processed_path)
+-                    processed_path = png_path
+-                    logger.info(f"🔄 Convertido a PNG: {processed_path}")
+-
+-            # 6. Validar que la imagen procesada es válida
+-            if not cls._validate_image(processed_path):
+-                # Restaurar desde backup si existe
+-                if backup_path and os.path.exists(backup_path):
+-                    cls._restore_from_backup(backup_path, image_path)
+-                    return False, None, backup_path, "Imagen procesada inválida - Restaurado desde backup"
+-                return False, None, backup_path, "Imagen procesada inválida"
+-
+-            # 7. Registrar éxito
+-            processing_time = (datetime.now() - start_time).total_seconds()
+-            logger.info(f"✅ Fondo eliminado exitosamente en {processing_time:.2f}s: {processed_path}")
+-
+-            return True, processed_path, backup_path, None
+-
+-        except Exception as e:
+-            logger.error(f"❌ Error al eliminar fondo: {str(e)}", exc_info=True)
+-
+-            # Intentar restaurar desde backup si existe
+-            if backup_path and os.path.exists(backup_path):
+-                try:
+-                    cls._restore_from_backup(backup_path, image_path)
+-                    logger.info(f"🔄 Restaurado desde backup: {backup_path}")
+-                except Exception as restore_error:
+-                    logger.error(f"❌ Error al restaurar desde backup: {str(restore_error)}")
+-
+-            return False, None, backup_path, f"Error de procesamiento: {str(e)}"
+-
+-    @classmethod
+-    def batch_remove_background(cls, image_paths, backup_original=True):
+-        """
+-        Elimina fondo de múltiples imágenes
+-
+-        Args:
+-            image_paths (list): Lista de rutas a imágenes
+-            backup_original (bool): Crear backups de originales
+-
+-        Returns:
+-            dict: Resultados por imagen
+-        """
+-        results = {
+-            'total': len(image_paths),
+-            'success': 0,
+-            'failed': 0,
+-            'details': {}
+-        }
+-
+-        for idx, image_path in enumerate(image_paths, 1):
+-            logger.info(f"🔄 Procesando imagen {idx}/{len(image_paths)}: {image_path}")
+-
+-            success, processed_path, backup_path, error = cls.remove_background(
+-                image_path, backup_original
+-            )
+-
+-            results['details'][image_path] = {
+-                'success': success,
+-                'processed_path': processed_path,
+-                'backup_path': backup_path,
+-                'error': error
+-            }
+-
+-            if success:
+-                results['success'] += 1
+-            else:
+-                results['failed'] += 1
+-
+-        logger.info(f"✅ Proceso por lotes completado: {results['success']} éxitos, {results['failed']} fallos")
+-        return results
+-
+-    @classmethod
+-    def _create_backup(cls, image_path):
+-        """
+-        Crea una copia de seguridad de la imagen original
+-
+-        Args:
+-            image_path: Ruta a la imagen original
+-
+-        Returns:
+-            str: Ruta del archivo de backup
+-        """
+-        try:
+-            path_obj = Path(image_path)
+-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+-            backup_name = f"{path_obj.stem}_original_{timestamp}{path_obj.suffix}"
+-            backup_path = str(path_obj.parent / backup_name)
+-
+-            # Copiar archivo
+-            import shutil
+-            shutil.copy2(image_path, backup_path)
+-
+-            return backup_path
+-        except Exception as e:
+-            logger.error(f"❌ Error al crear backup: {str(e)}")
+-            return None
+-
+-    @classmethod
+-    def _convert_to_png(cls, image_path):
+-        """
+-        Convierte una imagen a formato PNG manteniendo transparencia
+-
+-        Args:
+-            image_path: Ruta a la imagen original
+-
+-        Returns:
+-            str: Nueva ruta en PNG o None si falla
+-        """
+-        try:
+-            path_obj = Path(image_path)
+-            png_path = str(path_obj.parent / f"{path_obj.stem}.png")
+-
+-            # Abrir imagen y guardar como PNG
+-            with Image.open(image_path) as img:
+-                # Convertir a RGBA para mantener transparencia
+-                if img.mode != 'RGBA':
+-                    img = img.convert('RGBA')
+-                img.save(png_path, 'PNG')
+-
+-            return png_path
+-        except Exception as e:
+-            logger.error(f"❌ Error al convertir a PNG: {str(e)}")
+-            return None
+-
+-    @classmethod
+-    def _validate_image(cls, image_path):
+-        """
+-        Valida que una imagen procesada sea válida
+-
+-        Args:
+-            image_path: Ruta a la imagen
+-
+-        Returns:
+-            bool: True si la imagen es válida
+-        """
+-        try:
+-            with Image.open(image_path) as img:
+-                img.verify()  # Verificar integridad
+-                width, height = img.size
+-
+-                # Validaciones básicas
+-                if width == 0 or height == 0:
+-                    return False
+-
+-                # Verificar que tiene canal alpha (transparencia)
+-                if img.mode == 'RGBA':
+-                    # Verificar que realmente tiene transparencia
+-                    alpha = img.getchannel('A')
+-                    # Si todos los píxeles son opacos (255), podría no haberse removido el fondo
+-                    # pero igual es una imagen válida
+-                    pass
+-
+-                return True
+-        except Exception as e:
+-            logger.error(f"❌ Imagen inválida: {str(e)}")
+-            return False
+-
+-    @classmethod
+-    def _restore_from_backup(cls, backup_path, original_path):
+-        """
+-        Restaura una imagen desde su backup
+-
+-        Args:
+-            backup_path: Ruta del backup
+-            original_path: Ruta donde restaurar
+-
+-        Returns:
+-            bool: True si se restauró exitosamente
+-        """
+-        try:
+-            import shutil
+-            shutil.copy2(backup_path, original_path)
+-            logger.info(f"🔄 Restaurado: {backup_path} -> {original_path}")
+-            return True
+-        except Exception as e:
+-            logger.error(f"❌ Error al restaurar desde backup: {str(e)}")
+-            return False
+-
+-    @classmethod
+-    def cleanup_old_backups(cls, image_path, keep_recent=1):
+-        """
+-        Elimina backups antiguos, manteniendo solo los N más recientes
+-
+-        Args:
+-            image_path: Ruta a la imagen original (para encontrar backups)
+-            keep_recent: Número de backups recientes a mantener
+-
+-        Returns:
+-            int: Número de backups eliminados
+-        """
+-        try:
+-            path_obj = Path(image_path)
+-            backup_pattern = f"{path_obj.stem}_original_*.{path_obj.suffix[1:]}"
+-            backups = list(path_obj.parent.glob(backup_pattern))
+-
+-            # Ordenar por fecha de creación (más reciente primero)
+-            backups.sort(key=lambda x: x.stat().st_ctime, reverse=True)
+-
+-            # Mantener solo los N más recientes
+-            to_delete = backups[keep_recent:]
+-
+-            for backup in to_delete:
+-                try:
+-                    os.remove(str(backup))
+-                    logger.info(f"🧹 Backup eliminado: {backup}")
+-                except Exception as e:
+-                    logger.error(f"❌ Error al eliminar backup {backup}: {str(e)}")
+-
+-            return len(to_delete)
+-        except Exception as e:
+-            logger.error(f"❌ Error en limpieza de backups: {str(e)}")
+-            return 0
+-
+-    @classmethod
+-    def get_image_info(cls, image_path):
+-        """
+-        Obtiene información sobre una imagen, incluyendo si tiene fondo removido
+-
+-        Args:
+-            image_path: Ruta a la imagen
+-
+-        Returns:
+-            dict: Información de la imagen
+-        """
+-        try:
+-            path_obj = Path(image_path)
+-
+-            # Verificar si existe
+-            if not path_obj.exists():
+-                return {'exists': False}
+-
+-            # Información básica
+-            info = {
+-                'exists': True,
+-                'path': str(image_path),
+-                'filename': path_obj.name,
+-                'extension': path_obj.suffix.lower(),
+-                'size_mb': os.path.getsize(image_path) / (1024 * 1024),
+-                'is_png': path_obj.suffix.lower() == '.png',
+-                'has_background_removed': False,
+-                'backups': []
+-            }
+-
+-            # Buscar backups
+-            backup_pattern = f"{path_obj.stem}_original_*{path_obj.suffix}"
+-            backups = list(path_obj.parent.glob(backup_pattern))
+-            info['backups'] = sorted([str(b) for b in backups], reverse=True)
+-
+-            # Determinar si tiene fondo removido
+-            # Criterio: es PNG y tiene al menos un backup
+-            if info['is_png'] and info['backups']:
+-                info['has_background_removed'] = True
+-
+-            # Información de Pillow si está disponible
+-            try:
+-                with Image.open(image_path) as img:
+-                    info['dimensions'] = img.size
+-                    info['mode'] = img.mode
+-                    info['has_alpha'] = img.mode in ('RGBA', 'LA', 'PA')
+-            except:
+-                pass
+-
+-            return info
+-
+-        except Exception as e:
+-            logger.error(f"❌ Error al obtener info de imagen: {str(e)}")
+-            return {'exists': False, 'error': str(e)}
+-
+-
+-# Instancia global del servicio
+-background_service = ImageBackgroundService()
+\ No newline at end of file
+Index: app/routes/inventory.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># ============================================\r\n# RUTAS DE INVENTARIO - LAPTOPS\r\n# ============================================\r\n# Actualizado con sistema híbrido de imágenes\r\n# Añadida funcionalidad de eliminación automática de fondo\r\n\r\nimport logging\r\nimport os\r\nimport json\r\nimport re\r\nfrom datetime import datetime, date\r\nfrom flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify\r\nfrom flask_login import login_required, current_user\r\nfrom sqlalchemy import or_\r\nfrom werkzeug.utils import secure_filename\r\n\r\nfrom app import db\r\nfrom app.models.laptop import (\r\n    Laptop, LaptopImage, Brand, LaptopModel, Processor, OperatingSystem,\r\n    Screen, GraphicsCard, Storage, Ram, Store, Location, Supplier\r\n)\r\nfrom app.forms.laptop_forms import LaptopForm, FilterForm\r\nfrom app.services.sku_service import SKUService\r\nfrom app.services.catalog_service import CatalogService\r\nfrom app.services.image_background_service import background_service\r\nfrom app.utils.decorators import admin_required\r\n\r\n# Configurar logging\r\nlogger = logging.getLogger(__name__)\r\n\r\n# Crear Blueprint\r\ninventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')\r\n\r\n# Configuración de imágenes\r\nUPLOAD_FOLDER = 'static/uploads/laptops'\r\nMAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB\r\nALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'gif'}\r\n\r\n# Configuración de eliminación de fondo\r\nREMOVE_BG_ENABLED = True  # Se puede obtener de la configuración de la app\r\nREMOVE_BG_DEFAULT_COVER = True  # Aplicar a portada por defecto\r\n\r\n\r\n# ===== FUNCIONES DE UTILIDAD (EXISTENTES) =====\r\n\r\ndef generate_slug(text):\r\n    \"\"\"\r\n    Genera un slug URL-friendly a partir de texto\r\n\r\n    Args:\r\n        text: Texto a convertir en slug\r\n\r\n    Returns:\r\n        str: Slug generado\r\n    \"\"\"\r\n    # Convertir a minusculas y reemplazar espacios\r\n    slug = text.lower().strip()\r\n    # Eliminar caracteres especiales, mantener solo alfanumericos y espacios\r\n    slug = re.sub(r'[^\\w\\s-]', '', slug)\r\n    # Reemplazar espacios y guiones multiples con un solo guion\r\n    slug = re.sub(r'[-\\s]+', '-', slug)\r\n    # Eliminar guiones al inicio y final\r\n    slug = slug.strip('-')\r\n    return slug\r\n\r\n\r\ndef ensure_unique_slug(base_slug, laptop_id=None):\r\n    \"\"\"\r\n    Asegura que el slug sea unico\r\n\r\n    Args:\r\n        base_slug: Slug base\r\n        laptop_id: ID de la laptop actual (para edicion)\r\n\r\n    Returns:\r\n        str: Slug unico\r\n    \"\"\"\r\n    slug = base_slug\r\n    counter = 1\r\n\r\n    while True:\r\n        query = Laptop.query.filter_by(slug=slug)\r\n        if laptop_id:\r\n            query = query.filter(Laptop.id != laptop_id)\r\n\r\n        if not query.first():\r\n            return slug\r\n\r\n        slug = f\"{base_slug}-{counter}\"\r\n        counter += 1\r\n\r\n\r\ndef process_connectivity_ports(form_data):\r\n    \"\"\"\r\n    Procesa los puertos de conectividad del formulario\r\n\r\n    Args:\r\n        form_data: Lista de puertos seleccionados\r\n\r\n    Returns:\r\n        dict: Diccionario con los puertos y sus cantidades\r\n    \"\"\"\r\n    if not form_data:\r\n        return {}\r\n\r\n    # Convertir lista a diccionario con conteo\r\n    ports = {}\r\n    for port in form_data:\r\n        ports[port] = ports.get(port, 0) + 1\r\n\r\n    return ports\r\n\r\n\r\ndef allowed_image_file(filename):\r\n    \"\"\"\r\n    Verifica si el archivo tiene una extensión de imagen permitida\r\n\r\n    Args:\r\n        filename: Nombre del archivo\r\n\r\n    Returns:\r\n        bool: True si es permitido, False si no\r\n    \"\"\"\r\n    if not filename:\r\n        return False\r\n    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS\r\n\r\n\r\n# ===== NUEVA FUNCIÓN: PROCESAMIENTO DE ELIMINACIÓN DE FONDO =====\r\n\r\ndef _process_background_removal(image_path, image_info, is_cover=False):\r\n    \"\"\"\r\n    Procesa la eliminación de fondo de una imagen\r\n\r\n    Args:\r\n        image_path: Ruta completa al archivo de imagen\r\n        image_info: Información de la imagen para logging\r\n        is_cover: Si es imagen de portada\r\n\r\n    Returns:\r\n        tuple: (success, message, processed_path)\r\n    \"\"\"\r\n    if not REMOVE_BG_ENABLED:\r\n        return False, \"Funcionalidad deshabilitada\", None\r\n\r\n    if not background_service.is_available():\r\n        return False, \"Servicio de eliminación de fondo no disponible\", None\r\n\r\n    try:\r\n        logger.info(f\"\uD83C\uDFA8 Procesando eliminación de fondo: {image_info}\")\r\n\r\n        # Verificar si la imagen ya ha sido procesada\r\n        image_info = background_service.get_image_info(image_path)\r\n        if image_info.get('has_background_removed', False):\r\n            return False, \"La imagen ya tiene fondo eliminado\", image_path\r\n\r\n        # Procesar eliminación de fondo\r\n        success, processed_path, backup_path, error = background_service.remove_background(\r\n            image_path, backup_original=True\r\n        )\r\n\r\n        if success:\r\n            logger.info(f\"✅ Fondo eliminado exitosamente: {image_info}\")\r\n            return True, \"Fondo eliminado exitosamente\", processed_path\r\n        else:\r\n            logger.warning(f\"⚠\uFE0F  Error al eliminar fondo: {error}\")\r\n            return False, f\"Error: {error}\", None\r\n\r\n    except Exception as e:\r\n        logger.error(f\"❌ Error inesperado en eliminación de fondo: {str(e)}\", exc_info=True)\r\n        return False, f\"Error inesperado: {str(e)}\", None\r\n\r\n\r\n# ===== FUNCIÓN MODIFICADA: PROCESAMIENTO DE IMÁGENES CON ELIMINACIÓN DE FONDO =====\r\n\r\ndef process_laptop_images(laptop, form, remove_bg_cover=None, remove_bg_all=False):\r\n    \"\"\"\r\n    Procesa las imágenes del formulario (híbrido: nuevas + existentes)\r\n    CON SOPORTE PARA ELIMINACIÓN DE FONDO\r\n\r\n    Esta función maneja:\r\n    1. Eliminación de imágenes marcadas (images_to_delete)\r\n    2. Actualización de imágenes existentes (alt text, orden)\r\n    3. Guardado de imágenes nuevas\r\n    4. Asignación de portada\r\n    5. Eliminación de fondo para imágenes nuevas (si está habilitado)\r\n\r\n    Args:\r\n        laptop: Objeto Laptop (debe tener un ID asignado)\r\n        form: Formulario LaptopForm validado\r\n        remove_bg_cover: Si eliminar fondo de la portada (None=usar configuración por defecto)\r\n        remove_bg_all: Si eliminar fondo de todas las imágenes\r\n\r\n    Returns:\r\n        tuple: (success_count, error_messages, bg_processed_count, bg_error_messages)\r\n    \"\"\"\r\n    logger.info(f\"\\n{'=' * 60}\")\r\n    logger.info(f\"\uD83D\uDCF8 PROCESANDO IMÁGENES PARA LAPTOP ID: {laptop.id}\")\r\n    logger.info(f\"   Eliminación de fondo: Portada={remove_bg_cover}, Todas={remove_bg_all}\")\r\n    logger.info(f\"{'=' * 60}\\n\")\r\n\r\n    success_count = 0\r\n    error_messages = []\r\n    bg_processed_count = 0\r\n    bg_error_messages = []\r\n\r\n    # Determinar si aplicar eliminación de fondo a portada\r\n    if remove_bg_cover is None:\r\n        remove_bg_cover = REMOVE_BG_DEFAULT_COVER\r\n\r\n    # ===== PASO 1: ELIMINAR IMÁGENES MARCADAS =====\r\n    images_to_delete_json = request.form.get('images_to_delete', '[]')\r\n\r\n    try:\r\n        images_to_delete = json.loads(images_to_delete_json)\r\n        logger.info(f\"\uD83D\uDDD1\uFE0F  Imágenes marcadas para eliminar: {len(images_to_delete)}\")\r\n\r\n        for image_id in images_to_delete:\r\n            # Convertir a int si viene como string\r\n            try:\r\n                image_id = int(image_id)\r\n            except (ValueError, TypeError):\r\n                logger.warning(f\"⚠\uFE0F  ID inválido: {image_id}\")\r\n                continue\r\n\r\n            image = LaptopImage.query.get(image_id)\r\n\r\n            if image and image.laptop_id == laptop.id:\r\n                # Eliminar archivo físico\r\n                image_full_path = os.path.join('app', 'static', image.image_path)\r\n                if os.path.exists(image_full_path):\r\n                    try:\r\n                        os.remove(image_full_path)\r\n                        logger.info(f\"✅ Archivo eliminado: {image.image_path}\")\r\n                    except Exception as e:\r\n                        logger.error(f\"⚠\uFE0F  Error al eliminar archivo {image.image_path}: {str(e)}\")\r\n\r\n                # Eliminar registro de BD\r\n                db.session.delete(image)\r\n                logger.info(f\"✅ Registro eliminado: imagen ID {image_id}\")\r\n            else:\r\n                logger.warning(f\"⚠\uFE0F  Imagen ID {image_id} no encontrada o no pertenece al laptop\")\r\n\r\n    except json.JSONDecodeError as e:\r\n        logger.error(f\"⚠\uFE0F  Error al decodificar images_to_delete: {str(e)}\")\r\n        images_to_delete = []\r\n\r\n    # Flush para aplicar eliminaciones antes de continuar\r\n    db.session.flush()\r\n\r\n    # ===== PASO 2: OBTENER IMÁGENES EXISTENTES (que NO fueron eliminadas) =====\r\n    existing_images = LaptopImage.query.filter_by(laptop_id=laptop.id).all()\r\n\r\n    logger.info(f\"\\n\uD83D\uDCCA Imágenes existentes en BD después de eliminaciones: {len(existing_images)}\")\r\n\r\n    # ===== PASO 3: PROCESAR SLOTS DEL FORMULARIO (1-8) =====\r\n    processed_images = []\r\n    new_images = []  # Para trackear imágenes nuevas para eliminación de fondo\r\n\r\n    for i in range(1, 9):  # Slots 1-8\r\n        try:\r\n            file = request.files.get(f'image_{i}')\r\n            alt_text = request.form.get(f'image_{i}_alt', '')\r\n            image_path = request.form.get(f'image_{i}', '')\r\n            is_cover_input = request.form.get(f'image_{i}_is_cover', 'false')\r\n            is_cover = is_cover_input.lower() == 'true'\r\n\r\n            # CASO A: Archivo nuevo subido\r\n            if file and file.filename and allowed_image_file(file.filename):\r\n                logger.info(f\"\\n➕ SLOT {i}: Nuevo archivo detectado\")\r\n                logger.info(f\"   Nombre: {file.filename}\")\r\n                logger.info(f\"   Es portada: {is_cover}\")\r\n\r\n                # Validar extensión del archivo\r\n                if not allowed_image_file(file.filename):\r\n                    error_msg = f'Imagen {i}: Formato no permitido. Use JPG, PNG, WebP o GIF.'\r\n                    error_messages.append(error_msg)\r\n                    logger.warning(f'Laptop {laptop.sku}: {error_msg}')\r\n                    continue\r\n\r\n                # Validar tamaño del archivo\r\n                file.seek(0, os.SEEK_END)\r\n                file_size = file.tell()\r\n                file.seek(0)  # Volver al inicio para guardar\r\n\r\n                if file_size > MAX_IMAGE_SIZE:\r\n                    error_msg = f'Imagen {i}: Archivo muy grande ({file_size / 1024 / 1024:.1f}MB). Máximo 5MB.'\r\n                    error_messages.append(error_msg)\r\n                    logger.warning(f'Laptop {laptop.sku}: {error_msg}')\r\n                    continue\r\n\r\n                # Generar nombre seguro para el archivo\r\n                filename = secure_filename(file.filename)\r\n                # Agregar timestamp para evitar colisiones\r\n                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')\r\n                extension = filename.rsplit('.', 1)[1].lower()\r\n                filename = f\"{laptop.sku}_{i}_{timestamp}.{extension}\"\r\n\r\n                # Crear directorio si no existe\r\n                upload_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))\r\n                os.makedirs(upload_folder, exist_ok=True)\r\n\r\n                # Guardar archivo\r\n                filepath = os.path.join(upload_folder, filename)\r\n                file.save(filepath)\r\n\r\n                # Ruta relativa para la base de datos\r\n                relative_path = f\"uploads/laptops/{laptop.id}/{filename}\"\r\n\r\n                # Crear registro de imagen\r\n                image = LaptopImage(\r\n                    laptop_id=laptop.id,\r\n                    image_path=relative_path,\r\n                    alt_text=alt_text or f\"{laptop.display_name} - imagen {i}\",\r\n                    is_cover=is_cover,\r\n                    ordering=i,\r\n                    position=i\r\n                )\r\n\r\n                db.session.add(image)\r\n                db.session.flush()  # Para obtener el ID\r\n                processed_images.append(image)\r\n                success_count += 1\r\n\r\n                # Marcar como nueva imagen para posible eliminación de fondo\r\n                new_images.append({\r\n                    'image': image,\r\n                    'filepath': filepath,\r\n                    'is_cover': is_cover,\r\n                    'slot': i\r\n                })\r\n\r\n                logger.info(f'   ✅ Guardado como: {filename}')\r\n                logger.info(f'   ✅ Registro creado: ID {image.id}')\r\n\r\n            # CASO B: Imagen existente (mantener y actualizar)\r\n            elif image_path:\r\n                logger.info(f\"\\n\uD83D\uDD04 SLOT {i}: Verificando imagen existente\")\r\n                logger.info(f\"   Path: {image_path[:50]}...\")\r\n                logger.info(f\"   Es portada: {is_cover}\")\r\n\r\n                # Buscar imagen existente por path\r\n                existing_img = None\r\n                for img in existing_images:\r\n                    if img.image_path == image_path or image_path.endswith(img.image_path):\r\n                        existing_img = img\r\n                        break\r\n\r\n                if existing_img:\r\n                    logger.info(f\"   ✅ Encontrada: ID {existing_img.id}\")\r\n\r\n                    # Actualizar metadata\r\n                    existing_img.alt_text = alt_text or existing_img.alt_text\r\n                    existing_img.position = i\r\n                    existing_img.ordering = i\r\n                    existing_img.is_cover = is_cover\r\n                    processed_images.append(existing_img)\r\n\r\n                    logger.info(\r\n                        f\"   ✅ Actualizada: posición {i}, alt: {alt_text[:30] if alt_text else 'sin cambios'}...\")\r\n                else:\r\n                    logger.warning(f\"   ⚠\uFE0F  No encontrada en BD\")\r\n\r\n        except Exception as e:\r\n            error_msg = f'Imagen {i}: Error al procesar - {str(e)}'\r\n            error_messages.append(error_msg)\r\n            logger.error(f'Laptop {laptop.sku}: {error_msg}', exc_info=True)\r\n\r\n    # ===== PASO 4: PROCESAR ELIMINACIÓN DE FONDO PARA IMÁGENES NUEVAS =====\r\n    if new_images and (remove_bg_cover or remove_bg_all):\r\n        logger.info(f\"\\n\uD83C\uDFA8 PROCESANDO ELIMINACIÓN DE FONDO\")\r\n        logger.info(f\"   Nuevas imágenes: {len(new_images)}\")\r\n        logger.info(f\"   Eliminar fondo portada: {remove_bg_cover}\")\r\n        logger.info(f\"   Eliminar fondo todas: {remove_bg_all}\")\r\n\r\n        for new_img in new_images:\r\n            image_obj = new_img['image']\r\n            filepath = new_img['filepath']\r\n            is_cover = new_img['is_cover']\r\n            slot = new_img['slot']\r\n\r\n            # Determinar si procesar esta imagen\r\n            should_process = False\r\n            if remove_bg_all:\r\n                should_process = True\r\n                reason = \"todas las imágenes\"\r\n            elif remove_bg_cover and is_cover:\r\n                should_process = True\r\n                reason = \"imagen de portada\"\r\n            else:\r\n                continue\r\n\r\n            if should_process:\r\n                logger.info(f\"\\n   \uD83C\uDFA8 Procesando imagen slot {slot} ({reason})\")\r\n                logger.info(f\"      Ruta: {filepath}\")\r\n\r\n                success, message, processed_path = _process_background_removal(\r\n                    filepath,\r\n                    f\"Imagen {slot} (ID: {image_obj.id})\",\r\n                    is_cover=is_cover\r\n                )\r\n\r\n                if success:\r\n                    bg_processed_count += 1\r\n                    logger.info(f\"      ✅ {message}\")\r\n\r\n                    # Actualizar ruta de la imagen si cambió (a PNG)\r\n                    if processed_path and processed_path != filepath:\r\n                        new_relative_path = f\"uploads/laptops/{laptop.id}/{os.path.basename(processed_path)}\"\r\n                        image_obj.image_path = new_relative_path\r\n                        logger.info(f\"      \uD83D\uDD04 Ruta actualizada a: {new_relative_path}\")\r\n                else:\r\n                    bg_error_messages.append(f\"Imagen {slot}: {message}\")\r\n                    logger.warning(f\"      ⚠\uFE0F  {message}\")\r\n\r\n    # ===== PASO 5: ASIGNAR PORTADA Y POSICIONES FINALES =====\r\n    logger.info(f\"\\n\uD83D\uDC51 Asignando portada y posiciones finales\")\r\n    logger.info(f\"   Total imágenes procesadas: {len(processed_images)}\")\r\n\r\n    # Ordenar imágenes por posición\r\n    processed_images.sort(key=lambda img: img.position)\r\n\r\n    # Asegurar que exactamente una imagen sea portada\r\n    cover_assigned = False\r\n    for idx, img in enumerate(processed_images):\r\n        # Si esta imagen está marcada como portada y aún no hay portada asignada\r\n        if img.is_cover and not cover_assigned:\r\n            cover_assigned = True\r\n        else:\r\n            # Solo la primera imagen marcada como portada será realmente portada\r\n            img.is_cover = False\r\n\r\n        # Actualizar ordenación\r\n        img.position = idx + 1\r\n        img.ordering = idx + 1\r\n\r\n    # Si no hay portada asignada, hacer la primera imagen la portada\r\n    if processed_images and not cover_assigned:\r\n        processed_images[0].is_cover = True\r\n        logger.info(f\"   \uD83D\uDC51 PORTADA automática: {processed_images[0].image_path}\")\r\n\r\n    # Loggear qué imagen es la portada\r\n    for img in processed_images:\r\n        if img.is_cover:\r\n            logger.info(f\"   \uD83D\uDC51 PORTADA: {img.image_path}\")\r\n\r\n    logger.info(f\"\\n{'=' * 60}\")\r\n    logger.info(f\"✅ PROCESO COMPLETADO\")\r\n    logger.info(f\"   Imágenes guardadas: {success_count}\")\r\n    logger.info(f\"   Fondos eliminados: {bg_processed_count}\")\r\n    logger.info(f\"{'=' * 60}\\n\")\r\n\r\n    return success_count, error_messages, bg_processed_count, bg_error_messages\r\n\r\n\r\n# ===== NUEVA RUTA: REPROCESAMIENTO MANUAL DE IMÁGENES =====\r\n\r\n@inventory_bp.route('/<int:id>/remove-background', methods=['POST'])\r\n@login_required\r\n@admin_required\r\ndef laptop_remove_background(id):\r\n    \"\"\"\r\n    Endpoint para reprocesamiento manual de eliminación de fondo\r\n\r\n    Parámetros:\r\n    - mode: 'cover' (solo portada) o 'all' (todas las imágenes)\r\n    - force: 'true' para reprocesar incluso si ya tiene fondo eliminado\r\n    \"\"\"\r\n    laptop = Laptop.query.get_or_404(id)\r\n\r\n    # Verificar permisos\r\n    if not current_user.is_admin:\r\n        flash('❌ Solo administradores pueden usar esta función', 'error')\r\n        return redirect(url_for('inventory.laptop_detail', id=id))\r\n\r\n    # Obtener parámetros\r\n    mode = request.form.get('mode', 'cover')\r\n    force = request.form.get('force', 'false').lower() == 'true'\r\n\r\n    # Validar modo\r\n    if mode not in ['cover', 'all']:\r\n        flash('❌ Modo inválido. Use \"cover\" o \"all\".', 'error')\r\n        return redirect(url_for('inventory.laptop_detail', id=id))\r\n\r\n    # Verificar si el servicio está disponible\r\n    if not background_service.is_available():\r\n        flash('❌ Servicio de eliminación de fondo no disponible. Instale rembg.', 'error')\r\n        return redirect(url_for('inventory.laptop_detail', id=id))\r\n\r\n    try:\r\n        # Obtener imágenes\r\n        images = laptop.images\r\n        if not images:\r\n            flash('ℹ\uFE0F  Esta laptop no tiene imágenes', 'info')\r\n            return redirect(url_for('inventory.laptop_detail', id=id))\r\n\r\n        # Filtrar imágenes según el modo\r\n        if mode == 'cover':\r\n            target_images = [img for img in images if img.is_cover]\r\n            if not target_images:\r\n                target_images = [images[0]]  # Usar primera imagen si no hay portada explícita\r\n        else:  # 'all'\r\n            target_images = list(images)\r\n\r\n        # Procesar imágenes\r\n        results = {\r\n            'total': len(target_images),\r\n            'success': 0,\r\n            'failed': 0,\r\n            'details': []\r\n        }\r\n\r\n        for image in target_images:\r\n            image_path = os.path.join('app', 'static', image.image_path)\r\n\r\n            # Verificar si existe el archivo\r\n            if not os.path.exists(image_path):\r\n                results['failed'] += 1\r\n                results['details'].append({\r\n                    'image_id': image.id,\r\n                    'success': False,\r\n                    'message': 'Archivo no encontrado'\r\n                })\r\n                continue\r\n\r\n            # Verificar si ya tiene fondo eliminado (a menos que force=True)\r\n            image_info = background_service.get_image_info(image_path)\r\n            if not force and image_info.get('has_background_removed', False):\r\n                results['details'].append({\r\n                    'image_id': image.id,\r\n                    'success': False,\r\n                    'message': 'Ya tiene fondo eliminado (use force=true para reprocesar)',\r\n                    'skipped': True\r\n                })\r\n                continue\r\n\r\n            # Procesar eliminación de fondo\r\n            success, message, processed_path = _process_background_removal(\r\n                image_path,\r\n                f\"Imagen ID {image.id}\",\r\n                is_cover=image.is_cover\r\n            )\r\n\r\n            if success:\r\n                results['success'] += 1\r\n                # Actualizar ruta si cambió a PNG\r\n                if processed_path and processed_path != image_path:\r\n                    new_relative_path = f\"uploads/laptops/{laptop.id}/{os.path.basename(processed_path)}\"\r\n                    image.image_path = new_relative_path\r\n            else:\r\n                results['failed'] += 1\r\n\r\n            results['details'].append({\r\n                'image_id': image.id,\r\n                'success': success,\r\n                'message': message\r\n            })\r\n\r\n        # Guardar cambios en la base de datos\r\n        db.session.commit()\r\n\r\n        # Preparar mensaje para el usuario\r\n        if results['success'] > 0:\r\n            flash(f'✅ Fondo eliminado de {results[\"success\"]} imagen(es) exitosamente', 'success')\r\n        if results['failed'] > 0:\r\n            flash(f'⚠\uFE0F  {results[\"failed\"]} imagen(es) fallaron al procesar', 'warning')\r\n\r\n        # Loggear resultados\r\n        logger.info(f\"\uD83C\uDFA8 Reprocesamiento manual completado para laptop {laptop.sku}\")\r\n        logger.info(f\"   Modo: {mode}, Force: {force}\")\r\n        logger.info(f\"   Total: {results['total']}, Éxitos: {results['success']}, Fallos: {results['failed']}\")\r\n\r\n    except Exception as e:\r\n        db.session.rollback()\r\n        logger.error(f'❌ Error en reprocesamiento manual: {str(e)}', exc_info=True)\r\n        flash(f'❌ Error en reprocesamiento: {str(e)}', 'error')\r\n\r\n    return redirect(url_for('inventory.laptop_detail', id=id))\r\n\r\n\r\n# ===== RUTA PRINCIPAL: LISTADO DE LAPTOPS =====\r\n\r\n@inventory_bp.route('/')\r\n@login_required\r\ndef laptops_list():\r\n    \"\"\"\r\n    Muestra el listado principal de laptops con filtros y busqueda\r\n    \"\"\"\r\n    # Obtener parametros de filtros\r\n    store_filter = request.args.get('store', type=int, default=0)\r\n    brand_filter = request.args.get('brand', type=int, default=0)\r\n    category_filter = request.args.get('category', '')\r\n    processor_filter = request.args.get('processor', type=int, default=0)\r\n    gpu_filter = request.args.get('gpu', type=int, default=0)\r\n    screen_filter = request.args.get('screen', type=int, default=0)\r\n    condition_filter = request.args.get('condition', '')\r\n    supplier_filter = request.args.get('supplier', type=int, default=0)\r\n    is_published_filter = request.args.get('is_published', '')\r\n    is_featured_filter = request.args.get('is_featured', '')\r\n    has_npu_filter = request.args.get('has_npu', '')\r\n    min_price = request.args.get('min_price', type=float, default=0)\r\n    max_price = request.args.get('max_price', type=float, default=0)\r\n    search_query = request.args.get('q', '').strip()\r\n\r\n    # Paginacion\r\n    page = request.args.get('page', 1, type=int)\r\n    per_page = request.args.get('per_page', 20, type=int)\r\n\r\n    # Query base\r\n    query = Laptop.query\r\n\r\n    # Busqueda por texto\r\n    if search_query:\r\n        search_pattern = f'%{search_query}%'\r\n        query = query.filter(\r\n            or_(\r\n                Laptop.sku.ilike(search_pattern),\r\n                Laptop.display_name.ilike(search_pattern),\r\n                Laptop.slug.ilike(search_pattern),\r\n                Laptop.short_description.ilike(search_pattern)\r\n            )\r\n        )\r\n\r\n    # Aplicar filtros\r\n    if store_filter and store_filter > 0:\r\n        query = query.filter(Laptop.store_id == store_filter)\r\n\r\n    if brand_filter and brand_filter > 0:\r\n        query = query.filter(Laptop.brand_id == brand_filter)\r\n\r\n    if category_filter:\r\n        query = query.filter(Laptop.category == category_filter)\r\n\r\n    if processor_filter and processor_filter > 0:\r\n        query = query.filter(Laptop.processor_id == processor_filter)\r\n\r\n    if gpu_filter and gpu_filter > 0:\r\n        query = query.filter(Laptop.graphics_card_id == gpu_filter)\r\n\r\n    if screen_filter and screen_filter > 0:\r\n        query = query.filter(Laptop.screen_id == screen_filter)\r\n\r\n    if condition_filter:\r\n        query = query.filter(Laptop.condition == condition_filter)\r\n\r\n    if supplier_filter and supplier_filter > 0:\r\n        query = query.filter(Laptop.supplier_id == supplier_filter)\r\n\r\n    if is_published_filter:\r\n        query = query.filter(Laptop.is_published == (is_published_filter == '1'))\r\n\r\n    if is_featured_filter:\r\n        query = query.filter(Laptop.is_featured == (is_featured_filter == '1'))\r\n\r\n    if has_npu_filter:\r\n        query = query.filter(Laptop.npu == (has_npu_filter == '1'))\r\n\r\n    if min_price > 0:\r\n        query = query.filter(Laptop.sale_price >= min_price)\r\n\r\n    if max_price > 0:\r\n        query = query.filter(Laptop.sale_price <= max_price)\r\n\r\n    # Ordenar por fecha de ingreso (mas recientes primero)\r\n    query = query.order_by(Laptop.entry_date.desc())\r\n\r\n    # Paginar\r\n    pagination = query.paginate(page=page, per_page=per_page, error_out=False)\r\n    laptops = pagination.items\r\n\r\n    # Calcular estadisticas GLOBALES (todas las laptops, no solo filtradas)\r\n    all_laptops = Laptop.query.all()\r\n\r\n    # VALOR TOTAL = suma del precio de venta * cantidad de TODAS las laptops\r\n    total_inventory_value = sum(\r\n        float(laptop.sale_price * laptop.quantity)\r\n        for laptop in all_laptops\r\n        if laptop.sale_price and laptop.quantity\r\n    )\r\n\r\n    # Contar laptops con stock bajo\r\n    low_stock_count = len([l for l in all_laptops if l.is_low_stock])\r\n\r\n    # Contar publicadas y destacadas\r\n    published_count = len([l for l in all_laptops if l.is_published])\r\n    featured_count = len([l for l in all_laptops if l.is_featured])\r\n\r\n    stats = {\r\n        'total': len(all_laptops),\r\n        'total_value': total_inventory_value,\r\n        'low_stock': low_stock_count,\r\n        'published': published_count,\r\n        'featured': featured_count\r\n    }\r\n\r\n    # Formularios\r\n    filter_form = FilterForm()\r\n\r\n    # Obtener rango de precios de la base de datos\r\n    price_range = db.session.query(\r\n        db.func.min(Laptop.sale_price),\r\n        db.func.max(Laptop.sale_price)\r\n    ).first()\r\n\r\n    min_db_price = float(price_range[0]) if price_range[0] else 0\r\n    max_db_price = float(price_range[1]) if price_range[1] else 10000\r\n\r\n    return render_template(\r\n        'inventory/laptops_list.html',\r\n        laptops=laptops,\r\n        pagination=pagination,\r\n        stats=stats,\r\n        filter_form=filter_form,\r\n        min_db_price=min_db_price,\r\n        max_db_price=max_db_price,\r\n        search_query=search_query\r\n    )\r\n\r\n\r\n# ===== AGREGAR NUEVA LAPTOP (MODIFICADA) =====\r\n\r\n@inventory_bp.route('/add', methods=['GET', 'POST'])\r\n@login_required\r\n@admin_required\r\ndef laptop_add():\r\n    \"\"\"\r\n    Muestra el formulario y procesa la creacion de una nueva laptop\r\n    CON SOPORTE PARA ELIMINACIÓN DE FONDO\r\n    \"\"\"\r\n    form = LaptopForm()\r\n\r\n    if form.validate_on_submit():\r\n        try:\r\n            # Obtener opciones de eliminación de fondo del formulario\r\n            remove_bg_cover = request.form.get('remove_bg_cover', 'true').lower() == 'true'\r\n            remove_bg_all = request.form.get('remove_bg_all', 'false').lower() == 'true'\r\n\r\n            # Loggear opciones seleccionadas\r\n            logger.info(f\"\uD83C\uDFA8 Opciones de eliminación de fondo - Portada: {remove_bg_cover}, Todas: {remove_bg_all}\")\r\n\r\n            # Procesar catalogos dinamicos (crear si son strings)\r\n            catalog_data = CatalogService.process_laptop_form_data({\r\n                'brand_id': form.brand_id.data,\r\n                'model_id': form.model_id.data,\r\n                'processor_id': form.processor_id.data,\r\n                'os_id': form.os_id.data,\r\n                'screen_id': form.screen_id.data,\r\n                'graphics_card_id': form.graphics_card_id.data,\r\n                'storage_id': form.storage_id.data,\r\n                'ram_id': form.ram_id.data,\r\n                'store_id': form.store_id.data,\r\n                'location_id': form.location_id.data,\r\n                'supplier_id': form.supplier_id.data\r\n            })\r\n\r\n            # Generar SKU automaticamente\r\n            sku = SKUService.generate_laptop_sku()\r\n\r\n            # Generar slug\r\n            base_slug = generate_slug(form.display_name.data)\r\n            slug = form.slug.data if form.slug.data else ensure_unique_slug(base_slug)\r\n\r\n            # Procesar puertos de conectividad\r\n            connectivity_ports = process_connectivity_ports(form.connectivity_ports.data)\r\n\r\n            # Crear nueva laptop\r\n            laptop = Laptop(\r\n                # Identificadores\r\n                sku=sku,\r\n                slug=slug,\r\n\r\n                # Marketing y SEO\r\n                display_name=form.display_name.data,\r\n                short_description=form.short_description.data,\r\n                long_description_html=form.long_description_html.data,\r\n                is_published=form.is_published.data,\r\n                is_featured=form.is_featured.data,\r\n                seo_title=form.seo_title.data,\r\n                seo_description=form.seo_description.data,\r\n\r\n                # Relaciones\r\n                brand_id=catalog_data['brand_id'],\r\n                model_id=catalog_data['model_id'],\r\n                processor_id=catalog_data['processor_id'],\r\n                os_id=catalog_data['os_id'],\r\n                screen_id=catalog_data['screen_id'],\r\n                graphics_card_id=catalog_data['graphics_card_id'],\r\n                storage_id=catalog_data['storage_id'],\r\n                ram_id=catalog_data['ram_id'],\r\n                store_id=catalog_data['store_id'],\r\n                location_id=catalog_data.get('location_id'),\r\n                supplier_id=catalog_data.get('supplier_id'),\r\n\r\n                # Detalles tecnicos\r\n                npu=form.npu.data,\r\n                storage_upgradeable=form.storage_upgradeable.data,\r\n                ram_upgradeable=form.ram_upgradeable.data,\r\n                keyboard_layout=form.keyboard_layout.data,\r\n                connectivity_ports=connectivity_ports,\r\n\r\n                # Estado y categoria\r\n                category=form.category.data,\r\n                condition=form.condition.data,\r\n\r\n                # Financieros\r\n                purchase_cost=form.purchase_cost.data,\r\n                sale_price=form.sale_price.data,\r\n                discount_price=form.discount_price.data if form.discount_price.data else None,\r\n                tax_percent=form.tax_percent.data if form.tax_percent.data else 0,\r\n\r\n                # Inventario\r\n                quantity=form.quantity.data,\r\n                reserved_quantity=form.reserved_quantity.data if form.reserved_quantity.data else 0,\r\n                min_alert=form.min_alert.data,\r\n\r\n                # Timestamps\r\n                entry_date=date.today(),\r\n                sale_date=None,\r\n                internal_notes=form.internal_notes.data,\r\n\r\n                # Auditoria\r\n                created_by_id=current_user.id\r\n            )\r\n\r\n            # Guardar en base de datos\r\n            db.session.add(laptop)\r\n            db.session.flush()  # Para obtener el ID\r\n\r\n            # Procesar imágenes CON eliminación de fondo\r\n            img_success, img_errors, bg_processed, bg_errors = process_laptop_images(\r\n                laptop, form, remove_bg_cover=remove_bg_cover, remove_bg_all=remove_bg_all\r\n            )\r\n            db.session.commit()\r\n\r\n            # Mensaje de éxito\r\n            if img_success > 0:\r\n                flash(f'✅ Laptop {sku} agregada con {img_success} imagen(es)', 'success')\r\n            else:\r\n                flash(f'✅ Laptop {sku} agregada exitosamente', 'success')\r\n\r\n            # Mostrar resultados de eliminación de fondo\r\n            if bg_processed > 0:\r\n                flash(f'\uD83C\uDFA8 Fondo eliminado de {bg_processed} imagen(es)', 'success')\r\n\r\n            # Mostrar errores de imágenes si los hay\r\n            for error in img_errors:\r\n                flash(f'⚠\uFE0F {error}', 'warning')\r\n\r\n            # Mostrar errores de eliminación de fondo si los hay\r\n            for error in bg_errors:\r\n                flash(f'\uD83C\uDFA8 {error}', 'warning')\r\n\r\n            return redirect(url_for('inventory.laptop_detail', id=laptop.id))\r\n\r\n        except Exception as e:\r\n            db.session.rollback()\r\n            logger.error(f'Error al agregar laptop: {str(e)}', exc_info=True)\r\n            flash(f'❌ Error al agregar laptop: {str(e)}', 'error')\r\n\r\n    # Si hay errores en el formulario\r\n    if form.errors:\r\n        for field, errors in form.errors.items():\r\n            for error in errors:\r\n                flash(f'Error en {field}: {error}', 'error')\r\n\r\n    # Pasar información sobre disponibilidad de eliminación de fondo al template\r\n    remove_bg_available = background_service.is_available()\r\n    return render_template('inventory/laptop_form.html',\r\n                           form=form,\r\n                           mode='add',\r\n                           remove_bg_available=remove_bg_available)\r\n\r\n\r\n# ===== VER DETALLE DE LAPTOP (MODIFICADA) =====\r\n\r\n@inventory_bp.route('/<int:id>')\r\n@login_required\r\ndef laptop_detail(id):\r\n    \"\"\"\r\n    Muestra el detalle completo de una laptop\r\n    CON INFORMACIÓN SOBRE ELIMINACIÓN DE FONDO\r\n    \"\"\"\r\n    laptop = Laptop.query.get_or_404(id)\r\n\r\n    # Obtener laptops similares (misma categoria y marca)\r\n    similar_laptops = Laptop.query.filter(\r\n        Laptop.category == laptop.category,\r\n        Laptop.brand_id == laptop.brand_id,\r\n        Laptop.id != laptop.id,\r\n        Laptop.is_published == True\r\n    ).limit(5).all()\r\n\r\n    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()\r\n    # ¡laptop.images es una lista, no un objeto Query!\r\n    images = sorted(laptop.images, key=lambda img: img.ordering)\r\n\r\n    # Imagen de portada\r\n    cover_image = next((img for img in laptop.images if img.is_cover), None)\r\n\r\n    # Obtener información detallada de cada imagen (para mostrar estado de fondo eliminado)\r\n    images_info = []\r\n    for img in images:\r\n        img_path = os.path.join('app', 'static', img.image_path)\r\n        info = background_service.get_image_info(img_path) if background_service.is_available() else {}\r\n        images_info.append({\r\n            'image': img,\r\n            'info': info,\r\n            'has_background_removed': info.get('has_background_removed', False),\r\n            'backups': info.get('backups', [])\r\n        })\r\n\r\n    # Verificar si el servicio de eliminación de fondo está disponible\r\n    remove_bg_available = background_service.is_available()\r\n\r\n    return render_template(\r\n        'inventory/laptop_detail.html',\r\n        laptop=laptop,\r\n        similar_laptops=similar_laptops,\r\n        images=images,\r\n        cover_image=cover_image,\r\n        images_info=images_info,\r\n        remove_bg_available=remove_bg_available,\r\n        background_service=background_service\r\n    )\r\n\r\n\r\n# ===== VER LAPTOP POR SLUG (para URLs publicas) =====\r\n\r\n@inventory_bp.route('/p/<slug>')\r\ndef laptop_by_slug(slug):\r\n    \"\"\"\r\n    Muestra el detalle de una laptop por su slug (URL publica)\r\n    \"\"\"\r\n    laptop = Laptop.query.filter_by(slug=slug, is_published=True).first_or_404()\r\n\r\n    # Obtener laptops similares\r\n    similar_laptops = Laptop.query.filter(\r\n        Laptop.category == laptop.category,\r\n        Laptop.brand_id == laptop.brand_id,\r\n        Laptop.id != laptop.id,\r\n        Laptop.is_published == True\r\n    ).limit(5).all()\r\n\r\n    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()\r\n    images = sorted(laptop.images, key=lambda img: img.ordering)\r\n    cover_image = next((img for img in laptop.images if img.is_cover), None)\r\n\r\n    return render_template(\r\n        'inventory/laptop_public.html',\r\n        laptop=laptop,\r\n        similar_laptops=similar_laptops,\r\n        images=images,\r\n        cover_image=cover_image\r\n    )\r\n\r\n\r\n# ===== EDITAR LAPTOP (MODIFICADA) =====\r\n\r\n@inventory_bp.route('/<int:id>/edit', methods=['GET', 'POST'])\r\n@login_required\r\n@admin_required\r\ndef laptop_edit(id):\r\n    \"\"\"\r\n    Edita una laptop existente\r\n    CON SOPORTE PARA ELIMINACIÓN DE FONDO\r\n    \"\"\"\r\n    laptop = Laptop.query.get_or_404(id)\r\n    form = LaptopForm(obj=laptop)\r\n\r\n    # Pre-poblar connectivity_ports si existe\r\n    if request.method == 'GET' and laptop.connectivity_ports:\r\n        form.connectivity_ports.data = list(laptop.connectivity_ports.keys())\r\n\r\n    if form.validate_on_submit():\r\n        try:\r\n            # Obtener opciones de eliminación de fondo del formulario\r\n            remove_bg_cover = request.form.get('remove_bg_cover', 'true').lower() == 'true'\r\n            remove_bg_all = request.form.get('remove_bg_all', 'false').lower() == 'true'\r\n\r\n            # Loggear opciones seleccionadas\r\n            logger.info(f\"\uD83C\uDFA8 Opciones de eliminación de fondo - Portada: {remove_bg_cover}, Todas: {remove_bg_all}\")\r\n\r\n            # Procesar catalogos dinamicos\r\n            catalog_data = CatalogService.process_laptop_form_data({\r\n                'brand_id': form.brand_id.data,\r\n                'model_id': form.model_id.data,\r\n                'processor_id': form.processor_id.data,\r\n                'os_id': form.os_id.data,\r\n                'screen_id': form.screen_id.data,\r\n                'graphics_card_id': form.graphics_card_id.data,\r\n                'storage_id': form.storage_id.data,\r\n                'ram_id': form.ram_id.data,\r\n                'store_id': form.store_id.data,\r\n                'location_id': form.location_id.data,\r\n                'supplier_id': form.supplier_id.data\r\n            })\r\n\r\n            # Actualizar slug si cambio el nombre\r\n            if form.slug.data:\r\n                laptop.slug = ensure_unique_slug(form.slug.data, laptop.id)\r\n            elif form.display_name.data != laptop.display_name:\r\n                base_slug = generate_slug(form.display_name.data)\r\n                laptop.slug = ensure_unique_slug(base_slug, laptop.id)\r\n\r\n            # Procesar puertos de conectividad\r\n            connectivity_ports = process_connectivity_ports(form.connectivity_ports.data)\r\n\r\n            # Actualizar campos\r\n            # Marketing y SEO\r\n            laptop.display_name = form.display_name.data\r\n            laptop.short_description = form.short_description.data\r\n            laptop.long_description_html = form.long_description_html.data\r\n            laptop.is_published = form.is_published.data\r\n            laptop.is_featured = form.is_featured.data\r\n            laptop.seo_title = form.seo_title.data\r\n            laptop.seo_description = form.seo_description.data\r\n\r\n            # Relaciones\r\n            laptop.brand_id = catalog_data['brand_id']\r\n            laptop.model_id = catalog_data['model_id']\r\n            laptop.processor_id = catalog_data['processor_id']\r\n            laptop.os_id = catalog_data['os_id']\r\n            laptop.screen_id = catalog_data['screen_id']\r\n            laptop.graphics_card_id = catalog_data['graphics_card_id']\r\n            laptop.storage_id = catalog_data['storage_id']\r\n            laptop.ram_id = catalog_data['ram_id']\r\n            laptop.store_id = catalog_data['store_id']\r\n            laptop.location_id = catalog_data.get('location_id')\r\n            laptop.supplier_id = catalog_data.get('supplier_id')\r\n\r\n            # Detalles tecnicos\r\n            laptop.npu = form.npu.data\r\n            laptop.storage_upgradeable = form.storage_upgradeable.data\r\n            laptop.ram_upgradeable = form.ram_upgradeable.data\r\n            laptop.keyboard_layout = form.keyboard_layout.data\r\n            laptop.connectivity_ports = connectivity_ports\r\n\r\n            # Estado y categoria\r\n            laptop.category = form.category.data\r\n            laptop.condition = form.condition.data\r\n\r\n            # Financieros\r\n            laptop.purchase_cost = form.purchase_cost.data\r\n            laptop.sale_price = form.sale_price.data\r\n            laptop.discount_price = form.discount_price.data if form.discount_price.data else None\r\n            laptop.tax_percent = form.tax_percent.data if form.tax_percent.data else 0\r\n\r\n            # Inventario\r\n            laptop.quantity = form.quantity.data\r\n            laptop.reserved_quantity = form.reserved_quantity.data if form.reserved_quantity.data else 0\r\n            laptop.min_alert = form.min_alert.data\r\n\r\n            # Notas\r\n            laptop.internal_notes = form.internal_notes.data\r\n\r\n            laptop.updated_at = datetime.utcnow()\r\n\r\n            # Procesar imágenes CON eliminación de fondo\r\n            img_success, img_errors, bg_processed, bg_errors = process_laptop_images(\r\n                laptop, form, remove_bg_cover=remove_bg_cover, remove_bg_all=remove_bg_all\r\n            )\r\n            db.session.commit()\r\n\r\n            # Mensaje de éxito\r\n            if img_success > 0:\r\n                flash(f'✅ Laptop {laptop.sku} actualizada con {img_success} nueva(s) imagen(es)', 'success')\r\n            else:\r\n                flash(f'✅ Laptop {laptop.sku} actualizada exitosamente', 'success')\r\n\r\n            # Mostrar resultados de eliminación de fondo\r\n            if bg_processed > 0:\r\n                flash(f'\uD83C\uDFA8 Fondo eliminado de {bg_processed} imagen(es)', 'success')\r\n\r\n            # Mostrar errores de imágenes si los hay\r\n            for error in img_errors:\r\n                flash(f'⚠\uFE0F {error}', 'warning')\r\n\r\n            # Mostrar errores de eliminación de fondo si los hay\r\n            for error in bg_errors:\r\n                flash(f'\uD83C\uDFA8 {error}', 'warning')\r\n\r\n            return redirect(url_for('inventory.laptop_detail', id=laptop.id))\r\n\r\n        except Exception as e:\r\n            db.session.rollback()\r\n            logger.error(f'Error al actualizar laptop {laptop.sku}: {str(e)}', exc_info=True)\r\n            flash(f'❌ Error al actualizar laptop: {str(e)}', 'error')\r\n\r\n    # Si hay errores en el formulario\r\n    if form.errors:\r\n        for field, errors in form.errors.items():\r\n            for error in errors:\r\n                flash(f'Error en {field}: {error}', 'error')\r\n\r\n    # CORRECCIÓN: Obtener imágenes ordenadas usando sorted() en lugar de order_by()\r\n    images_list = sorted(laptop.images, key=lambda img: img.ordering)\r\n    images_by_position = {img.position: img for img in images_list}\r\n\r\n    # Obtener información sobre disponibilidad de eliminación de fondo\r\n    remove_bg_available = background_service.is_available()\r\n\r\n    return render_template('inventory/laptop_form.html',\r\n                           form=form,\r\n                           mode='edit',\r\n                           laptop=laptop,\r\n                           images_by_position=images_by_position,\r\n                           remove_bg_available=remove_bg_available)\r\n\r\n\r\n# ===== ELIMINAR LAPTOP =====\r\n\r\n@inventory_bp.route('/<int:id>/delete', methods=['POST'])\r\n@login_required\r\n@admin_required\r\ndef laptop_delete(id):\r\n    \"\"\"\r\n    Elimina una laptop del inventario\r\n    \"\"\"\r\n    laptop = Laptop.query.get_or_404(id)\r\n\r\n    try:\r\n        # Obtener y eliminar imágenes asociadas\r\n        images = laptop.images.all()\r\n\r\n        # Eliminar archivos de imágenes del sistema de archivos\r\n        for image in images:\r\n            try:\r\n                filepath = os.path.join('app', 'static', image.image_path)\r\n                if os.path.exists(filepath):\r\n                    os.remove(filepath)\r\n                    logger.info(f'Laptop {laptop.sku}: Imagen eliminada {image.image_path}')\r\n            except Exception as e:\r\n                logger.error(f'Error al eliminar imagen {image.image_path}: {str(e)}')\r\n\r\n        # Eliminar directorio de imágenes si existe\r\n        image_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))\r\n        if os.path.exists(image_folder):\r\n            try:\r\n                # Eliminar todos los archivos en el directorio\r\n                for filename in os.listdir(image_folder):\r\n                    file_path = os.path.join(image_folder, filename)\r\n                    try:\r\n                        if os.path.isfile(file_path):\r\n                            os.unlink(file_path)\r\n                    except Exception as e:\r\n                        logger.error(f'Error al eliminar {file_path}: {str(e)}')\r\n\r\n                # Eliminar el directorio vacío\r\n                os.rmdir(image_folder)\r\n                logger.info(f'Laptop {laptop.sku}: Directorio de imágenes eliminado')\r\n            except Exception as e:\r\n                logger.error(f'Error al eliminar directorio de imágenes: {str(e)}')\r\n\r\n        # Eliminar la laptop de la base de datos\r\n        db.session.delete(laptop)\r\n        db.session.commit()\r\n\r\n        flash(f'✅ Laptop {laptop.sku} eliminada exitosamente', 'success')\r\n        return redirect(url_for('inventory.laptops_list'))\r\n\r\n    except Exception as e:\r\n        db.session.rollback()\r\n        logger.error(f'Error al eliminar laptop {laptop.sku}: {str(e)}', exc_info=True)\r\n        flash(f'❌ Error al eliminar laptop: {str(e)}', 'error')\r\n        return redirect(url_for('inventory.laptop_detail', id=id))\r\n\r\n\r\n# ===== DUPLICAR LAPTOP =====\r\n\r\n@inventory_bp.route('/<int:id>/duplicate', methods=['POST'])\r\n@login_required\r\ndef laptop_duplicate(id):\r\n    original = Laptop.query.get_or_404(id)\r\n\r\n    duplicate = Laptop(\r\n        sku=f\"{original.sku}-COPY\",\r\n        display_name=f\"{original.display_name} (Copia)\",\r\n        short_description=original.short_description,\r\n        long_description_html=original.long_description_html,\r\n        category=original.category,\r\n        brand_id=original.brand_id,\r\n        model_id=original.model_id,\r\n        processor_id=original.processor_id,\r\n        ram_id=original.ram_id,\r\n        storage_id=original.storage_id,\r\n        sale_price=original.sale_price,\r\n        is_published=False,\r\n        created_by_id=current_user.id\r\n    )\r\n\r\n    db.session.add(duplicate)\r\n    db.session.commit()\r\n\r\n    flash('Laptop duplicada correctamente', 'success')\r\n    return redirect(url_for('inventory.laptop_edit', id=duplicate.id))
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/routes/inventory.py b/app/routes/inventory.py
+--- a/app/routes/inventory.py	(revision 63867b0451060cd65b5c83f0f1d5b85e8607c85a)
++++ b/app/routes/inventory.py	(date 1768644334774)
+@@ -2,18 +2,10 @@
+ # RUTAS DE INVENTARIO - LAPTOPS
+ # ============================================
+ # Actualizado con sistema híbrido de imágenes
+-# Añadida funcionalidad de eliminación automática de fondo
+ 
+ import logging
+-import os
+-import json
+-import re
+-from datetime import datetime, date
+ from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+ from flask_login import login_required, current_user
+-from sqlalchemy import or_
+-from werkzeug.utils import secure_filename
+-
+ from app import db
+ from app.models.laptop import (
+     Laptop, LaptopImage, Brand, LaptopModel, Processor, OperatingSystem,
+@@ -22,8 +14,13 @@
+ from app.forms.laptop_forms import LaptopForm, FilterForm
+ from app.services.sku_service import SKUService
+ from app.services.catalog_service import CatalogService
+-from app.services.image_background_service import background_service
+ from app.utils.decorators import admin_required
++from datetime import datetime, date
++from sqlalchemy import or_
++import re
++import os
++import json
++from werkzeug.utils import secure_filename
+ 
+ # Configurar logging
+ logger = logging.getLogger(__name__)
+@@ -36,12 +33,8 @@
+ MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
+ ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
+ 
+-# Configuración de eliminación de fondo
+-REMOVE_BG_ENABLED = True  # Se puede obtener de la configuración de la app
+-REMOVE_BG_DEFAULT_COVER = True  # Aplicar a portada por defecto
+ 
+-
+-# ===== FUNCIONES DE UTILIDAD (EXISTENTES) =====
++# ===== UTILIDADES =====
+ 
+ def generate_slug(text):
+     """
+@@ -126,87 +119,30 @@
+     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+ 
+ 
+-# ===== NUEVA FUNCIÓN: PROCESAMIENTO DE ELIMINACIÓN DE FONDO =====
+-
+-def _process_background_removal(image_path, image_info, is_cover=False):
+-    """
+-    Procesa la eliminación de fondo de una imagen
+-
+-    Args:
+-        image_path: Ruta completa al archivo de imagen
+-        image_info: Información de la imagen para logging
+-        is_cover: Si es imagen de portada
+-
+-    Returns:
+-        tuple: (success, message, processed_path)
+-    """
+-    if not REMOVE_BG_ENABLED:
+-        return False, "Funcionalidad deshabilitada", None
+-
+-    if not background_service.is_available():
+-        return False, "Servicio de eliminación de fondo no disponible", None
+-
+-    try:
+-        logger.info(f"🎨 Procesando eliminación de fondo: {image_info}")
+-
+-        # Verificar si la imagen ya ha sido procesada
+-        image_info = background_service.get_image_info(image_path)
+-        if image_info.get('has_background_removed', False):
+-            return False, "La imagen ya tiene fondo eliminado", image_path
+-
+-        # Procesar eliminación de fondo
+-        success, processed_path, backup_path, error = background_service.remove_background(
+-            image_path, backup_original=True
+-        )
+-
+-        if success:
+-            logger.info(f"✅ Fondo eliminado exitosamente: {image_info}")
+-            return True, "Fondo eliminado exitosamente", processed_path
+-        else:
+-            logger.warning(f"⚠️  Error al eliminar fondo: {error}")
+-            return False, f"Error: {error}", None
+-
+-    except Exception as e:
+-        logger.error(f"❌ Error inesperado en eliminación de fondo: {str(e)}", exc_info=True)
+-        return False, f"Error inesperado: {str(e)}", None
+-
+-
+-# ===== FUNCIÓN MODIFICADA: PROCESAMIENTO DE IMÁGENES CON ELIMINACIÓN DE FONDO =====
+-
+-def process_laptop_images(laptop, form, remove_bg_cover=None, remove_bg_all=False):
++def process_laptop_images(laptop, form):
+     """
+     Procesa las imágenes del formulario (híbrido: nuevas + existentes)
+-    CON SOPORTE PARA ELIMINACIÓN DE FONDO
+ 
+     Esta función maneja:
+     1. Eliminación de imágenes marcadas (images_to_delete)
+     2. Actualización de imágenes existentes (alt text, orden)
+     3. Guardado de imágenes nuevas
+     4. Asignación de portada
+-    5. Eliminación de fondo para imágenes nuevas (si está habilitado)
+ 
+     Args:
+         laptop: Objeto Laptop (debe tener un ID asignado)
+         form: Formulario LaptopForm validado
+-        remove_bg_cover: Si eliminar fondo de la portada (None=usar configuración por defecto)
+-        remove_bg_all: Si eliminar fondo de todas las imágenes
+ 
+     Returns:
+-        tuple: (success_count, error_messages, bg_processed_count, bg_error_messages)
++        tuple: (success_count, error_messages)
+     """
++
+     logger.info(f"\n{'=' * 60}")
+     logger.info(f"📸 PROCESANDO IMÁGENES PARA LAPTOP ID: {laptop.id}")
+-    logger.info(f"   Eliminación de fondo: Portada={remove_bg_cover}, Todas={remove_bg_all}")
+     logger.info(f"{'=' * 60}\n")
+ 
+     success_count = 0
+     error_messages = []
+-    bg_processed_count = 0
+-    bg_error_messages = []
+-
+-    # Determinar si aplicar eliminación de fondo a portada
+-    if remove_bg_cover is None:
+-        remove_bg_cover = REMOVE_BG_DEFAULT_COVER
+ 
+     # ===== PASO 1: ELIMINAR IMÁGENES MARCADAS =====
+     images_to_delete_json = request.form.get('images_to_delete', '[]')
+@@ -255,21 +191,17 @@
+ 
+     # ===== PASO 3: PROCESAR SLOTS DEL FORMULARIO (1-8) =====
+     processed_images = []
+-    new_images = []  # Para trackear imágenes nuevas para eliminación de fondo
+ 
+     for i in range(1, 9):  # Slots 1-8
+         try:
+             file = request.files.get(f'image_{i}')
+             alt_text = request.form.get(f'image_{i}_alt', '')
+             image_path = request.form.get(f'image_{i}', '')
+-            is_cover_input = request.form.get(f'image_{i}_is_cover', 'false')
+-            is_cover = is_cover_input.lower() == 'true'
+ 
+             # CASO A: Archivo nuevo subido
+             if file and file.filename and allowed_image_file(file.filename):
+                 logger.info(f"\n➕ SLOT {i}: Nuevo archivo detectado")
+                 logger.info(f"   Nombre: {file.filename}")
+-                logger.info(f"   Es portada: {is_cover}")
+ 
+                 # Validar extensión del archivo
+                 if not allowed_image_file(file.filename):
+@@ -312,7 +244,7 @@
+                     laptop_id=laptop.id,
+                     image_path=relative_path,
+                     alt_text=alt_text or f"{laptop.display_name} - imagen {i}",
+-                    is_cover=is_cover,
++                    is_cover=False,  # Se asigna después
+                     ordering=i,
+                     position=i
+                 )
+@@ -322,14 +254,6 @@
+                 processed_images.append(image)
+                 success_count += 1
+ 
+-                # Marcar como nueva imagen para posible eliminación de fondo
+-                new_images.append({
+-                    'image': image,
+-                    'filepath': filepath,
+-                    'is_cover': is_cover,
+-                    'slot': i
+-                })
+-
+                 logger.info(f'   ✅ Guardado como: {filename}')
+                 logger.info(f'   ✅ Registro creado: ID {image.id}')
+ 
+@@ -337,7 +261,6 @@
+             elif image_path:
+                 logger.info(f"\n🔄 SLOT {i}: Verificando imagen existente")
+                 logger.info(f"   Path: {image_path[:50]}...")
+-                logger.info(f"   Es portada: {is_cover}")
+ 
+                 # Buscar imagen existente por path
+                 existing_img = None
+@@ -353,7 +276,6 @@
+                     existing_img.alt_text = alt_text or existing_img.alt_text
+                     existing_img.position = i
+                     existing_img.ordering = i
+-                    existing_img.is_cover = is_cover
+                     processed_images.append(existing_img)
+ 
+                     logger.info(
+@@ -366,216 +288,24 @@
+             error_messages.append(error_msg)
+             logger.error(f'Laptop {laptop.sku}: {error_msg}', exc_info=True)
+ 
+-    # ===== PASO 4: PROCESAR ELIMINACIÓN DE FONDO PARA IMÁGENES NUEVAS =====
+-    if new_images and (remove_bg_cover or remove_bg_all):
+-        logger.info(f"\n🎨 PROCESANDO ELIMINACIÓN DE FONDO")
+-        logger.info(f"   Nuevas imágenes: {len(new_images)}")
+-        logger.info(f"   Eliminar fondo portada: {remove_bg_cover}")
+-        logger.info(f"   Eliminar fondo todas: {remove_bg_all}")
+-
+-        for new_img in new_images:
+-            image_obj = new_img['image']
+-            filepath = new_img['filepath']
+-            is_cover = new_img['is_cover']
+-            slot = new_img['slot']
+-
+-            # Determinar si procesar esta imagen
+-            should_process = False
+-            if remove_bg_all:
+-                should_process = True
+-                reason = "todas las imágenes"
+-            elif remove_bg_cover and is_cover:
+-                should_process = True
+-                reason = "imagen de portada"
+-            else:
+-                continue
+-
+-            if should_process:
+-                logger.info(f"\n   🎨 Procesando imagen slot {slot} ({reason})")
+-                logger.info(f"      Ruta: {filepath}")
+-
+-                success, message, processed_path = _process_background_removal(
+-                    filepath,
+-                    f"Imagen {slot} (ID: {image_obj.id})",
+-                    is_cover=is_cover
+-                )
+-
+-                if success:
+-                    bg_processed_count += 1
+-                    logger.info(f"      ✅ {message}")
+-
+-                    # Actualizar ruta de la imagen si cambió (a PNG)
+-                    if processed_path and processed_path != filepath:
+-                        new_relative_path = f"uploads/laptops/{laptop.id}/{os.path.basename(processed_path)}"
+-                        image_obj.image_path = new_relative_path
+-                        logger.info(f"      🔄 Ruta actualizada a: {new_relative_path}")
+-                else:
+-                    bg_error_messages.append(f"Imagen {slot}: {message}")
+-                    logger.warning(f"      ⚠️  {message}")
+-
+-    # ===== PASO 5: ASIGNAR PORTADA Y POSICIONES FINALES =====
++    # ===== PASO 4: ASIGNAR PORTADA Y POSICIONES FINALES =====
+     logger.info(f"\n👑 Asignando portada y posiciones finales")
+     logger.info(f"   Total imágenes procesadas: {len(processed_images)}")
+ 
+-    # Ordenar imágenes por posición
+-    processed_images.sort(key=lambda img: img.position)
+-
+-    # Asegurar que exactamente una imagen sea portada
+-    cover_assigned = False
++    # La primera imagen procesada es la portada
+     for idx, img in enumerate(processed_images):
+-        # Si esta imagen está marcada como portada y aún no hay portada asignada
+-        if img.is_cover and not cover_assigned:
+-            cover_assigned = True
+-        else:
+-            # Solo la primera imagen marcada como portada será realmente portada
+-            img.is_cover = False
+-
+-        # Actualizar ordenación
++        img.is_cover = (idx == 0)
+         img.position = idx + 1
+         img.ordering = idx + 1
+ 
+-    # Si no hay portada asignada, hacer la primera imagen la portada
+-    if processed_images and not cover_assigned:
+-        processed_images[0].is_cover = True
+-        logger.info(f"   👑 PORTADA automática: {processed_images[0].image_path}")
+-
+-    # Loggear qué imagen es la portada
+-    for img in processed_images:
+         if img.is_cover:
+             logger.info(f"   👑 PORTADA: {img.image_path}")
+ 
+     logger.info(f"\n{'=' * 60}")
+     logger.info(f"✅ PROCESO COMPLETADO")
+-    logger.info(f"   Imágenes guardadas: {success_count}")
+-    logger.info(f"   Fondos eliminados: {bg_processed_count}")
+     logger.info(f"{'=' * 60}\n")
+ 
+-    return success_count, error_messages, bg_processed_count, bg_error_messages
+-
+-
+-# ===== NUEVA RUTA: REPROCESAMIENTO MANUAL DE IMÁGENES =====
+-
+-@inventory_bp.route('/<int:id>/remove-background', methods=['POST'])
+-@login_required
+-@admin_required
+-def laptop_remove_background(id):
+-    """
+-    Endpoint para reprocesamiento manual de eliminación de fondo
+-
+-    Parámetros:
+-    - mode: 'cover' (solo portada) o 'all' (todas las imágenes)
+-    - force: 'true' para reprocesar incluso si ya tiene fondo eliminado
+-    """
+-    laptop = Laptop.query.get_or_404(id)
+-
+-    # Verificar permisos
+-    if not current_user.is_admin:
+-        flash('❌ Solo administradores pueden usar esta función', 'error')
+-        return redirect(url_for('inventory.laptop_detail', id=id))
+-
+-    # Obtener parámetros
+-    mode = request.form.get('mode', 'cover')
+-    force = request.form.get('force', 'false').lower() == 'true'
+-
+-    # Validar modo
+-    if mode not in ['cover', 'all']:
+-        flash('❌ Modo inválido. Use "cover" o "all".', 'error')
+-        return redirect(url_for('inventory.laptop_detail', id=id))
+-
+-    # Verificar si el servicio está disponible
+-    if not background_service.is_available():
+-        flash('❌ Servicio de eliminación de fondo no disponible. Instale rembg.', 'error')
+-        return redirect(url_for('inventory.laptop_detail', id=id))
+-
+-    try:
+-        # Obtener imágenes
+-        images = laptop.images
+-        if not images:
+-            flash('ℹ️  Esta laptop no tiene imágenes', 'info')
+-            return redirect(url_for('inventory.laptop_detail', id=id))
+-
+-        # Filtrar imágenes según el modo
+-        if mode == 'cover':
+-            target_images = [img for img in images if img.is_cover]
+-            if not target_images:
+-                target_images = [images[0]]  # Usar primera imagen si no hay portada explícita
+-        else:  # 'all'
+-            target_images = list(images)
+-
+-        # Procesar imágenes
+-        results = {
+-            'total': len(target_images),
+-            'success': 0,
+-            'failed': 0,
+-            'details': []
+-        }
+-
+-        for image in target_images:
+-            image_path = os.path.join('app', 'static', image.image_path)
+-
+-            # Verificar si existe el archivo
+-            if not os.path.exists(image_path):
+-                results['failed'] += 1
+-                results['details'].append({
+-                    'image_id': image.id,
+-                    'success': False,
+-                    'message': 'Archivo no encontrado'
+-                })
+-                continue
+-
+-            # Verificar si ya tiene fondo eliminado (a menos que force=True)
+-            image_info = background_service.get_image_info(image_path)
+-            if not force and image_info.get('has_background_removed', False):
+-                results['details'].append({
+-                    'image_id': image.id,
+-                    'success': False,
+-                    'message': 'Ya tiene fondo eliminado (use force=true para reprocesar)',
+-                    'skipped': True
+-                })
+-                continue
+-
+-            # Procesar eliminación de fondo
+-            success, message, processed_path = _process_background_removal(
+-                image_path,
+-                f"Imagen ID {image.id}",
+-                is_cover=image.is_cover
+-            )
+-
+-            if success:
+-                results['success'] += 1
+-                # Actualizar ruta si cambió a PNG
+-                if processed_path and processed_path != image_path:
+-                    new_relative_path = f"uploads/laptops/{laptop.id}/{os.path.basename(processed_path)}"
+-                    image.image_path = new_relative_path
+-            else:
+-                results['failed'] += 1
+-
+-            results['details'].append({
+-                'image_id': image.id,
+-                'success': success,
+-                'message': message
+-            })
+-
+-        # Guardar cambios en la base de datos
+-        db.session.commit()
+-
+-        # Preparar mensaje para el usuario
+-        if results['success'] > 0:
+-            flash(f'✅ Fondo eliminado de {results["success"]} imagen(es) exitosamente', 'success')
+-        if results['failed'] > 0:
+-            flash(f'⚠️  {results["failed"]} imagen(es) fallaron al procesar', 'warning')
+-
+-        # Loggear resultados
+-        logger.info(f"🎨 Reprocesamiento manual completado para laptop {laptop.sku}")
+-        logger.info(f"   Modo: {mode}, Force: {force}")
+-        logger.info(f"   Total: {results['total']}, Éxitos: {results['success']}, Fallos: {results['failed']}")
+-
+-    except Exception as e:
+-        db.session.rollback()
+-        logger.error(f'❌ Error en reprocesamiento manual: {str(e)}', exc_info=True)
+-        flash(f'❌ Error en reprocesamiento: {str(e)}', 'error')
+-
+-    return redirect(url_for('inventory.laptop_detail', id=id))
++    return success_count, error_messages
+ 
+ 
+ # ===== RUTA PRINCIPAL: LISTADO DE LAPTOPS =====
+@@ -717,7 +447,7 @@
+     )
+ 
+ 
+-# ===== AGREGAR NUEVA LAPTOP (MODIFICADA) =====
++# ===== AGREGAR NUEVA LAPTOP =====
+ 
+ @inventory_bp.route('/add', methods=['GET', 'POST'])
+ @login_required
+@@ -725,19 +455,11 @@
+ def laptop_add():
+     """
+     Muestra el formulario y procesa la creacion de una nueva laptop
+-    CON SOPORTE PARA ELIMINACIÓN DE FONDO
+     """
+     form = LaptopForm()
+ 
+     if form.validate_on_submit():
+         try:
+-            # Obtener opciones de eliminación de fondo del formulario
+-            remove_bg_cover = request.form.get('remove_bg_cover', 'true').lower() == 'true'
+-            remove_bg_all = request.form.get('remove_bg_all', 'false').lower() == 'true'
+-
+-            # Loggear opciones seleccionadas
+-            logger.info(f"🎨 Opciones de eliminación de fondo - Portada: {remove_bg_cover}, Todas: {remove_bg_all}")
+-
+             # Procesar catalogos dinamicos (crear si son strings)
+             catalog_data = CatalogService.process_laptop_form_data({
+                 'brand_id': form.brand_id.data,
+@@ -826,10 +548,8 @@
+             db.session.add(laptop)
+             db.session.flush()  # Para obtener el ID
+ 
+-            # Procesar imágenes CON eliminación de fondo
+-            img_success, img_errors, bg_processed, bg_errors = process_laptop_images(
+-                laptop, form, remove_bg_cover=remove_bg_cover, remove_bg_all=remove_bg_all
+-            )
++            # Procesar imágenes
++            img_success, img_errors = process_laptop_images(laptop, form)
+             db.session.commit()
+ 
+             # Mensaje de éxito
+@@ -838,18 +558,10 @@
+             else:
+                 flash(f'✅ Laptop {sku} agregada exitosamente', 'success')
+ 
+-            # Mostrar resultados de eliminación de fondo
+-            if bg_processed > 0:
+-                flash(f'🎨 Fondo eliminado de {bg_processed} imagen(es)', 'success')
+-
+             # Mostrar errores de imágenes si los hay
+             for error in img_errors:
+                 flash(f'⚠️ {error}', 'warning')
+ 
+-            # Mostrar errores de eliminación de fondo si los hay
+-            for error in bg_errors:
+-                flash(f'🎨 {error}', 'warning')
+-
+             return redirect(url_for('inventory.laptop_detail', id=laptop.id))
+ 
+         except Exception as e:
+@@ -863,22 +575,16 @@
+             for error in errors:
+                 flash(f'Error en {field}: {error}', 'error')
+ 
+-    # Pasar información sobre disponibilidad de eliminación de fondo al template
+-    remove_bg_available = background_service.is_available()
+-    return render_template('inventory/laptop_form.html',
+-                           form=form,
+-                           mode='add',
+-                           remove_bg_available=remove_bg_available)
++    return render_template('inventory/laptop_form.html', form=form, mode='add')
+ 
+ 
+-# ===== VER DETALLE DE LAPTOP (MODIFICADA) =====
++# ===== VER DETALLE DE LAPTOP =====
+ 
+ @inventory_bp.route('/<int:id>')
+ @login_required
+ def laptop_detail(id):
+     """
+     Muestra el detalle completo de una laptop
+-    CON INFORMACIÓN SOBRE ELIMINACIÓN DE FONDO
+     """
+     laptop = Laptop.query.get_or_404(id)
+ 
+@@ -897,30 +603,12 @@
+     # Imagen de portada
+     cover_image = next((img for img in laptop.images if img.is_cover), None)
+ 
+-    # Obtener información detallada de cada imagen (para mostrar estado de fondo eliminado)
+-    images_info = []
+-    for img in images:
+-        img_path = os.path.join('app', 'static', img.image_path)
+-        info = background_service.get_image_info(img_path) if background_service.is_available() else {}
+-        images_info.append({
+-            'image': img,
+-            'info': info,
+-            'has_background_removed': info.get('has_background_removed', False),
+-            'backups': info.get('backups', [])
+-        })
+-
+-    # Verificar si el servicio de eliminación de fondo está disponible
+-    remove_bg_available = background_service.is_available()
+-
+     return render_template(
+         'inventory/laptop_detail.html',
+         laptop=laptop,
+         similar_laptops=similar_laptops,
+         images=images,
+-        cover_image=cover_image,
+-        images_info=images_info,
+-        remove_bg_available=remove_bg_available,
+-        background_service=background_service
++        cover_image=cover_image
+     )
+ 
+ 
+@@ -954,7 +642,7 @@
+     )
+ 
+ 
+-# ===== EDITAR LAPTOP (MODIFICADA) =====
++# ===== EDITAR LAPTOP =====
+ 
+ @inventory_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
+ @login_required
+@@ -962,7 +650,6 @@
+ def laptop_edit(id):
+     """
+     Edita una laptop existente
+-    CON SOPORTE PARA ELIMINACIÓN DE FONDO
+     """
+     laptop = Laptop.query.get_or_404(id)
+     form = LaptopForm(obj=laptop)
+@@ -973,13 +660,6 @@
+ 
+     if form.validate_on_submit():
+         try:
+-            # Obtener opciones de eliminación de fondo del formulario
+-            remove_bg_cover = request.form.get('remove_bg_cover', 'true').lower() == 'true'
+-            remove_bg_all = request.form.get('remove_bg_all', 'false').lower() == 'true'
+-
+-            # Loggear opciones seleccionadas
+-            logger.info(f"🎨 Opciones de eliminación de fondo - Portada: {remove_bg_cover}, Todas: {remove_bg_all}")
+-
+             # Procesar catalogos dinamicos
+             catalog_data = CatalogService.process_laptop_form_data({
+                 'brand_id': form.brand_id.data,
+@@ -1055,10 +735,8 @@
+ 
+             laptop.updated_at = datetime.utcnow()
+ 
+-            # Procesar imágenes CON eliminación de fondo
+-            img_success, img_errors, bg_processed, bg_errors = process_laptop_images(
+-                laptop, form, remove_bg_cover=remove_bg_cover, remove_bg_all=remove_bg_all
+-            )
++            # Procesar imágenes
++            img_success, img_errors = process_laptop_images(laptop, form)
+             db.session.commit()
+ 
+             # Mensaje de éxito
+@@ -1067,18 +745,10 @@
+             else:
+                 flash(f'✅ Laptop {laptop.sku} actualizada exitosamente', 'success')
+ 
+-            # Mostrar resultados de eliminación de fondo
+-            if bg_processed > 0:
+-                flash(f'🎨 Fondo eliminado de {bg_processed} imagen(es)', 'success')
+-
+             # Mostrar errores de imágenes si los hay
+             for error in img_errors:
+                 flash(f'⚠️ {error}', 'warning')
+ 
+-            # Mostrar errores de eliminación de fondo si los hay
+-            for error in bg_errors:
+-                flash(f'🎨 {error}', 'warning')
+-
+             return redirect(url_for('inventory.laptop_detail', id=laptop.id))
+ 
+         except Exception as e:
+@@ -1096,15 +766,8 @@
+     images_list = sorted(laptop.images, key=lambda img: img.ordering)
+     images_by_position = {img.position: img for img in images_list}
+ 
+-    # Obtener información sobre disponibilidad de eliminación de fondo
+-    remove_bg_available = background_service.is_available()
+-
+-    return render_template('inventory/laptop_form.html',
+-                           form=form,
+-                           mode='edit',
+-                           laptop=laptop,
+-                           images_by_position=images_by_position,
+-                           remove_bg_available=remove_bg_available)
++    return render_template('inventory/laptop_form.html', form=form, mode='edit', laptop=laptop,
++                           images_by_position=images_by_position)
+ 
+ 
+ # ===== ELIMINAR LAPTOP =====
+@@ -1136,16 +799,6 @@
+         image_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
+         if os.path.exists(image_folder):
+             try:
+-                # Eliminar todos los archivos en el directorio
+-                for filename in os.listdir(image_folder):
+-                    file_path = os.path.join(image_folder, filename)
+-                    try:
+-                        if os.path.isfile(file_path):
+-                            os.unlink(file_path)
+-                    except Exception as e:
+-                        logger.error(f'Error al eliminar {file_path}: {str(e)}')
+-
+-                # Eliminar el directorio vacío
+                 os.rmdir(image_folder)
+                 logger.info(f'Laptop {laptop.sku}: Directorio de imágenes eliminado')
+             except Exception as e:
+Index: config.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import os\r\nfrom datetime import timedelta\r\nimport keyring\r\n\r\nbasedir = os.path.abspath(os.path.dirname(__file__))\r\n\r\n# Configuración de PostgreSQL\r\nDB_USER = \"LuxeraUSR\"\r\nDB_NAME = \"LuxeraDB\"\r\nDB_HOST = \"localhost\"\r\nDB_PORT = \"5432\"\r\nVAULT_SERVICE_NAME = \"LuxeraRD\"\r\n\r\n\r\ndef obtener_db_password():\r\n    \"\"\"\r\n    Obtiene la contraseña de la base de datos.\r\n    Prioridad:\r\n    1. Windows Vault (keyring)\r\n    2. Variable de entorno DB_PASSWORD\r\n    3. Contraseña por defecto\r\n    \"\"\"\r\n    password_vault = keyring.get_password(VAULT_SERVICE_NAME, DB_USER)\r\n    if password_vault:\r\n        print(f\"\uD83D\uDD11 Contraseña recuperada desde Windows Vault ({VAULT_SERVICE_NAME})\")\r\n        return password_vault\r\n\r\n    password_env = os.environ.get('DB_PASSWORD')\r\n    if password_env:\r\n        print(\"\uD83D\uDD11 Contraseña recuperada desde variable de entorno (.env)\")\r\n        return password_env\r\n\r\n    print(\"⚠\uFE0F  Usando contraseña por defecto (cambiar en producción)\")\r\n    return \"******\"\r\n\r\n\r\nclass Config:\r\n    # SEGURIDAD - Clave generada aleatoriamente\r\n    SECRET_KEY = os.environ.get('SECRET_KEY') or 'f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3'\r\n\r\n    # BASE DE DATOS - PostgreSQL (CORREGIDO: agregado +psycopg)\r\n    DB_PASSWORD = obtener_db_password()\r\n    SQLALCHEMY_DATABASE_URI = f\"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}\"\r\n    SQLALCHEMY_TRACK_MODIFICATIONS = False\r\n    SQLALCHEMY_ECHO = True\r\n\r\n    # SESIONES Y COOKIES\r\n    SESSION_COOKIE_NAME = 'luxera_session'\r\n    SESSION_COOKIE_HTTPONLY = True\r\n    SESSION_COOKIE_SAMESITE = 'Lax'\r\n    SESSION_COOKIE_SECURE = False\r\n    PERMANENT_SESSION_LIFETIME = timedelta(days=1)\r\n\r\n    # FLASK-LOGIN\r\n    LOGIN_VIEW = 'auth.login'\r\n    LOGIN_MESSAGE = 'Por favor inicia sesión para acceder a esta página.'\r\n    LOGIN_MESSAGE_CATEGORY = 'info'\r\n\r\n    # WTFORMS\r\n    WTF_CSRF_ENABLED = True\r\n    WTF_CSRF_TIME_LIMIT = 3600\r\n\r\n    # CONFIGURACIONES PERSONALIZADAS\r\n    MAX_LOGIN_ATTEMPTS = 5\r\n    LOGIN_LOCKOUT_TIME = 15\r\n    ALLOW_REGISTRATION = False  # Solo creación manual de usuarios\r\n    REQUIRE_EMAIL_VERIFICATION = False\r\n\r\n    # ===== CONFIGURACIÓN DE ELIMINACIÓN DE FONDO =====\r\n    # Configuración para el procesamiento automático de imágenes\r\n    REMOVE_BG_ENABLED = False  # Habilitar/deshabilitar funcionalidad globalmente\r\n    REMOVE_BG_DEFAULT_COVER = False  # Aplicar a imágenes de portada nuevas por defecto\r\n    REMOVE_BG_DEFAULT_ALL = False  # NO aplicar a todas las imágenes por defecto\r\n\r\n    # Límites de procesamiento\r\n    REMOVE_BG_MAX_IMAGE_SIZE_MB = 10  # Rechazar imágenes > 10MB\r\n    REMOVE_BG_PROCESSING_TIMEOUT = 30  # Segundos máximos por imagen\r\n\r\n    # Formatos soportados\r\n    REMOVE_BG_SUPPORTED_FORMATS = {'jpg', 'jpeg', 'png', 'webp', 'bmp'}\r\n\r\n    # Sistema de backup\r\n    REMOVE_BG_KEEP_BACKUPS = 1  # Número de backups recientes a mantener\r\n    REMOVE_BG_BACKUP_ORIGINAL = True  # Crear backup antes de procesar\r\n\r\n\r\nclass DevelopmentConfig(Config):\r\n    DEBUG = True\r\n    TESTING = False\r\n\r\n\r\nclass ProductionConfig(Config):\r\n    DEBUG = False\r\n    TESTING = False\r\n    SESSION_COOKIE_SECURE = True\r\n    SQLALCHEMY_ECHO = False\r\n    # En producción, podemos querer desactivar si hay problemas de rendimiento\r\n    # REMOVE_BG_ENABLED = False\r\n\r\n\r\nclass TestingConfig(Config):\r\n    TESTING = True\r\n    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'\r\n    WTF_CSRF_ENABLED = False\r\n    # En testing, desactivar para no depender de rembg\r\n    REMOVE_BG_ENABLED = False\r\n\r\n\r\nconfig = {\r\n    'development': DevelopmentConfig,\r\n    'production': ProductionConfig,\r\n    'testing': TestingConfig,\r\n    'default': DevelopmentConfig\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/config.py b/config.py
+--- a/config.py	(revision 63867b0451060cd65b5c83f0f1d5b85e8607c85a)
++++ b/config.py	(date 1768613527786)
+@@ -66,24 +66,6 @@
+     ALLOW_REGISTRATION = False  # Solo creación manual de usuarios
+     REQUIRE_EMAIL_VERIFICATION = False
+ 
+-    # ===== CONFIGURACIÓN DE ELIMINACIÓN DE FONDO =====
+-    # Configuración para el procesamiento automático de imágenes
+-    REMOVE_BG_ENABLED = False  # Habilitar/deshabilitar funcionalidad globalmente
+-    REMOVE_BG_DEFAULT_COVER = False  # Aplicar a imágenes de portada nuevas por defecto
+-    REMOVE_BG_DEFAULT_ALL = False  # NO aplicar a todas las imágenes por defecto
+-
+-    # Límites de procesamiento
+-    REMOVE_BG_MAX_IMAGE_SIZE_MB = 10  # Rechazar imágenes > 10MB
+-    REMOVE_BG_PROCESSING_TIMEOUT = 30  # Segundos máximos por imagen
+-
+-    # Formatos soportados
+-    REMOVE_BG_SUPPORTED_FORMATS = {'jpg', 'jpeg', 'png', 'webp', 'bmp'}
+-
+-    # Sistema de backup
+-    REMOVE_BG_KEEP_BACKUPS = 1  # Número de backups recientes a mantener
+-    REMOVE_BG_BACKUP_ORIGINAL = True  # Crear backup antes de procesar
+-
+-
+ class DevelopmentConfig(Config):
+     DEBUG = True
+     TESTING = False
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"86006194-debc-4cca-bee4-0e15741b8af4\" name=\"Changes\" comment=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <change afterPath=\"$PROJECT_DIR$/app/services/image_background_service.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/__init__.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/__init__.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/routes/inventory.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/routes/inventory.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/static/js/laptop_gallery.js\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/static/js/laptop_gallery.js\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/templates/about.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/templates/about.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/templates/contact.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/templates/contact.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/templates/index.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/templates/index.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/templates/inventory/laptop_form.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/templates/inventory/laptop_form.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/templates/landing/base_landing.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/templates/landing/base_landing.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/app/templates/landing/catalog.html\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/app/templates/landing/catalog.html\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/config.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/config.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/requirements.txt\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/requirements.txt\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Flask Main\" />\r\n        <option value=\"CSS File\" />\r\n        <option value=\"JavaScript File\" />\r\n        <option value=\"HTML File\" />\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"FlaskConsoleOptions\" custom-start-script=\"import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass\">\r\n    <envs>\r\n      <env key=\"FLASK_APP\" value=\"app\" />\r\n    </envs>\r\n    <option name=\"myCustomStartScript\" value=\"import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass\" />\r\n    <option name=\"myEnvs\">\r\n      <map>\r\n        <entry key=\"FLASK_APP\" value=\"app\" />\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Merge.Settings\">\r\n    <option name=\"BRANCH\" value=\"Luxera/master_2\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;somanumte&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\"><![CDATA[{\r\n  \"selectedUrlAndAccountId\": {\r\n    \"url\": \"https://github.com/somanumte/LuxeraRD.git\",\r\n    \"accountId\": \"86b36f90-bf38-4efe-9718-db4ca9d01197\"\r\n  }\r\n}]]></component>\r\n  <component name=\"McpProjectServerCommands\">\r\n    <commands />\r\n    <urls />\r\n  </component>\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"CurrentFile\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 0\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"37P1rICNtS3krUvteB7iZdjghle\" />\r\n  <component name=\"ProjectLevelVcsManager\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"ASKED_SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"DefaultHtmlFileTemplate\": \"HTML File\",\r\n    \"Flask server.Flask (app.py).executor\": \"Run\",\r\n    \"Flask server.Flask (run.py).executor\": \"Run\",\r\n    \"Flask server.Flask.executor\": \"Run\",\r\n    \"Flask server.Luxera.executor\": \"Run\",\r\n    \"JavaScript Debug.home.html.executor\": \"Run\",\r\n    \"ModuleVcsDetector.initialDetectionPerformed\": \"true\",\r\n    \"Python.Flask Manual.executor\": \"Run\",\r\n    \"Python.config.executor\": \"Run\",\r\n    \"Python.run.executor\": \"Run\",\r\n    \"RunOnceActivity.MCP Project settings loaded\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252\": \"true\",\r\n    \"RunOnceActivity.git.unshallow\": \"true\",\r\n    \"RunOnceActivity.typescript.service.memoryLimit.init\": \"true\",\r\n    \"SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"ai.playground.ignore.import.keys.banner.in.settings\": \"true\",\r\n    \"com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1\": \"true\",\r\n    \"git-widget-placeholder\": \"master\",\r\n    \"junie.onboarding.icon.badge.shown\": \"true\",\r\n    \"last_opened_file_path\": \"C:/Users/felix/PycharmProjects/Luxera/app/routes\",\r\n    \"list.type.of.created.stylesheet\": \"CSS\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"run.code.analysis.last.selected.profile\": \"aDefault\",\r\n    \"settings.editor.selected.configurable\": \"org.jetbrains.plugins.github.ui.GithubSettingsConfigurable\",\r\n    \"to.speed.mode.migration.done\": \"true\",\r\n    \"vue.rearranger.settings.migration\": \"true\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\routes\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\\landing\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\\customers\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\\dashboard\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\\admin\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\\Expenses\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\static\\js\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\\templates\\inventory\" />\r\n      <recent name=\"C:\\Users\\felix\\PycharmProjects\\Luxera\\app\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"Flask\" type=\"Python.FlaskServer\" nameIsGenerated=\"true\">\r\n      <module name=\"Luxera\" />\r\n      <option name=\"ENV_FILES\" value=\"\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"SDK_NAME\" value=\"Python 3.14 (LuxeraRD)\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\r\n      <option name=\"RUN_TOOL\" value=\"\" />\r\n      <option name=\"launchJavascriptDebuger\" value=\"false\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.29346.142\" />\r\n        <option value=\"bundled-python-sdk-f2b7a9f6281b-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.142\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"86006194-debc-4cca-bee4-0e15741b8af4\" name=\"Changes\" comment=\"\" />\r\n      <created>1766790089262</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1766790089262</updated>\r\n      <workItem from=\"1766790090283\" duration=\"582000\" />\r\n      <workItem from=\"1766790689463\" duration=\"5072000\" />\r\n      <workItem from=\"1766796380412\" duration=\"29220000\" />\r\n      <workItem from=\"1766879822334\" duration=\"95000\" />\r\n      <workItem from=\"1766880946008\" duration=\"5626000\" />\r\n      <workItem from=\"1767095844639\" duration=\"1306000\" />\r\n      <workItem from=\"1767133204534\" duration=\"195000\" />\r\n      <workItem from=\"1767133662632\" duration=\"96000\" />\r\n      <workItem from=\"1767133961120\" duration=\"4479000\" />\r\n      <workItem from=\"1767144752891\" duration=\"1930000\" />\r\n      <workItem from=\"1767146773948\" duration=\"11632000\" />\r\n      <workItem from=\"1767272506882\" duration=\"116000\" />\r\n      <workItem from=\"1767272649730\" duration=\"2142000\" />\r\n      <workItem from=\"1767314960289\" duration=\"631000\" />\r\n      <workItem from=\"1767350951084\" duration=\"5331000\" />\r\n      <workItem from=\"1767546171116\" duration=\"656000\" />\r\n      <workItem from=\"1767546883254\" duration=\"35523000\" />\r\n      <workItem from=\"1767610866218\" duration=\"341000\" />\r\n      <workItem from=\"1767695231665\" duration=\"3024000\" />\r\n      <workItem from=\"1767735652043\" duration=\"15190000\" />\r\n      <workItem from=\"1767780939694\" duration=\"1091000\" />\r\n      <workItem from=\"1767782617011\" duration=\"5599000\" />\r\n      <workItem from=\"1767820155874\" duration=\"177000\" />\r\n      <workItem from=\"1767820354072\" duration=\"10262000\" />\r\n      <workItem from=\"1767837617816\" duration=\"6672000\" />\r\n      <workItem from=\"1767915987902\" duration=\"168000\" />\r\n      <workItem from=\"1768043248675\" duration=\"816000\" />\r\n      <workItem from=\"1768045475159\" duration=\"2172000\" />\r\n      <workItem from=\"1768177270877\" duration=\"6000\" />\r\n      <workItem from=\"1768177285152\" duration=\"4096000\" />\r\n      <workItem from=\"1768212475511\" duration=\"1268000\" />\r\n      <workItem from=\"1768340024316\" duration=\"3842000\" />\r\n      <workItem from=\"1768555615126\" duration=\"413000\" />\r\n      <workItem from=\"1768556176183\" duration=\"33544000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00023\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767555886576</created>\r\n      <option name=\"number\" value=\"00023\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00023\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767555886576</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00024\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767562107687</created>\r\n      <option name=\"number\" value=\"00024\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00024\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767562107687</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00025\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767563029764</created>\r\n      <option name=\"number\" value=\"00025\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00025\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767563029764</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00026\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767565211795</created>\r\n      <option name=\"number\" value=\"00026\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00026\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767565211795</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00027\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767569477419</created>\r\n      <option name=\"number\" value=\"00027\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00027\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767569477419</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00028\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767574131998</created>\r\n      <option name=\"number\" value=\"00028\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00028\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767574131998</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00029\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767575182679</created>\r\n      <option name=\"number\" value=\"00029\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00029\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767575182679</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00030\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767576392584</created>\r\n      <option name=\"number\" value=\"00030\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00030\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767576392584</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00031\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767577253752</created>\r\n      <option name=\"number\" value=\"00031\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00031\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767577253752</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00032\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767578278211</created>\r\n      <option name=\"number\" value=\"00032\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00032\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767578278211</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00033\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767584491520</created>\r\n      <option name=\"number\" value=\"00033\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00033\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767584491520</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00034\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767584768998</created>\r\n      <option name=\"number\" value=\"00034\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00034\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767584768998</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00035\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767588630117</created>\r\n      <option name=\"number\" value=\"00035\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00035\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767588630117</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00036\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767589184505</created>\r\n      <option name=\"number\" value=\"00036\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00036\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767589184505</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00037\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767619946396</created>\r\n      <option name=\"number\" value=\"00037\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00037\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767619946396</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00038\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767647216056</created>\r\n      <option name=\"number\" value=\"00038\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00038\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767647216056</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00039\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767700037942</created>\r\n      <option name=\"number\" value=\"00039\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00039\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767700037942</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00040\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767700455549</created>\r\n      <option name=\"number\" value=\"00040\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00040\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767700455549</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00041\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767700524488</created>\r\n      <option name=\"number\" value=\"00041\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00041\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767700524488</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00042\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767743605748</created>\r\n      <option name=\"number\" value=\"00042\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00042\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767743605748</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00043\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767744721745</created>\r\n      <option name=\"number\" value=\"00043\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00043\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767744721745</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00044\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767747466315</created>\r\n      <option name=\"number\" value=\"00044\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00044\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767747466315</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00045\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767753610887</created>\r\n      <option name=\"number\" value=\"00045\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00045\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767753610887</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00046\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767754829328</created>\r\n      <option name=\"number\" value=\"00046\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00046\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767754829328</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00047\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767784307363</created>\r\n      <option name=\"number\" value=\"00047\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00047\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767784307363</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00048\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767785672593</created>\r\n      <option name=\"number\" value=\"00048\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00048\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767785672593</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00049\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767786123121</created>\r\n      <option name=\"number\" value=\"00049\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00049\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767786123121</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00050\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767786868990</created>\r\n      <option name=\"number\" value=\"00050\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00050\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767786868991</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00051\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767788420487</created>\r\n      <option name=\"number\" value=\"00051\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00051\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767788420487</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00052\" summary=\"Proyecto Luxera, V.1.0\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767834039185</created>\r\n      <option name=\"number\" value=\"00052\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00052\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767834039185</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00053\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767912296163</created>\r\n      <option name=\"number\" value=\"00053\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00053\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767912296163</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00054\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1767912309929</created>\r\n      <option name=\"number\" value=\"00054\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00054\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1767912309929</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00055\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768046426370</created>\r\n      <option name=\"number\" value=\"00055\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00055\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768046426370</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00056\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768086718501</created>\r\n      <option name=\"number\" value=\"00056\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00056\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768086718501</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00057\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768090495474</created>\r\n      <option name=\"number\" value=\"00057\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00057\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768090495474</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00058\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768130267433</created>\r\n      <option name=\"number\" value=\"00058\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00058\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768130267433</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00059\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768134254871</created>\r\n      <option name=\"number\" value=\"00059\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00059\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768134254873</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00060\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768168546862</created>\r\n      <option name=\"number\" value=\"00060\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00060\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768168546863</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00061\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768169405397</created>\r\n      <option name=\"number\" value=\"00061\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00061\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768169405397</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00062\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768170807001</created>\r\n      <option name=\"number\" value=\"00062\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00062\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768170807001</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00063\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768183461168</created>\r\n      <option name=\"number\" value=\"00063\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00063\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768183461168</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00064\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768184699081</created>\r\n      <option name=\"number\" value=\"00064\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00064\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768184699081</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00065\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768556203142</created>\r\n      <option name=\"number\" value=\"00065\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00065\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768556203142</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00066\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768577684380</created>\r\n      <option name=\"number\" value=\"00066\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00066\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768577684380</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00067\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768585971543</created>\r\n      <option name=\"number\" value=\"00067\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00067\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768585971543</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00068\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768589829516</created>\r\n      <option name=\"number\" value=\"00068\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00068\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768589829516</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00069\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768596761659</created>\r\n      <option name=\"number\" value=\"00069\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00069\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768596761659</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00070\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768599874797</created>\r\n      <option name=\"number\" value=\"00070\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00070\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768599874798</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00071\" summary=\"Proyecto Luxera, V.1.1 _ web\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1768616835189</created>\r\n      <option name=\"number\" value=\"00071\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00071\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1768616835189</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"72\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.History.Properties\">\r\n    <option name=\"COLUMN_ID_ORDER\">\r\n      <list>\r\n        <option value=\"Default.Root\" />\r\n        <option value=\"Default.Author\" />\r\n        <option value=\"Default.Date\" />\r\n        <option value=\"GitHub.CommitStatus\" />\r\n        <option value=\"Default.Subject\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"Proyecto Luxera, V.01\" />\r\n    <MESSAGE value=\"Proyecto Luxera, V.05\" />\r\n    <MESSAGE value=\"Proyecto Luxera, V.06\" />\r\n    <MESSAGE value=\"Proyecto Luxera, V.09\" />\r\n    <MESSAGE value=\"Proyecto Luxera, V.1.0\" />\r\n    <MESSAGE value=\"Proyecto Luxera, V.1.1 _ web\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Proyecto Luxera, V.1.1 _ web\" />\r\n  </component>\r\n  <component name=\"com.intellij.coverage.CoverageDataManagerImpl\">\r\n    <SUITE FILE_PATH=\"coverage/LuxeraRD$Flask.coverage\" NAME=\"Flask Coverage Results\" MODIFIED=\"1768638393293\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"\" />\r\n    <SUITE FILE_PATH=\"coverage/LuxeraRD$run.coverage\" NAME=\"run Coverage Results\" MODIFIED=\"1768576308097\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n    <SUITE FILE_PATH=\"coverage/Luxera$Flask_Manual.coverage\" NAME=\"Flask Manual Coverage Results\" MODIFIED=\"1767466106955\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"\" />\r\n    <SUITE FILE_PATH=\"coverage/Luxera$Luxera.coverage\" NAME=\"Luxera Coverage Results\" MODIFIED=\"1768344364165\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n    <SUITE FILE_PATH=\"coverage/LuxeraRD$Luxera.coverage\" NAME=\"Luxera Coverage Results\" MODIFIED=\"1768556376792\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n    <SUITE FILE_PATH=\"coverage/Luxera$Flask__run_py_.coverage\" NAME=\"Flask (run.py) Coverage Results\" MODIFIED=\"1766812318026\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"\" />\r\n    <SUITE FILE_PATH=\"coverage/Luxera$config.coverage\" NAME=\"config Coverage Results\" MODIFIED=\"1767096506857\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n    <SUITE FILE_PATH=\"coverage/Luxera$Flask__app_py_.coverage\" NAME=\"Flask (app.py) Coverage Results\" MODIFIED=\"1766791114868\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 63867b0451060cd65b5c83f0f1d5b85e8607c85a)
++++ b/.idea/workspace.xml	(date 1768643987943)
+@@ -5,19 +5,8 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="86006194-debc-4cca-bee4-0e15741b8af4" name="Changes" comment="Proyecto Luxera, V.1.1 _ web">
+-      <change afterPath="$PROJECT_DIR$/app/services/image_background_service.py" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/routes/inventory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/inventory.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/static/js/laptop_gallery.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/laptop_gallery.js" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/templates/about.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/about.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/templates/contact.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/contact.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/index.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/templates/inventory/laptop_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/inventory/laptop_form.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/templates/landing/base_landing.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/landing/base_landing.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/app/templates/landing/catalog.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/landing/catalog.html" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/app/services/image_background_service.py" beforeDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -58,12 +47,12 @@
+     &quot;assignee&quot;: &quot;somanumte&quot;
+   }
+ }</component>
+-  <component name="GithubPullRequestsUISettings"><![CDATA[{
+-  "selectedUrlAndAccountId": {
+-    "url": "https://github.com/somanumte/LuxeraRD.git",
+-    "accountId": "86b36f90-bf38-4efe-9718-db4ca9d01197"
+-  }
+-}]]></component>
++  <component name="GithubPullRequestsUISettings">{
++  &quot;selectedUrlAndAccountId&quot;: {
++    &quot;url&quot;: &quot;https://github.com/somanumte/LuxeraRD.git&quot;,
++    &quot;accountId&quot;: &quot;86b36f90-bf38-4efe-9718-db4ca9d01197&quot;
++  }
++}</component>
+   <component name="McpProjectServerCommands">
+     <commands />
+     <urls />
+@@ -82,42 +71,42 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+-    "DefaultHtmlFileTemplate": "HTML File",
+-    "Flask server.Flask (app.py).executor": "Run",
+-    "Flask server.Flask (run.py).executor": "Run",
+-    "Flask server.Flask.executor": "Run",
+-    "Flask server.Luxera.executor": "Run",
+-    "JavaScript Debug.home.html.executor": "Run",
+-    "ModuleVcsDetector.initialDetectionPerformed": "true",
+-    "Python.Flask Manual.executor": "Run",
+-    "Python.config.executor": "Run",
+-    "Python.run.executor": "Run",
+-    "RunOnceActivity.MCP Project settings loaded": "true",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+-    "RunOnceActivity.git.unshallow": "true",
+-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
+-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+-    "git-widget-placeholder": "master",
+-    "junie.onboarding.icon.badge.shown": "true",
+-    "last_opened_file_path": "C:/Users/felix/PycharmProjects/Luxera/app/routes",
+-    "list.type.of.created.stylesheet": "CSS",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "run.code.analysis.last.selected.profile": "aDefault",
+-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+-    "to.speed.mode.migration.done": "true",
+-    "vue.rearranger.settings.migration": "true"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
++    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
++    &quot;Flask server.Flask (app.py).executor&quot;: &quot;Run&quot;,
++    &quot;Flask server.Flask (run.py).executor&quot;: &quot;Run&quot;,
++    &quot;Flask server.Flask.executor&quot;: &quot;Run&quot;,
++    &quot;Flask server.Luxera.executor&quot;: &quot;Run&quot;,
++    &quot;JavaScript Debug.home.html.executor&quot;: &quot;Run&quot;,
++    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
++    &quot;Python.Flask Manual.executor&quot;: &quot;Run&quot;,
++    &quot;Python.config.executor&quot;: &quot;Run&quot;,
++    &quot;Python.run.executor&quot;: &quot;Run&quot;,
++    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
++    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
++    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
++    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
++    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
++    &quot;last_opened_file_path&quot;: &quot;C:/Users/felix/PycharmProjects/Luxera/app/routes&quot;,
++    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
++    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
++    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
+       <recent name="C:\Users\felix\PycharmProjects\Luxera\app\routes" />
+@@ -621,7 +610,7 @@
+     <option name="LAST_COMMIT_MESSAGE" value="Proyecto Luxera, V.1.1 _ web" />
+   </component>
+   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+-    <SUITE FILE_PATH="coverage/LuxeraRD$Flask.coverage" NAME="Flask Coverage Results" MODIFIED="1768638393293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
++    <SUITE FILE_PATH="coverage/LuxeraRD$Flask.coverage" NAME="Flask Coverage Results" MODIFIED="1768643386525" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+     <SUITE FILE_PATH="coverage/LuxeraRD$run.coverage" NAME="run Coverage Results" MODIFIED="1768576308097" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+     <SUITE FILE_PATH="coverage/Luxera$Flask_Manual.coverage" NAME="Flask Manual Coverage Results" MODIFIED="1767466106955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+     <SUITE FILE_PATH="coverage/Luxera$Luxera.coverage" NAME="Luxera Coverage Results" MODIFIED="1768344364165" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
