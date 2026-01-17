@@ -6,6 +6,8 @@
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link href="{{ url_for('static', filename='css/laptop_form.css') }}" rel="stylesheet">
+<!-- Toastify CSS para notificaciones -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 {% endblock %}
 
 {% block content %}
@@ -107,7 +109,7 @@
                         </label>
                         {{ form.model_id(class="select2-ajax w-full", id="model_id") }}
                         {% if form.model_id.errors %}
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.model_id.errors[0] }}</p>
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.brand_id.errors[0] }}</p>
                         {% endif %}
                     </div>
 
@@ -265,6 +267,27 @@
                     </div>
                 </div>
 
+                <!-- Selector de Portada -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                        <i class="fas fa-crown mr-2 text-yellow-600"></i>
+                        Seleccionar Imagen de Portada
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        La imagen de portada es la que se mostrará como principal en listados y detalles del producto.
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <select id="cover-selector" class="flex-grow px-4 py-2 border-2 border-yellow-300 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200">
+                            <option value="0">-- Seleccionar portada --</option>
+                            <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+                        </select>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span id="cover-selection-info">Selecciona una imagen</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Área de Drag & Drop -->
                 <div class="upload-area-premium" id="upload-area-premium">
                     <div class="upload-icon-premium">
@@ -321,6 +344,12 @@
                                {% if img %}
                                value="{{ img.alt_text or '' }}"
                                {% endif %}>
+
+                        <!-- Input hidden para indicar si es portada -->
+                        <input type="hidden"
+                               id="image_{{ i }}_is_cover"
+                               name="image_{{ i }}_is_cover"
+                               value="false">
                     </div>
                     {% endfor %}
 
@@ -329,6 +358,116 @@
                            id="images_to_delete"
                            name="images_to_delete"
                            value="[]">
+                </div>
+            </div>
+
+            <!-- Card: Opciones de Procesamiento de Imágenes (NUEVA) -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                    Opciones de Procesamiento de Imágenes
+                </h2>
+
+                {% if not remove_bg_available %}
+                <div class="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Funcionalidad No Disponible</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                La eliminación automática de fondo requiere la instalación de <code>rembg</code>.
+                                Instala las dependencias con: <code class="bg-gray-800 text-gray-100 px-2 py-1 rounded">pip install rembg Pillow</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="space-y-6">
+                    <!-- Opción 1: Eliminar fondo de portada -->
+                    <div class="{% if not remove_bg_available %}opacity-50 cursor-not-allowed{% endif %}">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <input type="checkbox"
+                                       id="remove_bg_cover"
+                                       name="remove_bg_cover"
+                                       value="true"
+                                       class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                       {% if not remove_bg_available %}disabled{% endif %}
+                                       {% if remove_bg_available %}checked{% endif %}>
+                                <label for="remove_bg_cover" class="ml-3 text-lg font-medium text-gray-900 dark:text-white">
+                                    <i class="fas fa-crown mr-2 text-yellow-500"></i>
+                                    Eliminar fondo automáticamente de la imagen de portada
+                                </label>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-bolt mr-1"></i> RECOMENDADO
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 ml-8">
+                            Solo aplica a imágenes <strong>nuevas</strong> de portada.
+                            Las imágenes se convertirán a formato PNG con transparencia.
+                            {% if not remove_bg_available %}
+                            <span class="text-red-500 font-semibold">(Requiere instalación de rembg)</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Opción 2: Eliminar fondo de todas las imágenes -->
+                    <div class="{% if not remove_bg_available %}opacity-50 cursor-not-allowed{% endif %}">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <input type="checkbox"
+                                       id="remove_bg_all"
+                                       name="remove_bg_all"
+                                       value="true"
+                                       class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                       {% if not remove_bg_available %}disabled{% endif %}>
+                                <label for="remove_bg_all" class="ml-3 text-lg font-medium text-gray-900 dark:text-white">
+                                    <i class="fas fa-images mr-2 text-blue-500"></i>
+                                    Eliminar fondo de <strong>todas</strong> las imágenes nuevas
+                                </label>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <i class="fas fa-hourglass-half mr-1"></i> TIEMPO EXTRA
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 ml-8">
+                            Procesa todas las imágenes nuevas (no solo la portada).
+                            Esto tomará más tiempo pero mejorará la presentación de toda la galería.
+                            {% if not remove_bg_available %}
+                            <span class="text-red-500 font-semibold">(Requiere instalación de rembg)</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Información de rendimiento -->
+                    <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <h4 class="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                            Información Importante
+                        </h4>
+                        <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <li class="flex items-start">
+                                <i class="fas fa-clock text-gray-400 mr-2 mt-0.5"></i>
+                                <span>El procesamiento de cada imagen toma aproximadamente <strong>5-10 segundos</strong>.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-hdd text-gray-400 mr-2 mt-0.5"></i>
+                                <span>Se creará un <strong>backup automático</strong> de la imagen original antes de procesar.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-file-image text-gray-400 mr-2 mt-0.5"></i>
+                                <span>Las imágenes procesadas se guardarán como <strong>PNG con transparencia</strong>.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-gray-400 mr-2 mt-0.5"></i>
+                                <span>Imágenes muy grandes (&gt;10MB) o con fondos complejos pueden fallar.</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -556,22 +695,184 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<!-- Toastify JS para notificaciones -->
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <!-- Scripts separados para mejor organización -->
 <script src="{{ url_for('static', filename='js/laptop_form.js') }}"></script>
 <script src="{{ url_for('static', filename='js/laptop_form_submit.js') }}"></script>
 <script src="{{ url_for('static', filename='js/laptop_gallery.js') }}"></script>
 
-<!-- Mensajes de error del formulario -->
+<!-- Script para manejo de eliminación de fondo y selección de portada -->
 <script>
+// Configuración global
+const REMOVE_BG_AVAILABLE = {% if remove_bg_available %}true{% else %}false{% endif %};
+
+// Notificaciones Toast
+function showToast(message, type = 'info') {
+    const colors = {
+        success: 'linear-gradient(to right, #00b09b, #96c93d)',
+        error: 'linear-gradient(to right, #ff5f6d, #ffc371)',
+        warning: 'linear-gradient(to right, #f46b45, #eea849)',
+        info: 'linear-gradient(to right, #4A00E0, #8E2DE2)'
+    };
+
+    Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: colors[type] || colors.info,
+        stopOnFocus: true
+    }).showToast();
+}
+
+// Manejar el estado de las opciones de eliminación de fondo
+$(document).ready(function() {
+    // Si rembg no está disponible, deshabilitar y mostrar advertencia
+    if (!REMOVE_BG_AVAILABLE) {
+        $('#remove_bg_cover, #remove_bg_all').prop('disabled', true);
+        showToast('La eliminación de fondo no está disponible. Instala rembg.', 'warning');
+    }
+
+    // Actualizar selector de portada cuando cambian las imágenes
+    function updateCoverSelector() {
+        const selector = $('#cover-selector');
+        selector.empty();
+        selector.append('<option value="0">-- Seleccionar portada --</option>');
+
+        let hasImages = false;
+        let currentCoverSlot = null;
+
+        // Recorrer slots 1-8
+        for (let i = 1; i <= 8; i++) {
+            const fileInput = $(`#image_${i}`);
+            const imageUrl = fileInput.data('image-url');
+            const isCover = fileInput.data('is-cover') === 'true';
+            const altText = $(`#image_${i}_alt`).val();
+
+            if (fileInput.val() || imageUrl) {
+                hasImages = true;
+                let displayText = `Imagen ${i}`;
+
+                // Determinar tipo de imagen
+                if (imageUrl) {
+                    displayText += ' 💾 Guardada';
+                } else if (fileInput.val()) {
+                    displayText += ' 🆕 Nueva';
+                }
+
+                // Añadir texto alternativo si existe
+                if (altText) {
+                    displayText += ` - ${altText.substring(0, 30)}`;
+                }
+
+                selector.append(`<option value="${i}" ${isCover ? 'selected' : ''}>${displayText}</option>`);
+
+                if (isCover) {
+                    currentCoverSlot = i;
+                }
+            }
+        }
+
+        // Actualizar información de selección
+        if (currentCoverSlot) {
+            $('#cover-selection-info').html(`Portada actual: Imagen ${currentCoverSlot}`);
+        } else if (hasImages) {
+            $('#cover-selection-info').html('Selecciona una imagen como portada');
+        } else {
+            $('#cover-selection-info').html('Sube imágenes para seleccionar portada');
+        }
+
+        // Habilitar/deshabilitar selector
+        selector.prop('disabled', !hasImages);
+    }
+
+    // Actualizar selector inicialmente
+    updateCoverSelector();
+
+    // Actualizar selector cuando cambian las imágenes
+    $(document).on('laptopGallery:imagesUpdated', updateCoverSelector);
+
+    // Manejar cambio de selección de portada
+    $('#cover-selector').on('change', function() {
+        const selectedSlot = $(this).val();
+
+        if (selectedSlot && selectedSlot !== '0') {
+            // Quitar portada de todas las imágenes
+            for (let i = 1; i <= 8; i++) {
+                $(`#image_${i}_is_cover`).val('false');
+                // Actualizar visualmente en la galería (si existe)
+                $(`[data-slot="${i}"]`).removeClass('border-yellow-400').addClass('border-gray-300');
+            }
+
+            // Establecer nueva portada
+            $(`#image_${selectedSlot}_is_cover`).val('true');
+
+            // Actualizar visualmente en la galería (si existe)
+            $(`[data-slot="${selectedSlot}"]`).removeClass('border-gray-300').addClass('border-yellow-400');
+
+            // Mostrar notificación
+            showToast(`Imagen ${selectedSlot} establecida como portada`, 'success');
+
+            // Actualizar información
+            $('#cover-selection-info').html(`Portada actual: Imagen ${selectedSlot}`);
+        }
+    });
+
+    // Validar antes de enviar el formulario
+    $('#laptop-form').on('submit', function(e) {
+        // Verificar que al menos haya una imagen si se marca como publicado
+        if ($('#is_published').is(':checked')) {
+            let hasImages = false;
+            for (let i = 1; i <= 8; i++) {
+                if ($(`#image_${i}`).val() || $(`#image_${i}`).data('image-url')) {
+                    hasImages = true;
+                    break;
+                }
+            }
+
+            if (!hasImages) {
+                e.preventDefault();
+                showToast('Para publicar un producto, debe tener al menos una imagen.', 'error');
+                return false;
+            }
+        }
+
+        // Mostrar advertencia si se selecciona eliminar fondo de todas las imágenes
+        if ($('#remove_bg_all').is(':checked') && REMOVE_BG_AVAILABLE) {
+            const imageCount = $('.original-image-input').filter(function() {
+                return $(this).val() || $(this).data('image-url');
+            }).length;
+
+            if (imageCount > 3) {
+                const confirmMsg = `Vas a procesar ${imageCount} imágenes. Esto puede tomar ${imageCount * 5-10} segundos. ¿Continuar?`;
+                if (!confirm(confirmMsg)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        // Mostrar indicador de carga
+        $('#submit-btn').html('<i class="fas fa-spinner fa-spin mr-2"></i> Procesando...');
+        $('#submit-btn').prop('disabled', true);
+    });
+});
+
+// Mensajes de error del formulario
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         $(document).ready(function() {
             {% for category, message in messages %}
                 {% if category == 'error' %}
-                    alert('Error: {{ message }}');
+                    showToast('{{ message }}', 'error');
                 {% elif category == 'success' %}
-                    console.log('Éxito: {{ message }}');
+                    showToast('{{ message }}', 'success');
+                {% elif category == 'warning' %}
+                    showToast('{{ message }}', 'warning');
+                {% else %}
+                    showToast('{{ message }}', 'info');
                 {% endif %}
             {% endfor %}
         });

@@ -2,10 +2,18 @@
 # RUTAS DE INVENTARIO - LAPTOPS
 # ============================================
 # Actualizado con sistema híbrido de imágenes
+# Añadida funcionalidad de eliminación automática de fondo
 
 import logging
+import os
+import json
+import re
+from datetime import datetime, date
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
+from sqlalchemy import or_
+from werkzeug.utils import secure_filename
+
 from app import db
 from app.models.laptop import (
     Laptop, LaptopImage, Brand, LaptopModel, Processor, OperatingSystem,
@@ -14,13 +22,8 @@ from app.models.laptop import (
 from app.forms.laptop_forms import LaptopForm, FilterForm
 from app.services.sku_service import SKUService
 from app.services.catalog_service import CatalogService
+from app.services.image_background_service import background_service
 from app.utils.decorators import admin_required
-from datetime import datetime, date
-from sqlalchemy import or_
-import re
-import os
-import json
-from werkzeug.utils import secure_filename
 
 # Configurar logging
 logger = logging.getLogger(__name__)
@@ -33,8 +36,12 @@ UPLOAD_FOLDER = 'static/uploads/laptops'
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
 
+# Configuración de eliminación de fondo
+REMOVE_BG_ENABLED = True  # Se puede obtener de la configuración de la app
+REMOVE_BG_DEFAULT_COVER = True  # Aplicar a portada por defecto
 
-# ===== UTILIDADES =====
+
+# ===== FUNCIONES DE UTILIDAD (EXISTENTES) =====
 
 def generate_slug(text):
     """
@@ -119,30 +126,87 @@ def allowed_image_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 
-def process_laptop_images(laptop, form):
+# ===== NUEVA FUNCIÓN: PROCESAMIENTO DE ELIMINACIÓN DE FONDO =====
+
+def _process_background_removal(image_path, image_info, is_cover=False):
+    """
+    Procesa la eliminación de fondo de una imagen
+
+    Args:
+        image_path: Ruta completa al archivo de imagen
+        image_info: Información de la imagen para logging
+        is_cover: Si es imagen de portada
+
+    Returns:
+        tuple: (success, message, processed_path)
+    """
+    if not REMOVE_BG_ENABLED:
+        return False, "Funcionalidad deshabilitada", None
+
+    if not background_service.is_available():
+        return False, "Servicio de eliminación de fondo no disponible", None
+
+    try:
+        logger.info(f"🎨 Procesando eliminación de fondo: {image_info}")
+
+        # Verificar si la imagen ya ha sido procesada
+        image_info = background_service.get_image_info(image_path)
+        if image_info.get('has_background_removed', False):
+            return False, "La imagen ya tiene fondo eliminado", image_path
+
+        # Procesar eliminación de fondo
+        success, processed_path, backup_path, error = background_service.remove_background(
+            image_path, backup_original=True
+        )
+
+        if success:
+            logger.info(f"✅ Fondo eliminado exitosamente: {image_info}")
+            return True, "Fondo eliminado exitosamente", processed_path
+        else:
+            logger.warning(f"⚠️  Error al eliminar fondo: {error}")
+            return False, f"Error: {error}", None
+
+    except Exception as e:
+        logger.error(f"❌ Error inesperado en eliminación de fondo: {str(e)}", exc_info=True)
+        return False, f"Error inesperado: {str(e)}", None
+
+
+# ===== FUNCIÓN MODIFICADA: PROCESAMIENTO DE IMÁGENES CON ELIMINACIÓN DE FONDO =====
+
+def process_laptop_images(laptop, form, remove_bg_cover=None, remove_bg_all=False):
     """
     Procesa las imágenes del formulario (híbrido: nuevas + existentes)
+    CON SOPORTE PARA ELIMINACIÓN DE FONDO
 
     Esta función maneja:
     1. Eliminación de imágenes marcadas (images_to_delete)
     2. Actualización de imágenes existentes (alt text, orden)
     3. Guardado de imágenes nuevas
     4. Asignación de portada
+    5. Eliminación de fondo para imágenes nuevas (si está habilitado)
 
     Args:
         laptop: Objeto Laptop (debe tener un ID asignado)
         form: Formulario LaptopForm validado
+        remove_bg_cover: Si eliminar fondo de la portada (None=usar configuración por defecto)
+        remove_bg_all: Si eliminar fondo de todas las imágenes
 
     Returns:
-        tuple: (success_count, error_messages)
+        tuple: (success_count, error_messages, bg_processed_count, bg_error_messages)
     """
-
     logger.info(f"\n{'=' * 60}")
     logger.info(f"📸 PROCESANDO IMÁGENES PARA LAPTOP ID: {laptop.id}")
+    logger.info(f"   Eliminación de fondo: Portada={remove_bg_cover}, Todas={remove_bg_all}")
     logger.info(f"{'=' * 60}\n")
 
     success_count = 0
     error_messages = []
+    bg_processed_count = 0
+    bg_error_messages = []
+
+    # Determinar si aplicar eliminación de fondo a portada
+    if remove_bg_cover is None:
+        remove_bg_cover = REMOVE_BG_DEFAULT_COVER
 
     # ===== PASO 1: ELIMINAR IMÁGENES MARCADAS =====
     images_to_delete_json = request.form.get('images_to_delete', '[]')
@@ -191,17 +255,21 @@ def process_laptop_images(laptop, form):
 
     # ===== PASO 3: PROCESAR SLOTS DEL FORMULARIO (1-8) =====
     processed_images = []
+    new_images = []  # Para trackear imágenes nuevas para eliminación de fondo
 
     for i in range(1, 9):  # Slots 1-8
         try:
             file = request.files.get(f'image_{i}')
             alt_text = request.form.get(f'image_{i}_alt', '')
             image_path = request.form.get(f'image_{i}', '')
+            is_cover_input = request.form.get(f'image_{i}_is_cover', 'false')
+            is_cover = is_cover_input.lower() == 'true'
 
             # CASO A: Archivo nuevo subido
             if file and file.filename and allowed_image_file(file.filename):
                 logger.info(f"\n➕ SLOT {i}: Nuevo archivo detectado")
                 logger.info(f"   Nombre: {file.filename}")
+                logger.info(f"   Es portada: {is_cover}")
 
                 # Validar extensión del archivo
                 if not allowed_image_file(file.filename):
@@ -244,7 +312,7 @@ def process_laptop_images(laptop, form):
                     laptop_id=laptop.id,
                     image_path=relative_path,
                     alt_text=alt_text or f"{laptop.display_name} - imagen {i}",
-                    is_cover=False,  # Se asigna después
+                    is_cover=is_cover,
                     ordering=i,
                     position=i
                 )
@@ -254,6 +322,14 @@ def process_laptop_images(laptop, form):
                 processed_images.append(image)
                 success_count += 1
 
+                # Marcar como nueva imagen para posible eliminación de fondo
+                new_images.append({
+                    'image': image,
+                    'filepath': filepath,
+                    'is_cover': is_cover,
+                    'slot': i
+                })
+
                 logger.info(f'   ✅ Guardado como: {filename}')
                 logger.info(f'   ✅ Registro creado: ID {image.id}')
 
@@ -261,6 +337,7 @@ def process_laptop_images(laptop, form):
             elif image_path:
                 logger.info(f"\n🔄 SLOT {i}: Verificando imagen existente")
                 logger.info(f"   Path: {image_path[:50]}...")
+                logger.info(f"   Es portada: {is_cover}")
 
                 # Buscar imagen existente por path
                 existing_img = None
@@ -276,6 +353,7 @@ def process_laptop_images(laptop, form):
                     existing_img.alt_text = alt_text or existing_img.alt_text
                     existing_img.position = i
                     existing_img.ordering = i
+                    existing_img.is_cover = is_cover
                     processed_images.append(existing_img)
 
                     logger.info(
@@ -288,24 +366,216 @@ def process_laptop_images(laptop, form):
             error_messages.append(error_msg)
             logger.error(f'Laptop {laptop.sku}: {error_msg}', exc_info=True)
 
-    # ===== PASO 4: ASIGNAR PORTADA Y POSICIONES FINALES =====
+    # ===== PASO 4: PROCESAR ELIMINACIÓN DE FONDO PARA IMÁGENES NUEVAS =====
+    if new_images and (remove_bg_cover or remove_bg_all):
+        logger.info(f"\n🎨 PROCESANDO ELIMINACIÓN DE FONDO")
+        logger.info(f"   Nuevas imágenes: {len(new_images)}")
+        logger.info(f"   Eliminar fondo portada: {remove_bg_cover}")
+        logger.info(f"   Eliminar fondo todas: {remove_bg_all}")
+
+        for new_img in new_images:
+            image_obj = new_img['image']
+            filepath = new_img['filepath']
+            is_cover = new_img['is_cover']
+            slot = new_img['slot']
+
+            # Determinar si procesar esta imagen
+            should_process = False
+            if remove_bg_all:
+                should_process = True
+                reason = "todas las imágenes"
+            elif remove_bg_cover and is_cover:
+                should_process = True
+                reason = "imagen de portada"
+            else:
+                continue
+
+            if should_process:
+                logger.info(f"\n   🎨 Procesando imagen slot {slot} ({reason})")
+                logger.info(f"      Ruta: {filepath}")
+
+                success, message, processed_path = _process_background_removal(
+                    filepath,
+                    f"Imagen {slot} (ID: {image_obj.id})",
+                    is_cover=is_cover
+                )
+
+                if success:
+                    bg_processed_count += 1
+                    logger.info(f"      ✅ {message}")
+
+                    # Actualizar ruta de la imagen si cambió (a PNG)
+                    if processed_path and processed_path != filepath:
+                        new_relative_path = f"uploads/laptops/{laptop.id}/{os.path.basename(processed_path)}"
+                        image_obj.image_path = new_relative_path
+                        logger.info(f"      🔄 Ruta actualizada a: {new_relative_path}")
+                else:
+                    bg_error_messages.append(f"Imagen {slot}: {message}")
+                    logger.warning(f"      ⚠️  {message}")
+
+    # ===== PASO 5: ASIGNAR PORTADA Y POSICIONES FINALES =====
     logger.info(f"\n👑 Asignando portada y posiciones finales")
     logger.info(f"   Total imágenes procesadas: {len(processed_images)}")
 
-    # La primera imagen procesada es la portada
+    # Ordenar imágenes por posición
+    processed_images.sort(key=lambda img: img.position)
+
+    # Asegurar que exactamente una imagen sea portada
+    cover_assigned = False
     for idx, img in enumerate(processed_images):
-        img.is_cover = (idx == 0)
+        # Si esta imagen está marcada como portada y aún no hay portada asignada
+        if img.is_cover and not cover_assigned:
+            cover_assigned = True
+        else:
+            # Solo la primera imagen marcada como portada será realmente portada
+            img.is_cover = False
+
+        # Actualizar ordenación
         img.position = idx + 1
         img.ordering = idx + 1
 
+    # Si no hay portada asignada, hacer la primera imagen la portada
+    if processed_images and not cover_assigned:
+        processed_images[0].is_cover = True
+        logger.info(f"   👑 PORTADA automática: {processed_images[0].image_path}")
+
+    # Loggear qué imagen es la portada
+    for img in processed_images:
         if img.is_cover:
             logger.info(f"   👑 PORTADA: {img.image_path}")
 
     logger.info(f"\n{'=' * 60}")
     logger.info(f"✅ PROCESO COMPLETADO")
+    logger.info(f"   Imágenes guardadas: {success_count}")
+    logger.info(f"   Fondos eliminados: {bg_processed_count}")
     logger.info(f"{'=' * 60}\n")
 
-    return success_count, error_messages
+    return success_count, error_messages, bg_processed_count, bg_error_messages
+
+
+# ===== NUEVA RUTA: REPROCESAMIENTO MANUAL DE IMÁGENES =====
+
+@inventory_bp.route('/<int:id>/remove-background', methods=['POST'])
+@login_required
+@admin_required
+def laptop_remove_background(id):
+    """
+    Endpoint para reprocesamiento manual de eliminación de fondo
+
+    Parámetros:
+    - mode: 'cover' (solo portada) o 'all' (todas las imágenes)
+    - force: 'true' para reprocesar incluso si ya tiene fondo eliminado
+    """
+    laptop = Laptop.query.get_or_404(id)
+
+    # Verificar permisos
+    if not current_user.is_admin:
+        flash('❌ Solo administradores pueden usar esta función', 'error')
+        return redirect(url_for('inventory.laptop_detail', id=id))
+
+    # Obtener parámetros
+    mode = request.form.get('mode', 'cover')
+    force = request.form.get('force', 'false').lower() == 'true'
+
+    # Validar modo
+    if mode not in ['cover', 'all']:
+        flash('❌ Modo inválido. Use "cover" o "all".', 'error')
+        return redirect(url_for('inventory.laptop_detail', id=id))
+
+    # Verificar si el servicio está disponible
+    if not background_service.is_available():
+        flash('❌ Servicio de eliminación de fondo no disponible. Instale rembg.', 'error')
+        return redirect(url_for('inventory.laptop_detail', id=id))
+
+    try:
+        # Obtener imágenes
+        images = laptop.images
+        if not images:
+            flash('ℹ️  Esta laptop no tiene imágenes', 'info')
+            return redirect(url_for('inventory.laptop_detail', id=id))
+
+        # Filtrar imágenes según el modo
+        if mode == 'cover':
+            target_images = [img for img in images if img.is_cover]
+            if not target_images:
+                target_images = [images[0]]  # Usar primera imagen si no hay portada explícita
+        else:  # 'all'
+            target_images = list(images)
+
+        # Procesar imágenes
+        results = {
+            'total': len(target_images),
+            'success': 0,
+            'failed': 0,
+            'details': []
+        }
+
+        for image in target_images:
+            image_path = os.path.join('app', 'static', image.image_path)
+
+            # Verificar si existe el archivo
+            if not os.path.exists(image_path):
+                results['failed'] += 1
+                results['details'].append({
+                    'image_id': image.id,
+                    'success': False,
+                    'message': 'Archivo no encontrado'
+                })
+                continue
+
+            # Verificar si ya tiene fondo eliminado (a menos que force=True)
+            image_info = background_service.get_image_info(image_path)
+            if not force and image_info.get('has_background_removed', False):
+                results['details'].append({
+                    'image_id': image.id,
+                    'success': False,
+                    'message': 'Ya tiene fondo eliminado (use force=true para reprocesar)',
+                    'skipped': True
+                })
+                continue
+
+            # Procesar eliminación de fondo
+            success, message, processed_path = _process_background_removal(
+                image_path,
+                f"Imagen ID {image.id}",
+                is_cover=image.is_cover
+            )
+
+            if success:
+                results['success'] += 1
+                # Actualizar ruta si cambió a PNG
+                if processed_path and processed_path != image_path:
+                    new_relative_path = f"uploads/laptops/{laptop.id}/{os.path.basename(processed_path)}"
+                    image.image_path = new_relative_path
+            else:
+                results['failed'] += 1
+
+            results['details'].append({
+                'image_id': image.id,
+                'success': success,
+                'message': message
+            })
+
+        # Guardar cambios en la base de datos
+        db.session.commit()
+
+        # Preparar mensaje para el usuario
+        if results['success'] > 0:
+            flash(f'✅ Fondo eliminado de {results["success"]} imagen(es) exitosamente', 'success')
+        if results['failed'] > 0:
+            flash(f'⚠️  {results["failed"]} imagen(es) fallaron al procesar', 'warning')
+
+        # Loggear resultados
+        logger.info(f"🎨 Reprocesamiento manual completado para laptop {laptop.sku}")
+        logger.info(f"   Modo: {mode}, Force: {force}")
+        logger.info(f"   Total: {results['total']}, Éxitos: {results['success']}, Fallos: {results['failed']}")
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'❌ Error en reprocesamiento manual: {str(e)}', exc_info=True)
+        flash(f'❌ Error en reprocesamiento: {str(e)}', 'error')
+
+    return redirect(url_for('inventory.laptop_detail', id=id))
 
 
 # ===== RUTA PRINCIPAL: LISTADO DE LAPTOPS =====
@@ -447,7 +717,7 @@ def laptops_list():
     )
 
 
-# ===== AGREGAR NUEVA LAPTOP =====
+# ===== AGREGAR NUEVA LAPTOP (MODIFICADA) =====
 
 @inventory_bp.route('/add', methods=['GET', 'POST'])
 @login_required
@@ -455,11 +725,19 @@ def laptops_list():
 def laptop_add():
     """
     Muestra el formulario y procesa la creacion de una nueva laptop
+    CON SOPORTE PARA ELIMINACIÓN DE FONDO
     """
     form = LaptopForm()
 
     if form.validate_on_submit():
         try:
+            # Obtener opciones de eliminación de fondo del formulario
+            remove_bg_cover = request.form.get('remove_bg_cover', 'true').lower() == 'true'
+            remove_bg_all = request.form.get('remove_bg_all', 'false').lower() == 'true'
+
+            # Loggear opciones seleccionadas
+            logger.info(f"🎨 Opciones de eliminación de fondo - Portada: {remove_bg_cover}, Todas: {remove_bg_all}")
+
             # Procesar catalogos dinamicos (crear si son strings)
             catalog_data = CatalogService.process_laptop_form_data({
                 'brand_id': form.brand_id.data,
@@ -548,8 +826,10 @@ def laptop_add():
             db.session.add(laptop)
             db.session.flush()  # Para obtener el ID
 
-            # Procesar imágenes
-            img_success, img_errors = process_laptop_images(laptop, form)
+            # Procesar imágenes CON eliminación de fondo
+            img_success, img_errors, bg_processed, bg_errors = process_laptop_images(
+                laptop, form, remove_bg_cover=remove_bg_cover, remove_bg_all=remove_bg_all
+            )
             db.session.commit()
 
             # Mensaje de éxito
@@ -558,9 +838,17 @@ def laptop_add():
             else:
                 flash(f'✅ Laptop {sku} agregada exitosamente', 'success')
 
+            # Mostrar resultados de eliminación de fondo
+            if bg_processed > 0:
+                flash(f'🎨 Fondo eliminado de {bg_processed} imagen(es)', 'success')
+
             # Mostrar errores de imágenes si los hay
             for error in img_errors:
                 flash(f'⚠️ {error}', 'warning')
+
+            # Mostrar errores de eliminación de fondo si los hay
+            for error in bg_errors:
+                flash(f'🎨 {error}', 'warning')
 
             return redirect(url_for('inventory.laptop_detail', id=laptop.id))
 
@@ -575,16 +863,22 @@ def laptop_add():
             for error in errors:
                 flash(f'Error en {field}: {error}', 'error')
 
-    return render_template('inventory/laptop_form.html', form=form, mode='add')
+    # Pasar información sobre disponibilidad de eliminación de fondo al template
+    remove_bg_available = background_service.is_available()
+    return render_template('inventory/laptop_form.html',
+                           form=form,
+                           mode='add',
+                           remove_bg_available=remove_bg_available)
 
 
-# ===== VER DETALLE DE LAPTOP =====
+# ===== VER DETALLE DE LAPTOP (MODIFICADA) =====
 
 @inventory_bp.route('/<int:id>')
 @login_required
 def laptop_detail(id):
     """
     Muestra el detalle completo de una laptop
+    CON INFORMACIÓN SOBRE ELIMINACIÓN DE FONDO
     """
     laptop = Laptop.query.get_or_404(id)
 
@@ -603,12 +897,30 @@ def laptop_detail(id):
     # Imagen de portada
     cover_image = next((img for img in laptop.images if img.is_cover), None)
 
+    # Obtener información detallada de cada imagen (para mostrar estado de fondo eliminado)
+    images_info = []
+    for img in images:
+        img_path = os.path.join('app', 'static', img.image_path)
+        info = background_service.get_image_info(img_path) if background_service.is_available() else {}
+        images_info.append({
+            'image': img,
+            'info': info,
+            'has_background_removed': info.get('has_background_removed', False),
+            'backups': info.get('backups', [])
+        })
+
+    # Verificar si el servicio de eliminación de fondo está disponible
+    remove_bg_available = background_service.is_available()
+
     return render_template(
         'inventory/laptop_detail.html',
         laptop=laptop,
         similar_laptops=similar_laptops,
         images=images,
-        cover_image=cover_image
+        cover_image=cover_image,
+        images_info=images_info,
+        remove_bg_available=remove_bg_available,
+        background_service=background_service
     )
 
 
@@ -642,7 +954,7 @@ def laptop_by_slug(slug):
     )
 
 
-# ===== EDITAR LAPTOP =====
+# ===== EDITAR LAPTOP (MODIFICADA) =====
 
 @inventory_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -650,6 +962,7 @@ def laptop_by_slug(slug):
 def laptop_edit(id):
     """
     Edita una laptop existente
+    CON SOPORTE PARA ELIMINACIÓN DE FONDO
     """
     laptop = Laptop.query.get_or_404(id)
     form = LaptopForm(obj=laptop)
@@ -660,6 +973,13 @@ def laptop_edit(id):
 
     if form.validate_on_submit():
         try:
+            # Obtener opciones de eliminación de fondo del formulario
+            remove_bg_cover = request.form.get('remove_bg_cover', 'true').lower() == 'true'
+            remove_bg_all = request.form.get('remove_bg_all', 'false').lower() == 'true'
+
+            # Loggear opciones seleccionadas
+            logger.info(f"🎨 Opciones de eliminación de fondo - Portada: {remove_bg_cover}, Todas: {remove_bg_all}")
+
             # Procesar catalogos dinamicos
             catalog_data = CatalogService.process_laptop_form_data({
                 'brand_id': form.brand_id.data,
@@ -735,8 +1055,10 @@ def laptop_edit(id):
 
             laptop.updated_at = datetime.utcnow()
 
-            # Procesar imágenes
-            img_success, img_errors = process_laptop_images(laptop, form)
+            # Procesar imágenes CON eliminación de fondo
+            img_success, img_errors, bg_processed, bg_errors = process_laptop_images(
+                laptop, form, remove_bg_cover=remove_bg_cover, remove_bg_all=remove_bg_all
+            )
             db.session.commit()
 
             # Mensaje de éxito
@@ -745,9 +1067,17 @@ def laptop_edit(id):
             else:
                 flash(f'✅ Laptop {laptop.sku} actualizada exitosamente', 'success')
 
+            # Mostrar resultados de eliminación de fondo
+            if bg_processed > 0:
+                flash(f'🎨 Fondo eliminado de {bg_processed} imagen(es)', 'success')
+
             # Mostrar errores de imágenes si los hay
             for error in img_errors:
                 flash(f'⚠️ {error}', 'warning')
+
+            # Mostrar errores de eliminación de fondo si los hay
+            for error in bg_errors:
+                flash(f'🎨 {error}', 'warning')
 
             return redirect(url_for('inventory.laptop_detail', id=laptop.id))
 
@@ -766,8 +1096,15 @@ def laptop_edit(id):
     images_list = sorted(laptop.images, key=lambda img: img.ordering)
     images_by_position = {img.position: img for img in images_list}
 
-    return render_template('inventory/laptop_form.html', form=form, mode='edit', laptop=laptop,
-                           images_by_position=images_by_position)
+    # Obtener información sobre disponibilidad de eliminación de fondo
+    remove_bg_available = background_service.is_available()
+
+    return render_template('inventory/laptop_form.html',
+                           form=form,
+                           mode='edit',
+                           laptop=laptop,
+                           images_by_position=images_by_position,
+                           remove_bg_available=remove_bg_available)
 
 
 # ===== ELIMINAR LAPTOP =====
@@ -799,6 +1136,16 @@ def laptop_delete(id):
         image_folder = os.path.join('app', 'static', 'uploads', 'laptops', str(laptop.id))
         if os.path.exists(image_folder):
             try:
+                # Eliminar todos los archivos en el directorio
+                for filename in os.listdir(image_folder):
+                    file_path = os.path.join(image_folder, filename)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception as e:
+                        logger.error(f'Error al eliminar {file_path}: {str(e)}')
+
+                # Eliminar el directorio vacío
                 os.rmdir(image_folder)
                 logger.info(f'Laptop {laptop.sku}: Directorio de imágenes eliminado')
             except Exception as e:
