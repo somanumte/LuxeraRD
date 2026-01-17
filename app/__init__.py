@@ -15,7 +15,6 @@ import random
 import re
 from flask_cors import CORS
 
-
 # Inicializar extensiones
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -25,11 +24,47 @@ bcrypt = Bcrypt()
 def create_app(config_name='development'):
     """
     Factory pattern para crear la aplicación Flask
+    CON VERIFICACIÓN DE FUNCIONALIDAD DE ELIMINACIÓN DE FONDO
     """
     from config import config
 
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+
+    # ===== VERIFICACIÓN DE ELIMINACIÓN DE FONDO =====
+    # Esta verificación debe hacerse ANTES de inicializar extensiones que puedan depender de ella
+    app.config['REMOVE_BG_AVAILABLE'] = False
+    app.config['REMOVE_BG_STATUS'] = 'Deshabilitado'
+
+    if app.config.get('REMOVE_BG_ENABLED', False):
+        try:
+            # Intentar importar rembg
+            from rembg import remove
+            from PIL import Image
+
+            # Verificar que las dependencias básicas funcionen
+            app.config['REMOVE_BG_AVAILABLE'] = True
+            app.config['REMOVE_BG_STATUS'] = 'Disponible'
+
+            # Log de éxito
+            if not app.testing:
+                app.logger.info("✅ rembg disponible para eliminación de fondos")
+
+        except ImportError as e:
+            app.config['REMOVE_BG_AVAILABLE'] = False
+            app.config['REMOVE_BG_STATUS'] = f'No disponible - Error de importación: {str(e)}'
+            if not app.testing:
+                app.logger.warning("⚠️  rembg no está instalado. La eliminación de fondos no estará disponible.")
+                app.logger.info("ℹ️  Instala con: pip install rembg Pillow numpy onnxruntime")
+
+        except Exception as e:
+            app.config['REMOVE_BG_AVAILABLE'] = False
+            app.config['REMOVE_BG_STATUS'] = f'No disponible - Error: {str(e)}'
+            if not app.testing:
+                app.logger.error(f"❌ Error verificando rembg: {str(e)}")
+    else:
+        if not app.testing:
+            app.logger.info("ℹ️  Eliminación de fondo deshabilitada por configuración")
 
     # Inicializar extensiones con la app
     db.init_app(app)
@@ -57,7 +92,6 @@ def create_app(config_name='development'):
     from app.routes.invoices import invoices_bp
     from app.routes.expenses import bp as expenses_bp
     from app.routes.public import public_bp
-
 
     app.register_blueprint(public_bp)
     app.register_blueprint(expenses_bp)
@@ -101,13 +135,23 @@ def create_app(config_name='development'):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Luxera startup')
 
+        # Log del estado de eliminación de fondo
+        if app.config.get('REMOVE_BG_ENABLED', False):
+            if app.config['REMOVE_BG_AVAILABLE']:
+                app.logger.info('🎨 Eliminación de fondo: DISPONIBLE')
+            else:
+                app.logger.warning('🎨 Eliminación de fondo: NO DISPONIBLE - ' + app.config['REMOVE_BG_STATUS'])
+
     # Context processor global
     @app.context_processor
     def inject_global_vars():
         return {
             'app_name': 'Luxera',
             'app_version': '1.0.0',
-            'allow_registration': app.config.get('ALLOW_REGISTRATION', False)
+            'allow_registration': app.config.get('ALLOW_REGISTRATION', False),
+            'remove_bg_enabled': app.config.get('REMOVE_BG_ENABLED', False),
+            'remove_bg_available': app.config.get('REMOVE_BG_AVAILABLE', False),
+            'remove_bg_status': app.config.get('REMOVE_BG_STATUS', 'Desconocido')
         }
 
     # Registrar comandos CLI
@@ -119,6 +163,7 @@ def create_app(config_name='development'):
 def register_cli_commands(app):
     """
     Registra todos los comandos CLI personalizados
+    INCLUYENDO COMANDOS PARA ELIMINACIÓN DE FONDO
     """
     from app.models.invoice import Invoice, InvoiceItem, InvoiceSettings
     from app.models.user import User
@@ -129,6 +174,7 @@ def register_cli_commands(app):
     )
     from app.services.sku_service import SKUService
     from app.models.expense import ExpenseCategory  # ← NUEVA IMPORTACIÓN
+    from app.services.image_background_service import background_service
 
     # ===== COMANDO: reset-db =====
     @app.cli.command('reset-db')
@@ -257,6 +303,160 @@ def register_cli_commands(app):
         _create_sample_laptops(admin.id)
         click.echo("✅ 50 laptops creadas")
 
+    # ===== NUEVO COMANDO: check-bg-removal =====
+    @app.cli.command('check-bg-removal')
+    def check_bg_removal():
+        """Verifica el estado de la funcionalidad de eliminación de fondo"""
+        click.echo("\n" + "=" * 60)
+        click.echo("🎨 VERIFICACIÓN DE ELIMINACIÓN DE FONDO")
+        click.echo("=" * 60)
+
+        click.echo(f"\n📊 Estado del servicio:")
+        click.echo(f"   Disponible: {'✅ Sí' if background_service.is_available() else '❌ No'}")
+
+        if background_service.is_available():
+            click.echo(f"   ✅ rembg está instalado correctamente")
+            click.echo(f"   ℹ️  El modelo U^2-Net se descargará en la primera ejecución")
+        else:
+            click.echo(f"   ❌ rembg no está disponible")
+            click.echo(f"   ℹ️  Instala con: pip install rembg Pillow numpy onnxruntime")
+
+        click.echo(f"\n⚙️ Configuración de la aplicación:")
+        click.echo(f"   REMOVE_BG_ENABLED: {app.config.get('REMOVE_BG_ENABLED', False)}")
+        click.echo(f"   REMOVE_BG_DEFAULT_COVER: {app.config.get('REMOVE_BG_DEFAULT_COVER', True)}")
+        click.echo(f"   REMOVE_BG_DEFAULT_ALL: {app.config.get('REMOVE_BG_DEFAULT_ALL', False)}")
+
+        click.echo(f"\n📁 Directorio de modelos (~176MB se descargarán):")
+        try:
+            import site
+            import os
+            model_dir = os.path.join(site.getsitepackages()[0], 'rembg', 'models')
+            click.echo(f"   {model_dir}")
+        except:
+            click.echo("   No se pudo determinar el directorio de modelos")
+
+        click.echo("\n" + "=" * 60)
+
+    # ===== NUEVO COMANDO: process-bg-test =====
+    @app.cli.command('process-bg-test')
+    @click.option('--image', '-i', help='Ruta a una imagen de prueba')
+    def process_bg_test(image):
+        """Prueba la eliminación de fondo con una imagen"""
+        if not background_service.is_available():
+            click.echo("❌ El servicio de eliminación de fondo no está disponible")
+            click.echo("ℹ️  Instala primero: pip install rembg Pillow numpy onnxruntime")
+            return
+
+        if not image:
+            # Crear una imagen de prueba simple
+            import tempfile
+            from PIL import Image, ImageDraw
+
+            click.echo("🖼️  Creando imagen de prueba...")
+            img = Image.new('RGB', (400, 300), color='red')
+            draw = ImageDraw.Draw(img)
+            draw.rectangle([50, 50, 350, 250], fill='blue')
+            draw.ellipse([150, 100, 250, 200], fill='green')
+
+            temp_file = tempfile.NamedTemporaryFile(suffix='.jpg', delete=False)
+            img.save(temp_file.name, 'JPEG')
+            image = temp_file.name
+            click.echo(f"✅ Imagen de prueba creada: {image}")
+
+        if not os.path.exists(image):
+            click.echo(f"❌ La imagen no existe: {image}")
+            return
+
+        click.echo(f"\n🎨 Procesando eliminación de fondo...")
+        click.echo(f"   Imagen: {image}")
+        click.echo(f"   Tamaño: {os.path.getsize(image) / 1024:.1f}KB")
+
+        import time
+        start_time = time.time()
+
+        success, processed_path, backup_path, error = background_service.remove_background(
+            image, backup_original=True
+        )
+
+        elapsed = time.time() - start_time
+
+        if success:
+            click.echo(f"\n✅ ELIMINACIÓN DE FONDO EXITOSA")
+            click.echo(f"   Tiempo: {elapsed:.2f} segundos")
+            click.echo(f"   Imagen procesada: {processed_path}")
+            click.echo(f"   Backup original: {backup_path}")
+
+            # Mostrar información de la imagen procesada
+            info = background_service.get_image_info(processed_path)
+            if info.get('exists'):
+                click.echo(f"\n📊 Información de la imagen procesada:")
+                click.echo(f"   Dimensiones: {info.get('dimensions', 'N/A')}")
+                click.echo(f"   Formato: {info.get('extension', 'N/A')}")
+                click.echo(f"   Tamaño: {info.get('size_mb', 0):.2f}MB")
+                click.echo(f"   Tiene transparencia: {'✅ Sí' if info.get('has_alpha') else '❌ No'}")
+                click.echo(f"   Fondo eliminado: {'✅ Sí' if info.get('has_background_removed') else '❌ No'}")
+        else:
+            click.echo(f"\n❌ ERROR EN EL PROCESAMIENTO")
+            click.echo(f"   Tiempo: {elapsed:.2f} segundos")
+            click.echo(f"   Error: {error}")
+
+        click.echo("\n" + "=" * 60)
+
+    # ===== NUEVO COMANDO: cleanup-bg-backups =====
+    @app.cli.command('cleanup-bg-backups')
+    @click.option('--laptop-id', '-l', type=int, help='ID de laptop específica')
+    @click.option('--keep', '-k', default=1, help='Número de backups a mantener')
+    def cleanup_bg_backups(laptop_id, keep):
+        """Limpia backups antiguos de imágenes procesadas"""
+        if not background_service.is_available():
+            click.echo("❌ El servicio de eliminación de fondo no está disponible")
+            return
+
+        click.echo(f"\n🧹 LIMPIEZA DE BACKUPS DE IMÁGENES")
+        click.echo(f"   Manteniendo {keep} backup(s) más reciente(s) por imagen")
+
+        from app.models.laptop import Laptop, LaptopImage
+
+        # Determinar qué laptops procesar
+        if laptop_id:
+            laptops = Laptop.query.filter_by(id=laptop_id).all()
+            if not laptops:
+                click.echo(f"❌ No se encontró la laptop con ID {laptop_id}")
+                return
+        else:
+            laptops = Laptop.query.all()
+
+        total_deleted = 0
+        total_images = 0
+
+        for laptop in laptops:
+            click.echo(f"\n💻 Laptop: {laptop.sku} (ID: {laptop.id})")
+
+            images = laptop.images.all()
+            if not images:
+                click.echo("   ℹ️  No tiene imágenes")
+                continue
+
+            laptop_deleted = 0
+            for image in images:
+                image_path = os.path.join('app', 'static', image.image_path)
+                if os.path.exists(image_path):
+                    deleted = background_service.cleanup_old_backups(image_path, keep_recent=keep)
+                    laptop_deleted += deleted
+                    total_deleted += deleted
+                    total_images += 1
+
+            if laptop_deleted > 0:
+                click.echo(f"   ✅ {laptop_deleted} backup(s) eliminado(s)")
+            else:
+                click.echo(f"   ℹ️  No había backups para limpiar")
+
+        click.echo(f"\n📊 RESUMEN:")
+        click.echo(f"   Laptops procesadas: {len(laptops)}")
+        click.echo(f"   Imágenes verificadas: {total_images}")
+        click.echo(f"   Backups eliminados: {total_deleted}")
+        click.echo("=" * 60)
+
     # ===== COMANDO: list-users =====
     @app.cli.command('list-users')
     def list_users():
@@ -297,7 +497,8 @@ def register_cli_commands(app):
         for laptop in laptops[:25]:
             model_name = laptop.model.name[:28] if laptop.model else 'N/A'
             brand_name = laptop.brand.name[:6] if laptop.brand else 'N/A'
-            click.echo(f"{laptop.sku:<18} {brand_name:<8} {model_name:<30} ${float(laptop.sale_price):>7,.0f} {laptop.quantity:>4}")
+            click.echo(
+                f"{laptop.sku:<18} {brand_name:<8} {model_name:<30} ${float(laptop.sale_price):>7,.0f} {laptop.quantity:>4}")
 
         if len(laptops) > 25:
             click.echo(f"\n... y {len(laptops) - 25} más")
@@ -506,59 +707,187 @@ def register_cli_commands(app):
         # 50 laptops reales
         laptops_data = [
             # DELL (10)
-            {'brand': 'Dell', 'model': 'Inspiron 15 3520', 'processor': 'Intel Core i5-1235U', 'ram': '8GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 450, 'price': 599},
-            {'brand': 'Dell', 'model': 'Inspiron 15 3530', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 550, 'price': 749},
-            {'brand': 'Dell', 'model': 'Latitude 5540', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 750, 'price': 999},
-            {'brand': 'Dell', 'model': 'Latitude 7440', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 950, 'price': 1299},
-            {'brand': 'Dell', 'model': 'XPS 15 9530', 'processor': 'Intel Core i7-13700H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 1200, 'price': 1599},
-            {'brand': 'Dell', 'model': 'XPS 15 9530 OLED', 'processor': 'Intel Core i7-13700H', 'ram': '32GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '15.6" 4K OLED (3840x2160)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 1600, 'price': 2199},
-            {'brand': 'Dell', 'model': 'G15 5530', 'processor': 'Intel Core i5-13450H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 120Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 700, 'price': 949},
-            {'brand': 'Dell', 'model': 'G15 5535', 'processor': 'AMD Ryzen 7 7840HS', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 850, 'price': 1149},
-            {'brand': 'Dell', 'model': 'G16 7630', 'processor': 'Intel Core i7-13650HX', 'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '16" QHD+ 165Hz (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1100, 'price': 1449},
-            {'brand': 'Dell', 'model': 'Alienware m16 R1', 'processor': 'Intel Core i9-13900HX', 'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080', 'screen': '16" QHD+ 165Hz (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2200, 'price': 2899},
+            {'brand': 'Dell', 'model': 'Inspiron 15 3520', 'processor': 'Intel Core i5-1235U',
+             'ram': '8GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 450,
+             'price': 599},
+            {'brand': 'Dell', 'model': 'Inspiron 15 3530', 'processor': 'Intel Core i7-1355U',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 550,
+             'price': 749},
+            {'brand': 'Dell', 'model': 'Latitude 5540', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)',
+             'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 750, 'price': 999},
+            {'brand': 'Dell', 'model': 'Latitude 7440', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz',
+             'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" FHD IPS (1920x1080)',
+             'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 950, 'price': 1299},
+            {'brand': 'Dell', 'model': 'XPS 15 9530', 'processor': 'Intel Core i7-13700H', 'ram': '16GB DDR5 4800MHz',
+             'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4050',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 1200,
+             'price': 1599},
+            {'brand': 'Dell', 'model': 'XPS 15 9530 OLED', 'processor': 'Intel Core i7-13700H',
+             'ram': '32GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '15.6" 4K OLED (3840x2160)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 1600,
+             'price': 2199},
+            {'brand': 'Dell', 'model': 'G15 5530', 'processor': 'Intel Core i5-13450H', 'ram': '16GB DDR5 4800MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 120Hz',
+             'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 700, 'price': 949},
+            {'brand': 'Dell', 'model': 'G15 5535', 'processor': 'AMD Ryzen 7 7840HS', 'ram': '16GB DDR5 4800MHz',
+             'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS 144Hz',
+             'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 850, 'price': 1149},
+            {'brand': 'Dell', 'model': 'G16 7630', 'processor': 'Intel Core i7-13650HX', 'ram': '16GB DDR5 4800MHz',
+             'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '16" QHD+ 165Hz (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1100,
+             'price': 1449},
+            {'brand': 'Dell', 'model': 'Alienware m16 R1', 'processor': 'Intel Core i9-13900HX',
+             'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080',
+             'screen': '16" QHD+ 165Hz (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2200,
+             'price': 2899},
             # LENOVO (10)
-            {'brand': 'Lenovo', 'model': 'IdeaPad 3 15IAU7', 'processor': 'Intel Core i3-1215U', 'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 320, 'price': 449},
-            {'brand': 'Lenovo', 'model': 'IdeaPad 5 15IAL7', 'processor': 'Intel Core i5-1235U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 480, 'price': 649},
-            {'brand': 'Lenovo', 'model': 'ThinkPad E15 Gen 4', 'processor': 'Intel Core i5-1235U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 620, 'price': 849},
-            {'brand': 'Lenovo', 'model': 'ThinkPad T14 Gen 4', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 900, 'price': 1249},
-            {'brand': 'Lenovo', 'model': 'ThinkPad X1 Carbon Gen 11', 'processor': 'Intel Core i7-1365U', 'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 1300, 'price': 1799},
-            {'brand': 'Lenovo', 'model': 'IdeaPad Gaming 3 15IAH7', 'processor': 'Intel Core i5-12500H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 120Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 600, 'price': 799},
-            {'brand': 'Lenovo', 'model': 'LOQ 15IRH8', 'processor': 'Intel Core i5-13420H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 750, 'price': 999},
-            {'brand': 'Lenovo', 'model': 'Legion 5 15IAH7H', 'processor': 'Intel Core i7-12700H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 950, 'price': 1299},
-            {'brand': 'Lenovo', 'model': 'Legion Pro 5 16IRX8', 'processor': 'Intel Core i7-13700HX', 'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4070', 'screen': '16" WQXGA IPS (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1400, 'price': 1899},
-            {'brand': 'Lenovo', 'model': 'Legion Pro 7 16IRX8H', 'processor': 'Intel Core i9-13900HX', 'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080', 'screen': '16" WQXGA IPS (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2000, 'price': 2699},
+            {'brand': 'Lenovo', 'model': 'IdeaPad 3 15IAU7', 'processor': 'Intel Core i3-1215U',
+             'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 320,
+             'price': 449},
+            {'brand': 'Lenovo', 'model': 'IdeaPad 5 15IAL7', 'processor': 'Intel Core i5-1235U',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 480,
+             'price': 649},
+            {'brand': 'Lenovo', 'model': 'ThinkPad E15 Gen 4', 'processor': 'Intel Core i5-1235U',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 620,
+             'price': 849},
+            {'brand': 'Lenovo', 'model': 'ThinkPad T14 Gen 4', 'processor': 'Intel Core i7-1355U',
+             'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 900,
+             'price': 1249},
+            {'brand': 'Lenovo', 'model': 'ThinkPad X1 Carbon Gen 11', 'processor': 'Intel Core i7-1365U',
+             'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 1300,
+             'price': 1799},
+            {'brand': 'Lenovo', 'model': 'IdeaPad Gaming 3 15IAH7', 'processor': 'Intel Core i5-12500H',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050',
+             'screen': '15.6" FHD IPS 120Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 600, 'price': 799},
+            {'brand': 'Lenovo', 'model': 'LOQ 15IRH8', 'processor': 'Intel Core i5-13420H', 'ram': '16GB DDR5 4800MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS 144Hz',
+             'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 750, 'price': 999},
+            {'brand': 'Lenovo', 'model': 'Legion 5 15IAH7H', 'processor': 'Intel Core i7-12700H',
+             'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 950,
+             'price': 1299},
+            {'brand': 'Lenovo', 'model': 'Legion Pro 5 16IRX8', 'processor': 'Intel Core i7-13700HX',
+             'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4070',
+             'screen': '16" WQXGA IPS (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1400,
+             'price': 1899},
+            {'brand': 'Lenovo', 'model': 'Legion Pro 7 16IRX8H', 'processor': 'Intel Core i9-13900HX',
+             'ram': '32GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080',
+             'screen': '16" WQXGA IPS (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2000,
+             'price': 2699},
             # HP (10)
-            {'brand': 'HP', 'model': '15-fd0xxx', 'processor': 'Intel Core i3-1215U', 'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 300, 'price': 399},
-            {'brand': 'HP', 'model': '15-fc0xxx', 'processor': 'AMD Ryzen 5 7530U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'AMD Radeon Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 420, 'price': 549},
-            {'brand': 'HP', 'model': 'Pavilion 15-eg3xxx', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 500, 'price': 699},
-            {'brand': 'HP', 'model': 'ProBook 450 G10', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 650, 'price': 899},
-            {'brand': 'HP', 'model': 'EliteBook 840 G10', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 950, 'price': 1349},
-            {'brand': 'HP', 'model': 'Spectre x360 14', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 1150, 'price': 1599},
-            {'brand': 'HP', 'model': 'Victus 15-fa0xxx', 'processor': 'Intel Core i5-12450H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 580, 'price': 779},
-            {'brand': 'HP', 'model': 'Victus 16-r0xxx', 'processor': 'Intel Core i5-13500H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '16" FHD+ IPS (1920x1200)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 750, 'price': 999},
-           # ASUS (10)
-            {'brand': 'ASUS', 'model': 'Vivobook 15 X1502ZA', 'processor': 'Intel Core i3-1215U', 'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 340, 'price': 449},
-            {'brand': 'ASUS', 'model': 'Vivobook 15 X1504VA', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 480, 'price': 649},
-            {'brand': 'ASUS', 'model': 'Zenbook 14 UX3402VA', 'processor': 'Intel Core i5-1340P', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 800, 'price': 1099},
-            {'brand': 'ASUS', 'model': 'Zenbook Pro 14 OLED', 'processor': 'Intel Core i7-13700H', 'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 1200, 'price': 1649},
-            {'brand': 'ASUS', 'model': 'TUF Gaming F15 FX507ZC', 'processor': 'Intel Core i5-12500H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 620, 'price': 849},
-            {'brand': 'ASUS', 'model': 'TUF Gaming A15 FA507NV', 'processor': 'AMD Ryzen 7 7735HS', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 850, 'price': 1149},
-            {'brand': 'ASUS', 'model': 'ROG Strix G15 G513RW', 'processor': 'AMD Ryzen 9 6900HX', 'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 3070', 'screen': '15.6" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1100, 'price': 1499},
-            {'brand': 'ASUS', 'model': 'ROG Strix G16 G614JV', 'processor': 'Intel Core i7-13650HX', 'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '16" FHD+ IPS (1920x1200)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1000, 'price': 1349},
-            {'brand': 'ASUS', 'model': 'ROG Zephyrus G14 GA402XV', 'processor': 'AMD Ryzen 9 7940HS', 'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '14" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1250, 'price': 1699},
-            {'brand': 'ASUS', 'model': 'ROG Strix SCAR 18 G834JY', 'processor': 'Intel Core i9-13980HX', 'ram': '32GB DDR5 5200MHz', 'storage': '2TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4090', 'screen': '18" QHD+ 240Hz (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2800, 'price': 3699},
+            {'brand': 'HP', 'model': '15-fd0xxx', 'processor': 'Intel Core i3-1215U', 'ram': '8GB DDR4 3200MHz',
+             'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics', 'screen': '15.6" FHD IPS (1920x1080)',
+             'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 300, 'price': 399},
+            {'brand': 'HP', 'model': '15-fc0xxx', 'processor': 'AMD Ryzen 5 7530U', 'ram': '16GB DDR4 3200MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'AMD Radeon Graphics', 'screen': '15.6" FHD IPS (1920x1080)',
+             'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 420, 'price': 549},
+            {'brand': 'HP', 'model': 'Pavilion 15-eg3xxx', 'processor': 'Intel Core i5-1335U',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 500,
+             'price': 699},
+            {'brand': 'HP', 'model': 'ProBook 450 G10', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)',
+             'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 650, 'price': 899},
+            {'brand': 'HP', 'model': 'EliteBook 840 G10', 'processor': 'Intel Core i7-1355U',
+             'ram': '16GB DDR5 5200MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 950,
+             'price': 1349},
+            {'brand': 'HP', 'model': 'Spectre x360 14', 'processor': 'Intel Core i7-1355U', 'ram': '16GB DDR5 5200MHz',
+             'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" 2.8K OLED 90Hz',
+             'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 1150, 'price': 1599},
+            {'brand': 'HP', 'model': 'Victus 15-fa0xxx', 'processor': 'Intel Core i5-12450H',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 580, 'price': 779},
+            {'brand': 'HP', 'model': 'Victus 16-r0xxx', 'processor': 'Intel Core i5-13500H', 'ram': '16GB DDR5 4800MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '16" FHD+ IPS (1920x1200)',
+             'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 750, 'price': 999},
+            # ASUS (10)
+            {'brand': 'ASUS', 'model': 'Vivobook 15 X1502ZA', 'processor': 'Intel Core i3-1215U',
+             'ram': '8GB DDR4 3200MHz', 'storage': '256GB SSD NVMe', 'gpu': 'Intel UHD Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 340,
+             'price': 449},
+            {'brand': 'ASUS', 'model': 'Vivobook 15 X1504VA', 'processor': 'Intel Core i5-1335U',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 480,
+             'price': 649},
+            {'brand': 'ASUS', 'model': 'Zenbook 14 UX3402VA', 'processor': 'Intel Core i5-1340P',
+             'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 800,
+             'price': 1099},
+            {'brand': 'ASUS', 'model': 'Zenbook Pro 14 OLED', 'processor': 'Intel Core i7-13700H',
+             'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4050',
+             'screen': '14" 2.8K OLED 90Hz', 'os': 'Windows 11 Pro', 'category': 'workstation', 'cost': 1200,
+             'price': 1649},
+            {'brand': 'ASUS', 'model': 'TUF Gaming F15 FX507ZC', 'processor': 'Intel Core i5-12500H',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 620, 'price': 849},
+            {'brand': 'ASUS', 'model': 'TUF Gaming A15 FA507NV', 'processor': 'AMD Ryzen 7 7735HS',
+             'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 850,
+             'price': 1149},
+            {'brand': 'ASUS', 'model': 'ROG Strix G15 G513RW', 'processor': 'AMD Ryzen 9 6900HX',
+             'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 3070',
+             'screen': '15.6" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1100,
+             'price': 1499},
+            {'brand': 'ASUS', 'model': 'ROG Strix G16 G614JV', 'processor': 'Intel Core i7-13650HX',
+             'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '16" FHD+ IPS (1920x1200)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1000,
+             'price': 1349},
+            {'brand': 'ASUS', 'model': 'ROG Zephyrus G14 GA402XV', 'processor': 'AMD Ryzen 9 7940HS',
+             'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '14" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1250,
+             'price': 1699},
+            {'brand': 'ASUS', 'model': 'ROG Strix SCAR 18 G834JY', 'processor': 'Intel Core i9-13980HX',
+             'ram': '32GB DDR5 5200MHz', 'storage': '2TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4090',
+             'screen': '18" QHD+ 240Hz (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2800,
+             'price': 3699},
             # ACER (5)
-            {'brand': 'Acer', 'model': 'Aspire 3 A315-59', 'processor': 'Intel Core i5-1235U', 'ram': '8GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 380, 'price': 499},
-            {'brand': 'Acer', 'model': 'Aspire 5 A515-57', 'processor': 'Intel Core i7-1255U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 520, 'price': 699},
-            {'brand': 'Acer', 'model': 'Swift 3 SF314-512', 'processor': 'Intel Core i7-1260P', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics', 'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 680, 'price': 899},
-            {'brand': 'Acer', 'model': 'Nitro 5 AN515-58', 'processor': 'Intel Core i5-12500H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 600, 'price': 799},
-            {'brand': 'Acer', 'model': 'Predator Helios 16 PH16-71', 'processor': 'Intel Core i7-13700HX', 'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4070', 'screen': '16" WQXGA IPS (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1350, 'price': 1799},
+            {'brand': 'Acer', 'model': 'Aspire 3 A315-59', 'processor': 'Intel Core i5-1235U',
+             'ram': '8GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 380,
+             'price': 499},
+            {'brand': 'Acer', 'model': 'Aspire 5 A515-57', 'processor': 'Intel Core i7-1255U',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 520,
+             'price': 699},
+            {'brand': 'Acer', 'model': 'Swift 3 SF314-512', 'processor': 'Intel Core i7-1260P',
+             'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe PCIe 4.0', 'gpu': 'Intel Iris Xe Graphics',
+             'screen': '14" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'workstation', 'cost': 680,
+             'price': 899},
+            {'brand': 'Acer', 'model': 'Nitro 5 AN515-58', 'processor': 'Intel Core i5-12500H',
+             'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 3050',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 600, 'price': 799},
+            {'brand': 'Acer', 'model': 'Predator Helios 16 PH16-71', 'processor': 'Intel Core i7-13700HX',
+             'ram': '16GB DDR5 4800MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4070',
+             'screen': '16" WQXGA IPS (2560x1600)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 1350,
+             'price': 1799},
             # MSI (5)
-            {'brand': 'MSI', 'model': 'Modern 15 B13M', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)', 'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 500, 'price': 679},
-            {'brand': 'MSI', 'model': 'Thin GF63 12VE', 'processor': 'Intel Core i5-12450H', 'ram': '16GB DDR4 3200MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 680, 'price': 899},
-            {'brand': 'MSI', 'model': 'Cyborg 15 A12VF', 'processor': 'Intel Core i7-12650H', 'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 900, 'price': 1199},
-            {'brand': 'MSI', 'model': 'Katana 15 B13VFK', 'processor': 'Intel Core i7-13620H', 'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060', 'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 950, 'price': 1299},
-            {'brand': 'MSI', 'model': 'Raider GE78 HX 13VH', 'processor': 'Intel Core i9-13950HX', 'ram': '32GB DDR5 5200MHz', 'storage': '2TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080', 'screen': '17.3" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2300, 'price': 2999},
+            {'brand': 'MSI', 'model': 'Modern 15 B13M', 'processor': 'Intel Core i5-1335U', 'ram': '16GB DDR4 3200MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'Intel Iris Xe Graphics', 'screen': '15.6" FHD IPS (1920x1080)',
+             'os': 'Windows 11 Home', 'category': 'laptop', 'cost': 500, 'price': 679},
+            {'brand': 'MSI', 'model': 'Thin GF63 12VE', 'processor': 'Intel Core i5-12450H', 'ram': '16GB DDR4 3200MHz',
+             'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4050', 'screen': '15.6" FHD IPS 144Hz',
+             'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 680, 'price': 899},
+            {'brand': 'MSI', 'model': 'Cyborg 15 A12VF', 'processor': 'Intel Core i7-12650H',
+             'ram': '16GB DDR5 4800MHz', 'storage': '512GB SSD NVMe', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 900,
+             'price': 1199},
+            {'brand': 'MSI', 'model': 'Katana 15 B13VFK', 'processor': 'Intel Core i7-13620H',
+             'ram': '16GB DDR5 5200MHz', 'storage': '1TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4060',
+             'screen': '15.6" FHD IPS 144Hz', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 950,
+             'price': 1299},
+            {'brand': 'MSI', 'model': 'Raider GE78 HX 13VH', 'processor': 'Intel Core i9-13950HX',
+             'ram': '32GB DDR5 5200MHz', 'storage': '2TB SSD NVMe PCIe 4.0', 'gpu': 'NVIDIA GeForce RTX 4080',
+             'screen': '17.3" QHD IPS 165Hz (2560x1440)', 'os': 'Windows 11 Home', 'category': 'gaming', 'cost': 2300,
+             'price': 2999},
         ]
 
         # Crear modelos primero
@@ -595,7 +924,7 @@ def register_cli_commands(app):
 
             existing = Laptop.query.filter_by(slug=slug).first()
             if existing:
-                slug = f"{slug}-{i+1}"
+                slug = f"{slug}-{i + 1}"
 
             laptop = Laptop(
                 sku=sku,

@@ -66,6 +66,23 @@ class Config:
     ALLOW_REGISTRATION = False  # Solo creación manual de usuarios
     REQUIRE_EMAIL_VERIFICATION = False
 
+    # ===== CONFIGURACIÓN DE ELIMINACIÓN DE FONDO =====
+    # Configuración para el procesamiento automático de imágenes
+    REMOVE_BG_ENABLED = False  # Habilitar/deshabilitar funcionalidad globalmente
+    REMOVE_BG_DEFAULT_COVER = False  # Aplicar a imágenes de portada nuevas por defecto
+    REMOVE_BG_DEFAULT_ALL = False  # NO aplicar a todas las imágenes por defecto
+
+    # Límites de procesamiento
+    REMOVE_BG_MAX_IMAGE_SIZE_MB = 10  # Rechazar imágenes > 10MB
+    REMOVE_BG_PROCESSING_TIMEOUT = 30  # Segundos máximos por imagen
+
+    # Formatos soportados
+    REMOVE_BG_SUPPORTED_FORMATS = {'jpg', 'jpeg', 'png', 'webp', 'bmp'}
+
+    # Sistema de backup
+    REMOVE_BG_KEEP_BACKUPS = 1  # Número de backups recientes a mantener
+    REMOVE_BG_BACKUP_ORIGINAL = True  # Crear backup antes de procesar
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -77,12 +94,16 @@ class ProductionConfig(Config):
     TESTING = False
     SESSION_COOKIE_SECURE = True
     SQLALCHEMY_ECHO = False
+    # En producción, podemos querer desactivar si hay problemas de rendimiento
+    # REMOVE_BG_ENABLED = False
 
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
+    # En testing, desactivar para no depender de rembg
+    REMOVE_BG_ENABLED = False
 
 
 config = {
